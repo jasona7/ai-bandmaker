@@ -23,7 +23,7 @@
 1. **Clone this repository**:
 
     ```bash
-    git clone https://github.com/yourusername/ai-bandmaker.git
+    git clone https://github.com/jasona7/ai-bandmaker.git
     cd ai-bandmaker
     ```
 
@@ -35,18 +35,12 @@
 
 3. **Set up your API keys**:
 
-    Ensure you have your API keys ready for OpenAI and Suno. Set them in your environment:
+    Ensure you have your API keys ready for OpenAI. Set it as an environment variable:
 
     ```bash
     export OPENAI_API_KEY='your_openai_api_key'
     ```
-
-    Or create a `.env` file in the root directory with:
-
-    ```env
-    OPENAI_API_KEY=your_openai_api_key
-    ```
-
+    
 ### 🎨 Usage
 
 1. **To start generating your AI-powered band fan page, simply run**:
