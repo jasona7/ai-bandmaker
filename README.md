@@ -1,4 +1,4 @@
-![AI Band Generator](ai_bandgenerator_logo.png)
+![AI Band Generator](ai_bandgenerator_logo_1.png)
 
 # Welcome to the AI-BandGenerator 🎸🤖
 
