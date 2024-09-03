@@ -2,16 +2,18 @@
 
 # Welcome to the AI-BandGenerator 🎸🤖
 
-**AI-BandGenerator** is your ultimate tool for creating imaginative fan pages for fictional bands, powered by advanced AI technologies! Whether you're a music enthusiast, creative writer, or AI hobbyist, this app breathes life into fictional bands with unique profiles, compelling backstories, custom discographies, and original music tracks.  The app uses a unique Author Style, Nationality, Genre 1, Genre 2, Post-Punk, Style Name, and a Year active.
+**AI-BandGenerator** is your ultimate tool for creating imaginative fan pages for AI generated bands, powered by advanced AI technologies! Whether you're a music enthusiast, creative writer, or AI hobbyist, this app breathes life into fictional bands with unique profiles, compelling backstories, custom discographies, and original music tracks.  The app uses a unique Author Style, Nationality, Genre 1, Genre 2, Post-Punk, Style Name, and a Year active.
+
+The AI prompt determines a unique and random author style, musical genres, and band style in the script logic.  This can fully customized in-line.
 
 ## ✨ Feature List
 
 - **Unique Band Profiles**: Automatically generate creative band names, genres, styles, and captivating backstories.
 - **AI-Generated Backstories**: Produce engaging narratives exploring the band's history, members, and journey, all written by OpenAI's GPT.
 - **Custom Discographies**: Create detailed albums complete with imaginative titles and track lists that reflect the band's evolving themes.
-- **Original Music Creation**: Leverage the Suno API to compose a unique music track that matches the band's genre and vibe.
+- **Original Music Creation**: Leverage the Suno API to compose a unique music track that matches the band's genre and vibe. (COMING SOON)
 - **Visual Content Generation**: Generate band member portraits and promotional images using OpenAI's DALL-E.
-- **Beautiful HTML Fan Pages**: Compile all generated content into a stunning, ready-to-share HTML fan page.
+- **Beautiful Retro Fan Pages**: Compile all generated content into a stunning, ready-to-share HTML fan page.
 
 ## 🚀 Getting Started
 
