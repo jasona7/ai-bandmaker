@@ -2,7 +2,7 @@
 
 # Welcome to the AI-BandGenerator 🎸🤖
 
-**AI-BandGenerator** is your ultimate tool for creating imaginative fan pages for AI generated bands, powered by advanced AI technologies! Whether you're a music enthusiast, creative writer, or AI hobbyist, this app breathes life into fictional bands with unique profiles, compelling backstories, custom discographies, and original music tracks.  The app uses a unique Author Style, Nationality, Genre 1, Genre 2, Post-Punk, Style Name, and a Year active.
+**AI-BandGenerator** is a fun AI showcase for creating retro-inspired static HTML pages for entirely AI-generated bands.  An AI-driven music enthusiast, creative writer, or hobbyist, this app breathes life into fictional bands with unique profiles, compelling backstories, custom discographies, and original music tracks.  The app uses a unique Author Style, Nationality, Genre 1, Genre 2, Post-Punk, Style Name, and Year active.  It's a fun way to fine-tune your LLM/AI prompt seeding technique.
 
 The AI prompt determines a unique and random author style, musical genres, and band style in the script logic.  This can fully customized in-line.
 
