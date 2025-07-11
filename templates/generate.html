@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Band - AI Band Generator{% endblock %}
+
+{% block content %}
+<section class="generate-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center mb-5">
+                    <h1 class="section-title">Generate Your AI Band</h1>
+                    <p class="section-subtitle">Watch as AI creates a unique band with full backstory, discography, and photos</p>
+                </div>
+
+                <!-- Generation Interface -->
+                <div class="generation-interface">
+                    <!-- Start Generation -->
+                    <div id="startGeneration" class="generation-start">
+                        <div class="card shadow-lg">
+                            <div class="card-body text-center p-5">
+                                <i class="fas fa-music generation-icon mb-4"></i>
+                                <h3 class="mb-4">Ready to Create Magic?</h3>
+                                <p class="mb-4">Click the button below to generate a completely unique AI-powered band. This process will create:</p>
+                                <ul class="feature-list mb-4">
+                                    <li><i class="fas fa-check text-success"></i> Unique band name and style</li>
+                                    <li><i class="fas fa-check text-success"></i> Complete backstory with band members</li>
+                                    <li><i class="fas fa-check text-success"></i> Full discography with albums and tracks</li>
+                                    <li><i class="fas fa-check text-success"></i> AI-generated band photo</li>
+                                    <li><i class="fas fa-check text-success"></i> Beautiful fan page</li>
+                                </ul>
+                                <button id="generateBtn" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-rocket"></i> Generate Band
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Display -->
+                    <div id="progressDisplay" class="generation-progress" style="display: none;">
+                        <div class="card shadow-lg">
+                            <div class="card-body p-5">
+                                <div class="text-center mb-4">
+                                    <h3 id="progressTitle">Creating Your Band...</h3>
+                                    <p id="progressMessage" class="text-muted">Initializing AI systems...</p>
+                                </div>
+                                
+                                <div class="progress-container mb-4">
+                                    <div class="progress progress-bar-animated">
+                                        <div id="progressBar" class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="progress-text mt-2">
+                                        <span id="progressPercent">0%</span>
+                                    </div>
+                                </div>
+
+                                <div class="progress-steps">
+                                    <div class="step" id="step1">
+                                        <div class="step-icon"><i class="fas fa-user-edit"></i></div>
+                                        <div class="step-text">Creating Profile</div>
+                                    </div>
+                                    <div class="step" id="step2">
+                                        <div class="step-icon"><i class="fas fa-folder"></i></div>
+                                        <div class="step-text">Setting Up</div>
+                                    </div>
+                                    <div class="step" id="step3">
+                                        <div class="step-icon"><i class="fas fa-pen"></i></div>
+                                        <div class="step-text">Writing Story</div>
+                                    </div>
+                                    <div class="step" id="step4">
+                                        <div class="step-icon"><i class="fas fa-users"></i></div>
+                                        <div class="step-text">Adding Members</div>
+                                    </div>
+                                    <div class="step" id="step5">
+                                        <div class="step-icon"><i class="fas fa-compact-disc"></i></div>
+                                        <div class="step-text">Creating Albums</div>
+                                    </div>
+                                    <div class="step" id="step6">
+                                        <div class="step-icon"><i class="fas fa-camera"></i></div>
+                                        <div class="step-text">Taking Photos</div>
+                                    </div>
+                                    <div class="step" id="step7">
+                                        <div class="step-icon"><i class="fas fa-code"></i></div>
+                                        <div class="step-text">Building Page</div>
+                                    </div>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <button id="cancelBtn" class="btn btn-outline-secondary">
+                                        <i class="fas fa-stop"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success Display -->
+                    <div id="successDisplay" class="generation-success" style="display: none;">
+                        <div class="card shadow-lg">
+                            <div class="card-body p-5 text-center">
+                                <i class="fas fa-check-circle success-icon mb-4"></i>
+                                <h3 class="mb-4">Band Created Successfully!</h3>
+                                <p class="mb-4">Your AI-generated band is ready to rock! Check out their complete profile below.</p>
+                                
+                                <div id="bandPreview" class="band-preview mb-4">
+                                    <!-- Band preview will be populated here -->
+                                </div>
+
+                                <div class="success-actions">
+                                    <button id="viewBandBtn" class="btn btn-primary btn-lg me-3">
+                                        <i class="fas fa-eye"></i> View Band Page
+                                    </button>
+                                    <button id="generateAnotherBtn" class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-plus"></i> Generate Another
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Display -->
+                    <div id="errorDisplay" class="generation-error" style="display: none;">
+                        <div class="card shadow-lg border-danger">
+                            <div class="card-body p-5 text-center">
+                                <i class="fas fa-exclamation-triangle error-icon mb-4"></i>
+                                <h3 class="mb-4">Something Went Wrong</h3>
+                                <p id="errorMessage" class="mb-4">We encountered an error while generating your band. Please try again.</p>
+                                <button id="retryBtn" class="btn btn-primary">
+                                    <i class="fas fa-redo"></i> Try Again
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentGenerationId = null;
+let statusCheckInterval = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generateBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const generateAnotherBtn = document.getElementById('generateAnotherBtn');
+    const viewBandBtn = document.getElementById('viewBandBtn');
+
+    generateBtn.addEventListener('click', startGeneration);
+    cancelBtn.addEventListener('click', cancelGeneration);
+    retryBtn.addEventListener('click', startGeneration);
+    generateAnotherBtn.addEventListener('click', resetInterface);
+    viewBandBtn.addEventListener('click', viewBand);
+});
+
+function startGeneration() {
+    showProgress();
+    
+    fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentGenerationId = data.generation_id;
+            startStatusCheck();
+        } else {
+            showError(data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showError('Failed to start generation. Please try again.');
+    });
+}
+
+function startStatusCheck() {
+    statusCheckInterval = setInterval(checkStatus, 1000);
+}
+
+function checkStatus() {
+    if (!currentGenerationId) return;
+    
+    fetch(`/api/status/${currentGenerationId}`)
+    .then(response => response.json())
+    .then(data => {
+        updateProgress(data);
+        
+        if (data.status === 'complete') {
+            clearInterval(statusCheckInterval);
+            showSuccess(data);
+        } else if (data.status === 'error') {
+            clearInterval(statusCheckInterval);
+            showError(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error checking status:', error);
+    });
+}
+
+function updateProgress(data) {
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressMessage = document.getElementById('progressMessage');
+    
+    progressBar.style.width = data.progress + '%';
+    progressPercent.textContent = data.progress + '%';
+    progressMessage.textContent = data.message;
+    
+    // Update step indicators
+    const steps = document.querySelectorAll('.step');
+    steps.forEach((step, index) => {
+        if (data.progress >= (index + 1) * 14) {
+            step.classList.add('active');
+        }
+    });
+}
+
+function showProgress() {
+    document.getElementById('startGeneration').style.display = 'none';
+    document.getElementById('progressDisplay').style.display = 'block';
+    document.getElementById('successDisplay').style.display = 'none';
+    document.getElementById('errorDisplay').style.display = 'none';
+}
+
+function showSuccess(data) {
+    document.getElementById('startGeneration').style.display = 'none';
+    document.getElementById('progressDisplay').style.display = 'none';
+    document.getElementById('successDisplay').style.display = 'block';
+    document.getElementById('errorDisplay').style.display = 'none';
+    
+    // Update band preview
+    const bandPreview = document.getElementById('bandPreview');
+    bandPreview.innerHTML = `
+        <div class="band-preview-card">
+            <h4>${data.band_name}</h4>
+            <p>Your new AI-generated band is ready!</p>
+        </div>
+    `;
+}
+
+function showError(message) {
+    document.getElementById('startGeneration').style.display = 'none';
+    document.getElementById('progressDisplay').style.display = 'none';
+    document.getElementById('successDisplay').style.display = 'none';
+    document.getElementById('errorDisplay').style.display = 'block';
+    
+    document.getElementById('errorMessage').textContent = message;
+}
+
+function cancelGeneration() {
+    if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+    }
+    resetInterface();
+}
+
+function resetInterface() {
+    document.getElementById('startGeneration').style.display = 'block';
+    document.getElementById('progressDisplay').style.display = 'none';
+    document.getElementById('successDisplay').style.display = 'none';
+    document.getElementById('errorDisplay').style.display = 'none';
+    
+    // Reset progress
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('progressPercent').textContent = '0%';
+    document.getElementById('progressMessage').textContent = 'Initializing AI systems...';
+    
+    // Reset steps
+    document.querySelectorAll('.step').forEach(step => {
+        step.classList.remove('active');
+    });
+    
+    currentGenerationId = null;
+}
+
+function viewBand() {
+    if (currentGenerationId) {
+        // This would need to be implemented based on the band directory structure
+        window.location.href = '/gallery';
+    }
+}
+</script>
+{% endblock %}
