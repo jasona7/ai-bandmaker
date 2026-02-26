@@ -1,13 +1,9 @@
 import os
+import json
 import random
 import requests
 import logging
 from datetime import datetime
-import re
-
-# Initialize Faker
-from faker import Faker
-fake = Faker()
 
 # Get the current year
 current_year = datetime.now().year
@@ -33,68 +29,68 @@ if not OPENAI_API_KEY:
     logging.error("OpenAI API key is not set.")
     raise ValueError("Please set the OPENAI_API_KEY environment variable.")
 
-# Predefined lists for additional randomization in API prompts
-author_styles = [
-    "Lester Bangs", "Greil Marcus", "Robert Christgau", "Ellen Willis", 
-    "Jon Pareles", "Ben Ratliff", "Paul Morley", "David Fricke", 
-    "Ann Powers", "Hunter S. Thompson", "Nick Kent", "Neil Strauss", 
-    "Alex Ross", "Chuck Klosterman", "Simon Reynolds", "David Hepworth",
-    "Barney Hoskyns", "Cameron Crowe", "Steve Huey", "Jim DeRogatis"
-]
 
-genres = [
-    "Blues", "Jazz", "Rock", "Folk", "Hip Hop", "Classical", 
-    "Electronic", "Pop", "Country", "Reggae", "Punk", "Metal", 
-    "Soul", "Funk", "R&B", "Disco", "Gospel", "Latin", "World Music",
-    "Ska", "Indie", "Alternative", "Grunge", "Techno", "House",
-    "Trance", "Ambient", "Dance", "Dubstep", "Bluegrass", "Opera",
-    "Swing", "Bossa Nova", "Afrobeat", "K-Pop", "J-Pop", "Flamenco",
-    "Salsa", "Merengue", "Tango", "Zydeco", "Celtic", "New Age",
-    "Industrial", "Gothic", "Baroque", "Choral"
-]
+def generate_chatgpt_response(prompt, max_tokens=500, temperature=0.9):
+    """Generate a ChatGPT response with configurable parameters."""
+    url = "https://api.openai.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "gpt-4o",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": max_tokens,
+        "temperature": temperature
+    }
 
-style_descriptors = [
-    "Edgy", "Political", "Party-Band", "Experimental", 
-    "Mellow", "Psychedelic", "Minimalist", "Aggressive", 
-    "Virtuosic", "Melancholic", "Uplifting", "Retro", 
-    "Avant-Garde", "Theatrical", "Romantic", "Rebellious", 
-    "Acoustic", "Electronic", "Fusion", "Roots"
-]
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        return response.json()['choices'][0]['message']['content']
+    except requests.exceptions.HTTPError as http_err:
+        logging.error(f"HTTP error occurred: {http_err}")
+        raise
+    except Exception as err:
+        logging.error(f"Other error occurred: {err}")
+        raise
 
-# Function to generate a random band profile using ChatGPT API
+
 def generate_band_profile():
+    """Generate a completely unique band profile using AI — no constraining lists."""
     prompt = (
-        f"Generate a creative band profile including the following details: "
-        f"a unique band name, an author style inspired by a music critic, "
-        f"a nationality, two distinct music genres, "
-        f"a style descriptor, and a reference year between 1955 and 2020. "
-        f"The band profile should be formatted in the following format:\n\n"
-        f"Band Name: [Band Name]\n"
-        f"Author Style: [Author Style]\n"
-        f"Nationality: [Nationality]\n"
-        f"Genre 1: [Genre 1]\n"
-        f"Genre 2: [Genre 2]\n"
-        f"Style Name: [Style Name]\n"
-        f"Reference Year: [Reference Year]"
+        "You are a wildly creative music historian. Invent a completely original fictional band. "
+        "Do NOT use any real band names, real people, or cliched combinations. Be surprising and specific.\n\n"
+        "Generate:\n"
+        "- A unique, memorable band name (not generic — make it evocative and strange)\n"
+        "- A writing voice/style inspired by a specific music critic or journalist (real or invented)\n"
+        "- A nationality or region of origin (can be obscure — not just USA/UK)\n"
+        "- Two distinct music genres that the band blends (be inventive — mix unexpected genres)\n"
+        "- A style descriptor (one or two evocative words capturing their artistic vibe)\n"
+        "- A reference year between 1955 and 2020 when they were most active\n\n"
+        "Format your response EXACTLY like this (one field per line, no extra text):\n"
+        "Band Name: [name]\n"
+        "Author Style: [critic/voice]\n"
+        "Nationality: [nationality]\n"
+        "Genre 1: [genre]\n"
+        "Genre 2: [genre]\n"
+        "Style Name: [descriptor]\n"
+        "Reference Year: [year]"
     )
 
-    response = generate_chatgpt_response(prompt)
-
-    # Log the raw response for debugging
+    response = generate_chatgpt_response(prompt, max_tokens=200, temperature=1.0)
     logging.info(f"Raw band profile response: {response}")
 
     try:
-        # Use regex to extract information
+        import re
         band_name = re.search(r"Band Name:\s*(.*)", response).group(1).strip()
         author_style = re.search(r"Author Style:\s*(.*)", response).group(1).strip()
         nationality = re.search(r"Nationality:\s*(.*)", response).group(1).strip()
         genre1 = re.search(r"Genre 1:\s*(.*)", response).group(1).strip()
         genre2 = re.search(r"Genre 2:\s*(.*)", response).group(1).strip()
         style_name = re.search(r"Style Name:\s*(.*)", response).group(1).strip()
-
-        # Extracting and cleaning the reference year
         reference_year_str = re.search(r"Reference Year:\s*([^\n]*)", response).group(1).strip()
-        reference_year = int(re.sub(r"[^\d]", "", reference_year_str))  # Remove non-digit characters
+        reference_year = int(re.sub(r"[^\d]", "", reference_year_str))
 
         profile = {
             "Band Name": band_name,
@@ -112,124 +108,168 @@ def generate_band_profile():
     except (AttributeError, IndexError, ValueError) as e:
         logging.error(f"Error parsing band profile response: {e}")
         raise ValueError("Failed to parse band profile from response.")
-    
-# Function to create a backstory for the band using ChatGPT
+
+
 def create_band_backstory(band_profile):
+    """Create a detailed backstory with named band members."""
     prompt = (
-        f"Write a fan page backstory for a band called '{band_profile['Band Name']}' formed in {band_profile['Reference Year']} in {band_profile['Nationality']}. "
-        f"The band has a {band_profile['Style Name']} style and blends {band_profile['Genre 1']} and {band_profile['Genre 2']} genres of music. "
-        f"Include detailed descriptions of each band member and their instruments. "
-        f"The completed backstory should be written in the style of {band_profile['Author Style']}. Limit the backstory to 250 words."
+        f"Write a fan page backstory for a fictional band called '{band_profile['Band Name']}' "
+        f"formed around {band_profile['Reference Year']} in {band_profile['Nationality']}. "
+        f"They have a {band_profile['Style Name']} style blending {band_profile['Genre 1']} and {band_profile['Genre 2']}.\n\n"
+        f"IMPORTANT: Include exactly 3-5 band members. For EACH member, clearly state:\n"
+        f"- Their full name (first and last, with an optional nickname in quotes)\n"
+        f"- Their instrument or role (e.g., lead vocals, bass guitar, drums, synthesizer)\n"
+        f"- A brief note about their personality or contribution\n\n"
+        f"Write in the style of {band_profile['Author Style']}. Keep it to 250 words. "
+        f"Make it vivid and specific — this is a fan page, so write with passion and insider knowledge."
     )
 
-    response = generate_chatgpt_response(prompt)
-
-    # Log the backstory for debugging
+    response = generate_chatgpt_response(prompt, max_tokens=600, temperature=0.85)
     logging.info(f"Generated backstory: {response}")
 
-    # Trim the response to ensure it is no longer than 250 words
-    word_limit = 250
+    # Trim to ~250 words at a sentence boundary
     words = response.split()
-    
-    if len(words) > word_limit:
-        # Find the last complete sentence within the word limit
-        trimmed_response = ' '.join(words[:word_limit])
-        last_sentence_end = max(trimmed_response.rfind('.'), trimmed_response.rfind('!'), trimmed_response.rfind('?'))
-        response = trimmed_response[:last_sentence_end + 1]
-    
+    if len(words) > 280:
+        trimmed = ' '.join(words[:280])
+        last_end = max(trimmed.rfind('.'), trimmed.rfind('!'), trimmed.rfind('?'))
+        if last_end > 0:
+            response = trimmed[:last_end + 1]
+
     return response
 
-# Function to generate the discography using ChatGPT API
-def generate_discography_info(band_profile, backstory):
+
+def extract_band_members(band_profile, backstory):
+    """Use AI to extract structured band member info from the backstory."""
     prompt = (
-        f"Based on the following backstory and band profile, generate three unique and creative album titles for the band '{band_profile['Band Name']}'. "
-        f"Each album should have a list of 10 to 15 tracks that fit the band's style, genres ({band_profile['Genre 1']} and {band_profile['Genre 2']}), and era ({band_profile['Reference Year']}). "
-        f"The track names should be imaginative and reflect the band's evolution and changing themes over time. "
-        f"Backstory: {backstory} "
-        f"Ensure each album title is distinct, and the track names are varied and expressive, capturing different moods and stories."
+        f"Read this backstory for the band '{band_profile['Band Name']}' and extract the band members.\n\n"
+        f"Backstory:\n{backstory}\n\n"
+        f"Return a JSON array of band members. Each member should have:\n"
+        f"- \"name\": their full name (include nickname if mentioned)\n"
+        f"- \"instrument\": their instrument or role\n"
+        f"- \"bio\": a one-sentence description of them\n\n"
+        f"Return ONLY valid JSON, no other text. Example format:\n"
+        f'[{{"name": "Jane Doe", "instrument": "lead vocals", "bio": "The fiery frontwoman..."}}]'
     )
 
-    response = generate_chatgpt_response(prompt)
-    
+    response = generate_chatgpt_response(prompt, max_tokens=600, temperature=0.3)
+    logging.info(f"Raw member extraction response: {response}")
+
+    try:
+        # Strip markdown code fences if present
+        cleaned = response.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1] if "\n" in cleaned else cleaned[3:]
+            if cleaned.endswith("```"):
+                cleaned = cleaned[:-3]
+            cleaned = cleaned.strip()
+
+        members = json.loads(cleaned)
+        logging.info(f"Extracted band members: {members}")
+        return members
+    except (json.JSONDecodeError, KeyError) as e:
+        logging.error(f"Error parsing band members JSON: {e}")
+        # Fallback: return a minimal member list
+        return [{"name": band_profile["Band Name"], "instrument": "various", "bio": "The band."}]
+
+
+def generate_discography_info(band_profile, backstory):
+    """Generate a full discography with 3 albums and 10-15 tracks each."""
+    prompt = (
+        f"Generate a complete discography for the fictional band '{band_profile['Band Name']}' "
+        f"({band_profile['Genre 1']}/{band_profile['Genre 2']}, {band_profile['Style Name']} style, "
+        f"active around {band_profile['Reference Year']}).\n\n"
+        f"Backstory context: {backstory[:300]}...\n\n"
+        f"Create exactly 3 albums. For each album provide:\n"
+        f"- An album title (creative, era-appropriate)\n"
+        f"- 10-15 track names that reflect the band's evolution\n\n"
+        f"Format EXACTLY like this (separate albums with a blank line):\n\n"
+        f"Album: [Title] ([Year])\n"
+        f"1. Track Name\n"
+        f"2. Track Name\n"
+        f"...\n\n"
+        f"Album: [Title] ([Year])\n"
+        f"1. Track Name\n"
+        f"..."
+    )
+
+    response = generate_chatgpt_response(prompt, max_tokens=1500, temperature=0.85)
     logging.info(f"Generated discography response: {response}")
 
     try:
-        # Parse the response to extract album titles and track lists
         albums = []
-        album_blocks = response.split("\n\n")  # Split response by double newlines to separate albums
-        for album_block in album_blocks:
-            lines = album_block.split("\n")
-            title = lines[0].strip()
-            tracks = []
-            for line in lines[1:]:
-                track = line.strip()
-                if track:
-                    tracks.append(track)
-            albums.append((title, tracks))
-        
-        logging.info(f"Parsed albums: {albums}")
+        album_blocks = response.split("\n\n")
+        current_title = None
+        current_tracks = []
+
+        for block in album_blocks:
+            lines = block.strip().split("\n")
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                if line.lower().startswith("album:") or (not line[0].isdigit() and not current_title):
+                    # Save previous album if exists
+                    if current_title and current_tracks:
+                        albums.append((current_title, current_tracks))
+                    current_title = line.replace("Album:", "").strip() if line.lower().startswith("album:") else line
+                    current_tracks = []
+                elif line and (line[0].isdigit() or line.startswith("-")):
+                    # Strip leading number/dash/dot
+                    import re
+                    track = re.sub(r'^[\d]+[\.\)\-\s]+', '', line).strip()
+                    track = re.sub(r'^[\-\s]+', '', track).strip()
+                    if track:
+                        current_tracks.append(track)
+
+        # Don't forget the last album
+        if current_title and current_tracks:
+            albums.append((current_title, current_tracks))
+
+        logging.info(f"Parsed {len(albums)} albums")
         return albums
 
     except Exception as e:
         logging.error(f"Error parsing discography response: {e}")
         raise
 
-# Function to generate ChatGPT response for backstory or album descriptions
-def generate_chatgpt_response(prompt):
-    url = "https://api.openai.com/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "model": "gpt-4o",
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 500,
-        "temperature": 0.7
-    }
 
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()  # Raises an HTTPError if the response code was unsuccessful
-        return response.json()['choices'][0]['message']['content']
-    except requests.exceptions.HTTPError as http_err:
-        logging.error(f"HTTP error occurred: {http_err}")
-        raise
-    except Exception as err:
-        logging.error(f"Other error occurred: {err}")
-        raise
+def get_era_photography_style(reference_year):
+    """Map a band's reference year to an era-appropriate photography description."""
+    year = int(reference_year)
+    if year < 1970:
+        return (
+            "Black and white film photography, grainy high-contrast look, "
+            "period-appropriate fashion and hairstyles from the 1950s-1960s, "
+            "vintage studio lighting with dramatic shadows"
+        )
+    elif year < 1980:
+        return (
+            "Saturated 1970s color film photography, warm tones, "
+            "bell-bottoms, long hair, mustaches, wood-paneled studio backdrop, "
+            "soft focus lens flare typical of 70s album covers"
+        )
+    elif year < 1990:
+        return (
+            "1980s glamour photography with dramatic lighting, neon accent colors, "
+            "big hair, bold makeup, synth-pop fashion, leather and denim, "
+            "studio backdrop with colored gels and fog machine"
+        )
+    elif year < 2000:
+        return (
+            "1990s lo-fi photography aesthetic, disposable camera look, "
+            "slightly washed out colors, grunge/flannel fashion, "
+            "candid feel like a Spin Magazine photo shoot, natural lighting"
+        )
+    else:
+        return (
+            "Early 2000s-2010s digital photography, clean lighting, "
+            "contemporary fashion, urban or industrial backdrop, "
+            "high resolution with slight color grading"
+        )
 
-# Function to extract band members from the backstory
-def extract_band_members_from_backstory(backstory):
-    try:
-        # Regular expression pattern to match 'Firstname "Nickname" Lastname' format followed by instruments
-        pattern = r'([A-Z][a-z]+\s"[^"]+"\s[A-Z][a-z]+)\s(?:with\s)?(?:on\s)?(\b(?:\w+\s?)+?(?:guitar|drums|vocals|bass|keys|piano|saxophone|trumpet|violin|flute|harmonica|synthesizer|accordion|banjo|mandolin|cello|percussion|congas|clarinet)\b)'
-        
-        # Find all matches of the pattern in the backstory
-        matches = re.findall(pattern, backstory)
 
-        logging.info(f"Extracted band members from backstory: {matches}")
-
-        # Create band member dictionary
-        band_members = []
-        for match in matches:
-            full_name = match[0].strip()
-            instrument = match[1].strip()
-            #bio = f"**{full_name}** is known for their expertise in {instrument} and adds a unique flavor to the band's music."
-            bio = f"{full_name} on {instrument}"
-            band_members.append({
-                "name": full_name,
-                "instruments": instrument,
-                "bio": bio
-            })
-
-        return band_members
-
-    except Exception as e:
-        logging.error(f"Error extracting band members from backstory: {e}")
-
-# Function to generate DALL-E images for band photo
 def generate_dall_e_image(prompt, output_path):
+    """Generate a DALL-E image and save it to disk."""
     url = "https://api.openai.com/v1/images/generations"
     headers = {
         "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
@@ -244,16 +284,11 @@ def generate_dall_e_image(prompt, output_path):
 
     try:
         response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()  # Raises an HTTPError if the response code was unsuccessful
-
-        # Get the image URL from the response
+        response.raise_for_status()
         image_url = response.json()['data'][0]['url']
-
-        # Download the image
         image_response = requests.get(image_url)
         image_response.raise_for_status()
 
-        # Save the image to the specified output path
         with open(output_path, 'wb') as file:
             file.write(image_response.content)
 
@@ -266,188 +301,309 @@ def generate_dall_e_image(prompt, output_path):
         logging.error(f"An error occurred while generating image: {err}")
         raise
 
-# Function to create HTML content with improved styling and band members section
+
+def build_band_photo_prompt(band_profile, band_members):
+    """Build a DALL-E prompt with era-appropriate photography style."""
+    photo_style = get_era_photography_style(band_profile['Reference Year'])
+    member_count = len(band_members)
+
+    prompt = (
+        f"A promotional band photo of {member_count} musicians from the fictional band "
+        f"'{band_profile['Band Name']}', a {band_profile['Nationality']} "
+        f"{band_profile['Genre 1']}/{band_profile['Genre 2']} group active in {band_profile['Reference Year']}. "
+        f"Photography style: {photo_style}. "
+        f"The band has a {band_profile['Style Name']} aesthetic. "
+        f"This should look like an authentic press kit photo from {band_profile['Reference Year']}. "
+        f"No text or words in the image."
+    )
+
+    logging.info(f"DALL-E prompt: {prompt}")
+    return prompt
+
+
 def create_html_content(band_profile, backstory, albums, band_members, output_dir):
-    selected_font = random.choice([
-        "Arial, sans-serif", "Georgia, serif", "Tahoma, sans-serif", 
-        "Verdana, sans-serif", "Trebuchet MS, sans-serif", "Courier New, monospace",
-        "Lucida Sans, sans-serif", "Garamond, serif", "Helvetica, sans-serif"
-    ])  # Randomly select a font
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{band_profile['Band Name']} - {band_profile['Style Name']} Sound</title>
-        <style>
-            body {{
-                font-family: {selected_font};
-                background-color: #F0E68C;
-                color: #333;
-                margin: 0;
-                padding: 0;
-            }}
-            header {{
-                background-color: #2F4F4F;
-                color: #FFF;
-                padding: 20px;
-                text-align: center;
-            }}
-            header h1 {{
-                font-size: 3em;
-                font-weight: bold;
-                margin: 0;
-                font-family: {selected_font};
-            }}
-            nav {{
-                background-color: #8B4513;
-                padding: 10px;
-                text-align: center;
-            }}
-            nav a {{
-                color: #FFF;
-                margin: 0 15px;
-                text-decoration: none;
-                font-family: {selected_font};
-            }}
-            .container {{
-                padding: 20px;
-                max-width: 1200px;
-                margin: 0 auto;
-            }}
-            .section-title {{
-                font-family: {selected_font};
-                font-size: 2em;
-                border-bottom: 2px solid #333;
-                padding-bottom: 5px;
-                margin-bottom: 20px;
-            }}
-            .album-item {{
-                margin-bottom: 20px;
-            }}
-            .album-item p {{
-                margin: 0;
-                font-size: 1em;
-                color: #555;
-            }}
-            .track-list {{
-                margin-top: 10px;
-                padding-left: 20px;
-                list-style-type: decimal;
-            }}
-            .band-member {{
-                display: flex;
-                align-items: center;
-                margin-bottom: 20px;
-            }}
-            .band-member img {{
-                width: 150px;
-                height: 150px;
-                border-radius: 50%;
-                margin-right: 20px;
-                border: 3px solid #8B4513;
-            }}
-            .band-member p {{
-                margin: 0;
-                font-size: 1.2em;
-                font-weight: bold;
-            }}
-            .band-member-bio {{
-                margin: 10px 0;
-                font-size: 1em;
-                color: #555;
-            }}
-            footer {{
-                background-color: #2F4F4F;
-                color: #FFF;
-                text-align: center;
-                padding: 10px 0;
-                position: fixed;
-                bottom: 0;
-                width: 100%;
-            }}
-            .band-photo {{
-                width: 600px;
-                height: auto;
-                display: block;
-                margin: 0 auto 10px auto;
-            }}
-            .caption {{
-                text-align: center;
-                font-size: 1.1em;
-                font-style: italic;
-                margin-bottom: 20px;
-            }}
-        </style>
-    </head>
-    <body>
+    """Generate a retro 90s-style fan page HTML for the band."""
+    band_name = band_profile['Band Name']
+    style_name = band_profile['Style Name']
+    ref_year = band_profile['Reference Year']
+    genre1 = band_profile['Genre 1']
+    genre2 = band_profile['Genre 2']
+    nationality = band_profile['Nationality']
 
-    <header>
-        <h1>{band_profile['Band Name']} - {band_profile['Style Name']} Sound</h1>
-    </header>
+    # Pick random retro accent colors
+    accent_colors = [
+        ("#00ffff", "#ff00ff", "#ffff00"),  # cyan, magenta, yellow
+        ("#00ff00", "#ff6600", "#ff00ff"),  # lime, orange, magenta
+        ("#ffff00", "#00ffff", "#ff4444"),  # yellow, cyan, red
+        ("#ff69b4", "#00ff00", "#ffff00"),  # hotpink, lime, yellow
+    ]
+    c1, c2, c3 = random.choice(accent_colors)
 
-    <nav>
-        <a href="#backstory">Backstory</a>
-        <a href="#members">Band Members</a>
-        <a href="#discography">Discography</a>
-    </nav>
+    # Build members HTML
+    members_html = ""
+    for member in band_members:
+        members_html += f"""
+        <tr>
+            <td style="color:{c2}; padding:4px 12px; font-weight:bold;">{member.get('name', 'Unknown')}</td>
+            <td style="color:{c3}; padding:4px 12px;">{member.get('instrument', '')}</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">{member.get('bio', '')}</td>
+        </tr>"""
 
-    <div class="container">
-        <section id="backstory" class="backstory">
-            <h2 class="section-title">Backstory</h2>
-            <p>{backstory}</p>
-        </section>
+    # Build discography HTML
+    disco_html = ""
+    for title, tracks in albums:
+        tracks_html = ""
+        for i, track in enumerate(tracks, 1):
+            tracks_html += f'<li style="color:#cccccc;">{track}</li>\n'
+        disco_html += f"""
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="{c2}"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:{c1}; font-weight:bold; padding:8px; font-size:1.1em;">
+                {title}
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:{c3}; margin:0; padding-left:20px;">
+                    {tracks_html}
+                </ol>
+            </td></tr>
+        </table>"""
 
-        <section id="members" class="members">
-            <h2 class="section-title">Band Members</h2>
-            <img src="band_photo.jpg" alt="{band_profile['Band Name']} Photo" class="band-photo">
-            <div class="caption">Band Members: {', '.join(member['name'] for member in band_members)}</div>
-            <div>
-    """
-    for i, member in enumerate(band_members):
-        html_content += f"""
-        <div class="band-member">
-            <div>
-                <p>{member['bio']}</p>
-            </div>
-        </div>
-        """
+    # Visitor counter (fake, random)
+    visitor_count = random.randint(1247, 99999)
 
-    html_content += """
-            </div>
-        </section>
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~*~ {band_name} ~*~ Official Fan Page ~*~</title>
+    <style>
+        body {{
+            background-color: #000000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='%23111'/%3E%3C/svg%3E");
+            color: #cccccc;
+            font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+        }}
+        a {{ color: {c1}; }}
+        a:visited {{ color: {c2}; }}
+        a:hover {{ color: {c3}; text-decoration: none; }}
+        .page-wrapper {{
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }}
+        .header-table {{
+            width: 100%;
+            background: linear-gradient(to right, #000033, #000066, #000033);
+            border: 3px ridge {c2};
+            margin-bottom: 10px;
+        }}
+        .header-table td {{
+            text-align: center;
+            padding: 15px;
+        }}
+        .divider {{
+            width: 80%;
+            margin: 15px auto;
+        }}
+        .section-header {{
+            color: {c1};
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0 10px 0;
+            text-shadow: 1px 1px 2px {c2};
+        }}
+        .photo-frame {{
+            text-align: center;
+            margin: 15px auto;
+        }}
+        .photo-frame img {{
+            max-width: 500px;
+            width: 100%;
+            border: 4px ridge {c2};
+            display: block;
+            margin: 0 auto;
+        }}
+        .photo-caption {{
+            color: {c3};
+            font-style: italic;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }}
+        .backstory-box {{
+            background-color: #0a0a1a;
+            border: 2px inset {c1};
+            padding: 15px;
+            margin: 10px auto;
+            width: 90%;
+            color: #dddddd;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }}
+        .members-table {{
+            margin: 10px auto;
+            border: 2px ridge {c1};
+            background-color: #0a0a0a;
+            border-collapse: collapse;
+        }}
+        .members-table td {{
+            border-bottom: 1px dashed #333333;
+        }}
+        .footer-area {{
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            border-top: 2px ridge {c2};
+            font-size: 0.8em;
+            color: #888888;
+        }}
+        .footer-area a {{
+            color: {c2};
+            font-size: 0.85em;
+        }}
+        .blink {{
+            animation: blinker 1.2s linear infinite;
+        }}
+        @keyframes blinker {{
+            50% {{ opacity: 0; }}
+        }}
+        .badge-row {{
+            text-align: center;
+            margin: 15px 0;
+            font-size: 0.75em;
+            color: #999999;
+        }}
+        .badge-row span {{
+            margin: 0 8px;
+            padding: 3px 8px;
+            border: 1px solid #444444;
+            background-color: #111111;
+        }}
+        .nav-bar {{
+            text-align: center;
+            padding: 8px;
+            background-color: #111111;
+            border: 1px solid #333333;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }}
+        .nav-bar a {{
+            margin: 0 5px;
+        }}
+        marquee {{
+            font-size: 1.8em;
+            font-weight: bold;
+            color: {c1};
+            text-shadow: 2px 2px 4px {c2};
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }}
+        .stars {{
+            color: {c3};
+            letter-spacing: 3px;
+        }}
+    </style>
+</head>
+<body>
 
-        <section id="discography" class="discography">
-            <h2 class="section-title">Discography</h2>
-    """
-    for i, (title, tracks) in enumerate(albums):
-        html_content += f"""
-        <div class="album-item">
-            <p><strong>{title}</strong></p>
-            <ol class="track-list">
-        """
-        for track in tracks:
-            html_content += f"<li>{track}</li>"
-        html_content += """
-            </ol>
-        </div>
-        """
-    html_content += f"""
-        </section>
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <table class="header-table" cellpadding="0" cellspacing="0">
+        <tr><td>
+            <span class="stars">* * * * * * * * * * * * *</span><br>
+            <marquee scrollamount="3">{band_name}</marquee>
+            <br>
+            <span style="color:{c3}; font-size:0.85em;">
+                {style_name} | {genre1} / {genre2} | Est. {ref_year} | {nationality}
+            </span><br>
+            <span class="stars">* * * * * * * * * * * * *</span>
+        </td></tr>
+    </table>
+
+    <!-- Navigation -->
+    <div class="nav-bar">
+        <a href="#backstory">Backstory</a> |
+        <a href="#photo">Band Photo</a> |
+        <a href="#members">Members</a> |
+        <a href="#discography">Discography</a> |
+        <a href="#guestbook">Guestbook</a>
     </div>
 
-    <footer>
-        <p>&copy; {current_year} {band_profile['Band Name']}. All rights reserved.</p>
-    </footer>
+    <!-- Backstory -->
+    <a name="backstory"></a>
+    <h3 class="section-header">~ The Story ~</h3>
+    <hr class="divider" color="{c2}" size="2" noshade>
+    <div class="backstory-box">
+        {backstory}
+    </div>
 
-    </body>
-    </html>
-    """
+    <!-- Band Photo -->
+    <a name="photo"></a>
+    <h3 class="section-header">~ Band Photo ~</h3>
+    <hr class="divider" color="{c2}" size="2" noshade>
+    <div class="photo-frame">
+        <img src="band_photo.jpg" alt="{band_name} - Band Photo">
+        <div class="photo-caption">
+            {', '.join(m.get('name', '') for m in band_members)}
+        </div>
+    </div>
+
+    <!-- Band Members -->
+    <a name="members"></a>
+    <h3 class="section-header">~ The Members ~</h3>
+    <hr class="divider" color="{c2}" size="2" noshade>
+    <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
+        {members_html}
+    </table>
+
+    <!-- Discography -->
+    <a name="discography"></a>
+    <h3 class="section-header">~ Discography ~</h3>
+    <hr class="divider" color="{c2}" size="2" noshade>
+    {disco_html}
+
+    <!-- Guestbook / Links -->
+    <a name="guestbook"></a>
+    <h3 class="section-header">~ Guestbook & Links ~</h3>
+    <hr class="divider" color="{c2}" size="2" noshade>
+    <div style="text-align:center; padding:10px;">
+        <p><a href="#">Sign the Guestbook!</a> | <a href="#">View Guestbook</a></p>
+        <p><a href="mailto:webmaster@{band_name.replace(' ', '').lower()}.geocities.com">Email the Webmaster</a></p>
+        <p style="color:#666666; font-size:0.8em;">
+            <a href="#">Link to us!</a> |
+            <a href="#">Webrings</a> |
+            <a href="#">MIDI Archive</a>
+        </p>
+    </div>
+
+    <!-- Badges / Footer -->
+    <div class="badge-row">
+        <span>Best viewed in Netscape Navigator 4.0</span>
+        <span>800x600 resolution</span>
+        <span>Made with Notepad</span>
+    </div>
+
+    <div class="footer-area">
+        <p>You are visitor number <strong style="color:{c1};">#{visitor_count:,}</strong> since {ref_year}!</p>
+        <p class="blink">*** This page is always under construction! ***</p>
+        <p>&copy; {current_year} {band_name} Fan Page. All rights reserved.<br>
+        This is a fan-made page. We are not affiliated with {band_name} or their management.</p>
+        <p><a href="#">Back to Top</a></p>
+    </div>
+
+</div>
+
+</body>
+</html>"""
     return html_content
 
-# Function to save HTML content to a file
+
 def save_html_to_file(content, output_dir, filename="home.html"):
+    """Save HTML content to a file."""
     filepath = os.path.join(output_dir, filename)
     try:
         with open(filepath, "w") as file:
@@ -457,8 +613,9 @@ def save_html_to_file(content, output_dir, filename="home.html"):
         logging.error(f"Error writing HTML file '{filename}': {e}")
         raise
 
-# Function to create a unique subdirectory name based on band name in camelCase
+
 def create_project_directory(band_name):
+    """Create a unique subdirectory based on band name in CamelCase."""
     directory_name = ''.join(word.capitalize() for word in band_name.split())
     directory = directory_name
     counter = 1
@@ -475,37 +632,32 @@ def create_project_directory(band_name):
 
     return directory
 
-# Example usage
+
+# CLI entry point
 if __name__ == "__main__":
     try:
-        # Generate a band profile using ChatGPT API
+        # Generate a band profile
         band_profile = generate_band_profile()
 
-        # Create project directory using camelCase band name
+        # Create project directory
         output_dir = create_project_directory(band_profile['Band Name'])
 
-        # Create band backstory using ChatGPT API
+        # Create band backstory
         backstory = create_band_backstory(band_profile)
 
-        # Extract band member information from the generated backstory
-        band_members = extract_band_members_from_backstory(backstory)
+        # Extract band members via AI
+        band_members = extract_band_members(band_profile, backstory)
 
-        # Generate discography information using ChatGPT API with enhanced creativity and uniqueness
+        # Generate discography
         albums = generate_discography_info(band_profile, backstory)
 
-        # Generate a single band photo using DALL-E
-        band_photo_prompt = (
-            f"A promotional photo of the band '{band_profile['Band Name']}' from {band_profile['Reference Year']}: "
-            f"{', '.join(member['name'] for member in band_members)}. The image should be a traditional band promotional photo from a typical press kit of {band_profile['Reference Year']}, depicting them together, "
-            f"reflecting their {band_profile['Style Name']} vibe & style of {band_profile['Reference Year']}, with elements of {band_profile['Genre 1']} and {band_profile['Genre 2']} attire and atmosphere."
-        )
+        # Generate band photo with era-appropriate styling
+        photo_prompt = build_band_photo_prompt(band_profile, band_members)
         band_photo_path = os.path.join(output_dir, "band_photo.jpg")
-        generate_dall_e_image(band_photo_prompt, band_photo_path)
+        generate_dall_e_image(photo_prompt, band_photo_path)
 
-        # Create HTML content with improved styling and discography section
+        # Create and save the HTML fan page
         html_content = create_html_content(band_profile, backstory, albums, band_members, output_dir)
-
-        # Save HTML content to a file
         save_html_to_file(html_content, output_dir)
 
         logging.info("Script executed successfully.")
