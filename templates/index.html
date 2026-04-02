@@ -5,7 +5,7 @@
 {% block content %}
 <div class="welcome-box">
     <h2 class="section-header">Welcome to the AI Band Generator!!</h2>
-    <hr class="pointed-hr" noshade>
+    <hr class="pointed-hr">
 
     <div class="center-text">
         <p class="intro-text">
@@ -13,57 +13,57 @@
             A band with a rich backstory, incredible albums, and a look all their own?
         </p>
         <p class="intro-text">
-            <strong style="color:#00ffff;">Well now you can!!</strong> Our AI-powered generator creates
+            <strong class="retro-box-heading--cyan-inline">Well now you can!!</strong> Our AI-powered generator creates
             completely unique fictional bands &mdash; complete with backstories, band members,
             full discographies, promotional photos, and their very own fan pages!
         </p>
     </div>
 
-    <hr class="pointed-hr" noshade>
+    <hr class="pointed-hr">
 </div>
 
 <!-- How It Works -->
 <h2 class="section-header">~ How It Works ~</h2>
 
-<table class="info-table" cellpadding="8" cellspacing="0" border="2" bordercolor="#ff00ff">
+<table class="info-table">
     <tr class="table-header-row">
-        <td width="50" align="center"><strong>#</strong></td>
-        <td><strong>Step</strong></td>
-        <td><strong>What Happens</strong></td>
+        <th scope="col" class="step-number" style="width:50px;">#</th>
+        <th scope="col">Step</th>
+        <th scope="col">What Happens</th>
     </tr>
     <tr>
-        <td align="center" style="color:#ffff00; font-size:1.4em; font-weight:bold;">1</td>
-        <td style="color:#00ff00;">Click &quot;Generate&quot;</td>
+        <td class="step-number">1</td>
+        <td class="step-label">Click &quot;Generate&quot;</td>
         <td>Start the AI band creation process with a single click</td>
     </tr>
     <tr>
-        <td align="center" style="color:#ffff00; font-size:1.4em; font-weight:bold;">2</td>
-        <td style="color:#00ff00;">AI Creates a Profile</td>
+        <td class="step-number">2</td>
+        <td class="step-label">AI Creates a Profile</td>
         <td>Our AI invents a band name, genre, style, nationality, and era</td>
     </tr>
     <tr>
-        <td align="center" style="color:#ffff00; font-size:1.4em; font-weight:bold;">3</td>
-        <td style="color:#00ff00;">Backstory &amp; Members</td>
+        <td class="step-number">3</td>
+        <td class="step-label">Backstory &amp; Members</td>
         <td>A rich backstory and detailed band member bios are written</td>
     </tr>
     <tr>
-        <td align="center" style="color:#ffff00; font-size:1.4em; font-weight:bold;">4</td>
-        <td style="color:#00ff00;">Discography</td>
+        <td class="step-number">4</td>
+        <td class="step-label">Discography</td>
         <td>Three full albums with track listings are generated</td>
     </tr>
     <tr>
-        <td align="center" style="color:#ffff00; font-size:1.4em; font-weight:bold;">5</td>
-        <td style="color:#00ff00;">Band Photo</td>
+        <td class="step-number">5</td>
+        <td class="step-label">Band Photo</td>
         <td>DALL-E creates an era-appropriate promotional band photo</td>
     </tr>
     <tr>
-        <td align="center" style="color:#ffff00; font-size:1.4em; font-weight:bold;">6</td>
-        <td style="color:#00ff00;">Fan Page!</td>
+        <td class="step-number">6</td>
+        <td class="step-label">Fan Page!</td>
         <td>Everything comes together in a retro fan page you can browse</td>
     </tr>
 </table>
 
-<div class="center-text" style="margin:25px 0;">
+<div class="center-text cta-block">
     <p style="font-size:1.2em;">
         Ready to create your own band?<br>
         <a href="{{ url_for('generate_page') }}" class="big-link">&gt;&gt;&gt; Click Here to Generate a Band! &lt;&lt;&lt;</a>
@@ -76,30 +76,22 @@
 
 <!-- What You Get -->
 <h2 class="section-header">~ What You Get ~</h2>
-<hr class="pointed-hr" noshade>
+<hr class="pointed-hr">
 
-<table width="90%" cellpadding="6" cellspacing="0" border="0" style="margin:0 auto;">
-    <tr>
-        <td width="33%" valign="top" class="feature-cell">
-            <div class="feature-box">
-                <h4 style="color:#00ffff;">AI-Generated Profiles</h4>
-                <p>Unique band names, styles, nationalities, and eras. No two bands are alike!</p>
-            </div>
-        </td>
-        <td width="33%" valign="top" class="feature-cell">
-            <div class="feature-box">
-                <h4 style="color:#ff00ff;">Complete Discographies</h4>
-                <p>Three albums with 10-15 tracks each, complete with creative titles.</p>
-            </div>
-        </td>
-        <td width="33%" valign="top" class="feature-cell">
-            <div class="feature-box">
-                <h4 style="color:#ffff00;">Band Photos</h4>
-                <p>AI-generated promotional photos matching the band's era and style!</p>
-            </div>
-        </td>
-    </tr>
-</table>
+<div class="feature-grid">
+    <div class="feature-box">
+        <h3 class="feature-title feature-title--cyan">AI-Generated Profiles</h3>
+        <p>Unique band names, styles, nationalities, and eras. No two bands are alike!</p>
+    </div>
+    <div class="feature-box">
+        <h3 class="feature-title feature-title--magenta">Complete Discographies</h3>
+        <p>Three albums with 10-15 tracks each, complete with creative titles.</p>
+    </div>
+    <div class="feature-box">
+        <h3 class="feature-title feature-title--yellow">Band Photos</h3>
+        <p>AI-generated promotional photos matching the band's era and style!</p>
+    </div>
+</div>
 
-<hr class="pointed-hr" noshade>
+<hr class="pointed-hr">
 {% endblock %}

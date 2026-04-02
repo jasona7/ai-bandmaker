@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
 import json
+import re
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from createAct import (
     generate_band_profile, create_band_backstory, extract_band_members,
@@ -19,6 +20,24 @@ logger = logging.getLogger(__name__)
 
 # Store generation status
 generation_status = {}
+
+# Path validation pattern
+SAFE_BAND_NAME = re.compile(r'^[A-Za-z0-9_\-]+$')
+
+
+def cleanup_old_generations():
+    """Remove generation status entries older than 1 hour"""
+    cutoff = datetime.now() - timedelta(hours=1)
+    to_remove = []
+    for gen_id in generation_status:
+        try:
+            gen_time = datetime.strptime(gen_id, "%Y%m%d_%H%M%S")
+            if gen_time < cutoff:
+                to_remove.append(gen_id)
+        except ValueError:
+            pass
+    for gen_id in to_remove:
+        del generation_status[gen_id]
 
 
 @app.route('/')
@@ -40,7 +59,6 @@ def gallery():
 
     for band_dir in glob.glob("*/home.html"):
         band_name = os.path.dirname(band_dir)
-        import re
         display_name = re.sub(r'([A-Z])', r' \1', band_name).strip()
         bands.append({
             'name': display_name,
@@ -51,9 +69,11 @@ def gallery():
     return render_template('gallery.html', bands=bands)
 
 
-@app.route('/band/<band_name>')
+@app.route('/band/<band_name>/')
 def view_band(band_name):
     """View a specific band's page"""
+    if not SAFE_BAND_NAME.match(band_name):
+        return "Invalid band name", 400
     band_path = os.path.join(band_name, 'home.html')
     if os.path.exists(band_path):
         return send_from_directory(band_name, 'home.html')
@@ -64,6 +84,8 @@ def view_band(band_name):
 @app.route('/band/<band_name>/<filename>')
 def band_assets(band_name, filename):
     """Serve band assets like photos"""
+    if not SAFE_BAND_NAME.match(band_name):
+        return "Invalid band name", 400
     return send_from_directory(band_name, filename)
 
 
@@ -71,7 +93,19 @@ def band_assets(band_name, filename):
 def api_generate():
     """API endpoint to generate a new band"""
     try:
+        cleanup_old_generations()
+
         generation_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # Grab user selections (empty string = let AI decide)
+        data = request.get_json(silent=True) or {}
+        constraints = {
+            'genre1': data.get('genre1', ''),
+            'genre2': data.get('genre2', ''),
+            'nationality': data.get('nationality', ''),
+            'style_name': data.get('style_name', ''),
+            'era': data.get('era', ''),
+        }
 
         generation_status[generation_id] = {
             'status': 'starting',
@@ -81,7 +115,7 @@ def api_generate():
             'directory': None
         }
 
-        thread = threading.Thread(target=generate_band_async, args=(generation_id,))
+        thread = threading.Thread(target=generate_band_async, args=(generation_id, constraints))
         thread.daemon = True
         thread.start()
 
@@ -95,7 +129,7 @@ def api_generate():
         logger.error(f"Error starting band generation: {e}")
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': 'An error occurred while starting band generation. Please try again.'
         }), 500
 
 
@@ -110,7 +144,7 @@ def api_status(generation_id):
     return jsonify(status)
 
 
-def generate_band_async(generation_id):
+def generate_band_async(generation_id, constraints=None):
     """Generate a band asynchronously"""
     try:
         generation_status[generation_id].update({
@@ -119,7 +153,7 @@ def generate_band_async(generation_id):
             'message': 'Creating band profile...'
         })
 
-        band_profile = generate_band_profile()
+        band_profile = generate_band_profile(constraints=constraints)
 
         generation_status[generation_id].update({
             'status': 'creating_directory',
@@ -181,11 +215,11 @@ def generate_band_async(generation_id):
         })
 
     except Exception as e:
-        logger.error(f"Error in band generation: {e}")
+        logger.error(f"Error in band generation {generation_id}: {e}", exc_info=True)
         generation_status[generation_id].update({
             'status': 'error',
             'progress': 0,
-            'message': f'Error: {str(e)}'
+            'message': 'An error occurred during band generation. Please try again.'
         })
 
 

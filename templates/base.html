@@ -8,33 +8,36 @@
     {% block head %}{% endblock %}
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <div class="page-wrapper">
 
     <!-- Top Banner -->
-    <div class="site-banner">
+    <header class="site-banner">
         <div class="banner-stars">* * * * * * * * * * * * * * * * * * * * *</div>
         <h1 class="site-title">
             <a href="{{ url_for('index') }}">~*~ AI Band Generator ~*~</a>
         </h1>
         <div class="banner-tagline">Creating Fictional Bands Since 1996</div>
         <div class="banner-stars">* * * * * * * * * * * * * * * * * * * * *</div>
-    </div>
+    </header>
 
     <!-- Navigation Bar -->
-    <div class="nav-bar">
-        [ <a href="{{ url_for('index') }}">Home</a> ] |
-        [ <a href="{{ url_for('generate_page') }}">Generate a Band!</a> ] |
-        [ <a href="{{ url_for('gallery') }}">Band Gallery</a> ]
-    </div>
+    <nav class="nav-bar" aria-label="Main navigation">
+        <ul>
+            <li>[ <a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}aria-current="page" class="nav-active"{% endif %}>Home</a> ]</li>
+            <li>| [ <a href="{{ url_for('generate_page') }}" {% if request.endpoint == 'generate_page' %}aria-current="page" class="nav-active"{% endif %}>Generate a Band!</a> ]</li>
+            <li>| [ <a href="{{ url_for('gallery') }}" {% if request.endpoint == 'gallery' %}aria-current="page" class="nav-active"{% endif %}>Band Gallery</a> ]</li>
+        </ul>
+    </nav>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <main class="main-content" id="main-content">
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
     <!-- Footer -->
-    <div class="site-footer">
+    <footer class="site-footer">
         <hr class="rainbow-hr">
         <div class="footer-badges">
             <span class="badge">Best viewed in Netscape Navigator 4.0</span>
@@ -49,7 +52,7 @@
         <p class="footer-email">
             Questions? <a href="mailto:webmaster@aibandgen.geocities.com">Email the Webmaster!</a>
         </p>
-    </div>
+    </footer>
 
 </div>
 
