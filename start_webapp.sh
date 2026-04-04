@@ -5,17 +5,21 @@
 echo "🎸 Starting AI Band Generator Web App..."
 
 # Check if virtual environment exists
-if [ ! -d "ai_band_env" ]; then
-    echo "❌ Virtual environment not found. Please run the following commands first:"
-    echo "   python3 -m venv ai_band_env"
-    echo "   source ai_band_env/bin/activate"
-    echo "   pip install -r requirements.txt"
-    exit 1
+if [ -d "venv" ]; then
+    VENV_DIR="venv"
+elif [ -d "ai_band_env" ]; then
+    VENV_DIR="ai_band_env"
+else
+    echo "Virtual environment not found. Creating one..."
+    python3 -m venv venv
+    VENV_DIR="venv"
+    source "$VENV_DIR/bin/activate"
+    pip install -r requirements.txt
 fi
 
 # Activate virtual environment
-echo "🔧 Activating virtual environment..."
-source ai_band_env/bin/activate
+echo "Activating virtual environment..."
+source "$VENV_DIR/bin/activate"
 
 # Check if OpenAI API key is set
 if [ -z "$OPENAI_API_KEY" ]; then

@@ -50,3 +50,6 @@ Thumbs.db
 # Generated band directories (optional - you might want to keep these)
 # */band_photo.jpg
 # */home.html
+# Generated media output (videos, decks, banners, images, articles)
+/media/
+!media/.gitkeep

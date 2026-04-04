@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add a subtle star twinkle effect to the starfield background
     // (purely cosmetic, non-blocking)
     try {
-        var stars = document.querySelectorAll('.banner-stars');
+        const stars = document.querySelectorAll('.banner-stars');
         if (stars.length > 0) {
             setInterval(function() {
                 stars.forEach(function(el) {
