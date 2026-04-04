@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, session
 import os
 import json
 import re
+import uuid
+import secrets
 import threading
+import time
 from datetime import datetime, timedelta
 import logging
 from createAct import (
@@ -13,13 +16,21 @@ from createAct import (
 import glob
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(32))
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Store generation status
+# Store generation status (H-006: protected by lock)
 generation_status = {}
+generation_lock = threading.Lock()
+
+# Simple rate limiting (H-005): track generation timestamps per IP
+_rate_limit = {}
+_rate_lock = threading.Lock()
+RATE_LIMIT_MAX = 5
+RATE_LIMIT_WINDOW = 3600  # 1 hour
 
 # Path validation pattern
 SAFE_BAND_NAME = re.compile(r'^[A-Za-z0-9_\-]+$')
@@ -27,17 +38,12 @@ SAFE_BAND_NAME = re.compile(r'^[A-Za-z0-9_\-]+$')
 
 def cleanup_old_generations():
     """Remove generation status entries older than 1 hour"""
-    cutoff = datetime.now() - timedelta(hours=1)
-    to_remove = []
-    for gen_id in generation_status:
-        try:
-            gen_time = datetime.strptime(gen_id, "%Y%m%d_%H%M%S")
-            if gen_time < cutoff:
-                to_remove.append(gen_id)
-        except ValueError:
-            pass
-    for gen_id in to_remove:
-        del generation_status[gen_id]
+    cutoff = time.time() - 3600
+    with generation_lock:
+        to_remove = [gid for gid, info in generation_status.items()
+                     if info.get('_created', 0) < cutoff]
+        for gen_id in to_remove:
+            del generation_status[gen_id]
 
 
 @app.route('/')
@@ -57,8 +63,8 @@ def gallery():
     """Gallery of generated bands"""
     bands = []
 
-    for band_dir in glob.glob("*/home.html"):
-        band_name = os.path.dirname(band_dir)
+    for band_dir in glob.glob(os.path.join(app.root_path, "*/home.html")):
+        band_name = os.path.basename(os.path.dirname(band_dir))
         display_name = re.sub(r'([A-Z])', r' \1', band_name).strip()
         bands.append({
             'name': display_name,
@@ -93,9 +99,31 @@ def band_assets(band_name, filename):
 def api_generate():
     """API endpoint to generate a new band"""
     try:
+        # CSRF check (H-004): verify Origin/Referer matches our host
+        origin = request.headers.get('Origin', '')
+        referer = request.headers.get('Referer', '')
+        if origin and request.host not in origin:
+            return jsonify({'success': False, 'error': 'Invalid request origin.'}), 403
+        if not origin and referer and request.host not in referer:
+            return jsonify({'success': False, 'error': 'Invalid request origin.'}), 403
+
+        # Rate limiting (H-005)
+        client_ip = request.remote_addr
+        now = time.time()
+        with _rate_lock:
+            timestamps = _rate_limit.get(client_ip, [])
+            timestamps = [t for t in timestamps if now - t < RATE_LIMIT_WINDOW]
+            if len(timestamps) >= RATE_LIMIT_MAX:
+                return jsonify({
+                    'success': False,
+                    'error': 'Rate limit exceeded. Please wait before generating another band.'
+                }), 429
+            timestamps.append(now)
+            _rate_limit[client_ip] = timestamps
+
         cleanup_old_generations()
 
-        generation_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        generation_id = uuid.uuid4().hex[:12]
 
         # Grab user selections (empty string = let AI decide)
         data = request.get_json(silent=True) or {}
@@ -107,13 +135,15 @@ def api_generate():
             'era': data.get('era', ''),
         }
 
-        generation_status[generation_id] = {
-            'status': 'starting',
-            'progress': 0,
-            'message': 'Initializing band generation...',
-            'band_name': None,
-            'directory': None
-        }
+        with generation_lock:
+            generation_status[generation_id] = {
+                'status': 'starting',
+                'progress': 0,
+                'message': 'Initializing band generation...',
+                'band_name': None,
+                'directory': None,
+                '_created': time.time()
+            }
 
         thread = threading.Thread(target=generate_band_async, args=(generation_id, constraints))
         thread.daemon = True
@@ -136,18 +166,27 @@ def api_generate():
 @app.route('/api/status/<generation_id>')
 def api_status(generation_id):
     """Check the status of a band generation"""
-    status = generation_status.get(generation_id, {
-        'status': 'not_found',
-        'progress': 0,
-        'message': 'Generation not found'
-    })
-    return jsonify(status)
+    with generation_lock:
+        status = generation_status.get(generation_id, {
+            'status': 'not_found',
+            'progress': 0,
+            'message': 'Generation not found'
+        })
+        # Don't expose internal fields to the client
+        return jsonify({k: v for k, v in status.items() if not k.startswith('_')})
+
+
+def _update_status(generation_id, updates):
+    """Thread-safe update of generation status."""
+    with generation_lock:
+        if generation_id in generation_status:
+            generation_status[generation_id].update(updates)
 
 
 def generate_band_async(generation_id, constraints=None):
     """Generate a band asynchronously"""
     try:
-        generation_status[generation_id].update({
+        _update_status(generation_id, {
             'status': 'generating_profile',
             'progress': 10,
             'message': 'Creating band profile...'
@@ -155,7 +194,7 @@ def generate_band_async(generation_id, constraints=None):
 
         band_profile = generate_band_profile(constraints=constraints)
 
-        generation_status[generation_id].update({
+        _update_status(generation_id, {
             'status': 'creating_directory',
             'progress': 20,
             'message': f'Setting up {band_profile["Band Name"]}...',
@@ -163,9 +202,9 @@ def generate_band_async(generation_id, constraints=None):
         })
 
         output_dir = create_project_directory(band_profile['Band Name'])
-        generation_status[generation_id]['directory'] = output_dir
+        _update_status(generation_id, {'directory': output_dir})
 
-        generation_status[generation_id].update({
+        _update_status(generation_id, {
             'status': 'generating_backstory',
             'progress': 35,
             'message': 'Writing band backstory...'
@@ -173,7 +212,7 @@ def generate_band_async(generation_id, constraints=None):
 
         backstory = create_band_backstory(band_profile)
 
-        generation_status[generation_id].update({
+        _update_status(generation_id, {
             'status': 'extracting_members',
             'progress': 50,
             'message': 'Identifying band members...'
@@ -181,7 +220,7 @@ def generate_band_async(generation_id, constraints=None):
 
         band_members = extract_band_members(band_profile, backstory)
 
-        generation_status[generation_id].update({
+        _update_status(generation_id, {
             'status': 'generating_discography',
             'progress': 60,
             'message': 'Creating discography...'
@@ -189,7 +228,7 @@ def generate_band_async(generation_id, constraints=None):
 
         albums = generate_discography_info(band_profile, backstory)
 
-        generation_status[generation_id].update({
+        _update_status(generation_id, {
             'status': 'generating_photo',
             'progress': 75,
             'message': 'Taking band photo...'
@@ -199,7 +238,7 @@ def generate_band_async(generation_id, constraints=None):
         photo_prompt = build_band_photo_prompt(band_profile, band_members)
         generate_dall_e_image(photo_prompt, os.path.join(output_dir, 'band_photo.jpg'))
 
-        generation_status[generation_id].update({
+        _update_status(generation_id, {
             'status': 'creating_page',
             'progress': 90,
             'message': 'Building fan page...'
@@ -208,7 +247,7 @@ def generate_band_async(generation_id, constraints=None):
         html_content = create_html_content(band_profile, backstory, albums, band_members, output_dir)
         save_html_to_file(html_content, output_dir)
 
-        generation_status[generation_id].update({
+        _update_status(generation_id, {
             'status': 'complete',
             'progress': 100,
             'message': f'{band_profile["Band Name"]} is ready to rock!'
@@ -216,7 +255,7 @@ def generate_band_async(generation_id, constraints=None):
 
     except Exception as e:
         logger.error(f"Error in band generation {generation_id}: {e}", exc_info=True)
-        generation_status[generation_id].update({
+        _update_status(generation_id, {
             'status': 'error',
             'progress': 0,
             'message': 'An error occurred during band generation. Please try again.'

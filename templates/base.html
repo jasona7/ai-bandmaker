@@ -14,20 +14,20 @@
 
     <!-- Top Banner -->
     <header class="site-banner">
-        <div class="banner-stars">* * * * * * * * * * * * * * * * * * * * *</div>
+        <div class="banner-stars" aria-hidden="true">* * * * * * * * * * * * * * * * * * * * *</div>
         <h1 class="site-title">
             <a href="{{ url_for('index') }}">~*~ AI Band Generator ~*~</a>
         </h1>
         <div class="banner-tagline">Creating Fictional Bands Since 1996</div>
-        <div class="banner-stars">* * * * * * * * * * * * * * * * * * * * *</div>
+        <div class="banner-stars" aria-hidden="true">* * * * * * * * * * * * * * * * * * * * *</div>
     </header>
 
     <!-- Navigation Bar -->
     <nav class="nav-bar" aria-label="Main navigation">
         <ul>
-            <li>[ <a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}aria-current="page" class="nav-active"{% endif %}>Home</a> ]</li>
-            <li>| [ <a href="{{ url_for('generate_page') }}" {% if request.endpoint == 'generate_page' %}aria-current="page" class="nav-active"{% endif %}>Generate a Band!</a> ]</li>
-            <li>| [ <a href="{{ url_for('gallery') }}" {% if request.endpoint == 'gallery' %}aria-current="page" class="nav-active"{% endif %}>Band Gallery</a> ]</li>
+            <li><span aria-hidden="true">[ </span><a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}aria-current="page" class="nav-active"{% endif %}>Home</a><span aria-hidden="true"> ]</span></li>
+            <li><span aria-hidden="true">| [ </span><a href="{{ url_for('generate_page') }}" {% if request.endpoint == 'generate_page' %}aria-current="page" class="nav-active"{% endif %}>Generate a Band!</a><span aria-hidden="true"> ]</span></li>
+            <li><span aria-hidden="true">| [ </span><a href="{{ url_for('gallery') }}" {% if request.endpoint == 'gallery' %}aria-current="page" class="nav-active"{% endif %}>Band Gallery</a><span aria-hidden="true"> ]</span></li>
         </ul>
     </nav>
 
@@ -44,7 +44,7 @@
             <span class="badge">800x600</span>
             <span class="badge">Made with Notepad</span>
         </div>
-        <p class="footer-counter">
+        <p class="footer-counter" aria-hidden="true">
             You are visitor #<span class="counter-num">{{ range(1000, 99999) | random }}</span>
         </p>
         <p class="blink">*** Always Under Construction! ***</p>

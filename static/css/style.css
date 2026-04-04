@@ -10,7 +10,7 @@
     --color-bg-surface-alt: #0a0a1a;
     --color-bg-nav: #111122;
     --color-text-primary: #cccccc;
-    --color-text-muted: #999999;
+    --color-text-muted: #b0b0b0;
     --color-accent-cyan: #00ffff;
     --color-accent-magenta: #ff00ff;
     --color-accent-yellow: #ffff00;
@@ -313,7 +313,7 @@ a:focus-visible {
 .feature-title--yellow { color: var(--color-accent-yellow); }
 
 .feature-box p {
-    color: #aaaaaa;
+    color: #bbbbbb;
     font-size: 0.9em;
     margin: 0;
 }
@@ -360,13 +360,16 @@ a:focus-visible {
     background-color: #333366;
     color: var(--color-accent-cyan);
     border: 1px outset #6666cc;
-    padding: var(--space-xs) 12px;
+    padding: 10px 16px;
     font-family: var(--font-body);
     font-size: 0.85em;
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
+    min-height: 44px;
+    min-width: 44px;
+    box-sizing: border-box;
 }
 .retro-button-small:hover {
     background-color: #444488;
@@ -433,6 +436,15 @@ a:focus-visible {
     font-weight: bold;
 }
 
+/* Step indicator states (H-001: replaces inline JS color assignments) */
+.step-indicator--active { color: var(--color-accent-yellow); }
+.step-indicator--complete { color: var(--color-accent-green); }
+
+/* Progress bar extracted styles (H-012, C-002) */
+.progress-empty { color: #666688; }
+.progress-pct { color: var(--color-accent-magenta); }
+.step-number-col { width: 50px; }
+
 /* --- Gallery --- */
 .gallery-table {
     margin: 15px auto;
@@ -473,6 +485,11 @@ a:focus-visible {
     vertical-align: middle;
     text-align: center;
 }
+
+/* Gallery column widths (H-012: extracted from inline styles) */
+.gallery-col-photo { width: 120px; }
+.gallery-col-view { width: 120px; }
+.gallery-band-cell { vertical-align: middle; }
 
 /* --- Band Params Fieldset --- */
 .band-params-fieldset {
@@ -647,6 +664,14 @@ a:focus-visible {
 .cta-block {
     margin: 25px 0;
 }
+.cta-text {
+    font-size: 1.2em;
+}
+
+/* Randomize button spacing (H-012: replaces inline margin-bottom) */
+.button-area .retro-button-small {
+    margin-bottom: 10px;
+}
 
 /* --- Responsive --- */
 @media (max-width: 640px) {
@@ -673,4 +698,26 @@ a:focus-visible {
         width: 60px;
         height: 60px;
     }
+
+    /* H-019: Responsive param-row for narrow screens */
+    .param-row {
+        flex-wrap: wrap;
+    }
+    .param-label {
+        width: 100%;
+        text-align: left;
+        margin-bottom: var(--space-xs);
+    }
+    .retro-select {
+        max-width: none;
+    }
 }
+
+/* M-005/H-019: Intermediate breakpoint for tablets */
+@media (max-width: 768px) {
+    .feature-grid {
+        flex-wrap: wrap;
+    }
+    .feature-grid .feature-box {
+        min-width: 200px;
+    }

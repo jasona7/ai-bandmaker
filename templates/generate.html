@@ -15,6 +15,7 @@
     <div class="retro-box">
         <h3 class="retro-box-heading">~ Band Parameters ~</h3>
 
+        <form id="bandForm" role="form" aria-label="Band generation parameters" onsubmit="return false;">
         <fieldset class="band-params-fieldset">
             <legend class="sr-only">Band Parameters</legend>
             <div class="param-row">
@@ -168,32 +169,33 @@
         </fieldset>
 
         <div class="button-area">
-            <button type="button" id="randomizeAllBtn" class="retro-button-secondary retro-button-small" style="margin-bottom:10px;">
+            <button type="button" id="randomizeAllBtn" class="retro-button-secondary retro-button-small">
                 &#127922; RANDOMIZE ALL
             </button>
             <br>
-            <button id="generateBtn" class="retro-button">
+            <button type="submit" id="generateBtn" class="retro-button">
                 &gt;&gt; GENERATE BAND &lt;&lt;
             </button>
         </div>
+        </form>
     </div>
 </div>
 
 <!-- Progress Display -->
 <div id="progressDisplay" style="display:none;">
     <div class="retro-box">
-        <h3 id="progressTitle" class="retro-box-heading retro-box-heading--green">Creating Your Band...</h3>
+        <h3 id="progressTitle" tabindex="-1" class="retro-box-heading retro-box-heading--green">Creating Your Band...</h3>
         <p id="progressMessage" class="center-text" aria-live="polite">Initializing AI systems...</p>
 
         <!-- ASCII progress bar -->
-        <div class="ascii-progress">
-            <span class="step-number">Progress: [</span><span id="progressBarFill" class="step-label"></span><span id="progressBarEmpty" style="color:#333333;"></span><span class="step-number">]</span>
-            <span id="progressPercent" style="color:#ff00ff;"> 0%</span>
+        <div class="ascii-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Band generation progress">
+            <span class="step-number">Progress: [</span><span id="progressBarFill" class="step-label"></span><span id="progressBarEmpty" class="progress-empty"></span><span class="step-number">]</span>
+            <span id="progressPercent" class="progress-pct"> 0%</span>
         </div>
 
         <table class="progress-steps-table">
             <tr class="table-header-row">
-                <th scope="col">?</th>
+                <th scope="col"><span class="sr-only">Status</span><span aria-hidden="true">?</span></th>
                 <th scope="col">Step</th>
             </tr>
             <tr id="step1" class="step-row">
@@ -237,7 +239,7 @@
 <!-- Success Display -->
 <div id="successDisplay" style="display:none;">
     <div class="retro-box center-text">
-        <h3 class="retro-box-heading retro-box-heading--green">** Band Created Successfully!! **</h3>
+        <h3 tabindex="-1" class="retro-box-heading retro-box-heading--green">** Band Created Successfully!! **</h3>
         <p>Your AI-generated band is ready to rock!</p>
 
         <div id="bandPreview" class="band-preview-retro">
@@ -247,7 +249,6 @@
             <button id="viewBandBtn" class="retro-button">
                 &gt;&gt; VIEW BAND PAGE &lt;&lt;
             </button>
-            &nbsp;&nbsp;
             <button id="generateAnotherBtn" class="retro-button retro-button-secondary">
                 [ GENERATE ANOTHER ]
             </button>
@@ -258,11 +259,16 @@
 <!-- Error Display -->
 <div id="errorDisplay" style="display:none;">
     <div class="retro-box error-box center-text">
-        <h3 class="retro-box-heading retro-box-heading--error">!! ERROR !!</h3>
+        <h3 tabindex="-1" class="retro-box-heading retro-box-heading--error">!! ERROR !!</h3>
         <p id="errorMessage" aria-live="assertive">Something went wrong. Please try again.</p>
-        <button id="retryBtn" class="retro-button">
-            [ TRY AGAIN ]
-        </button>
+        <div class="button-area button-area--spaced">
+            <button id="retryBtn" class="retro-button">
+                [ TRY AGAIN ]
+            </button>
+            <button id="changeParamsBtn" class="retro-button retro-button-secondary">
+                [ CHANGE PARAMETERS ]
+            </button>
+        </div>
     </div>
 </div>
 
@@ -276,9 +282,13 @@ let currentDirectory = null;
 let generationTimeout = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('generateBtn').addEventListener('click', startGeneration);
+    document.getElementById('bandForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        startGeneration();
+    });
     document.getElementById('cancelBtn').addEventListener('click', cancelGeneration);
     document.getElementById('retryBtn').addEventListener('click', startGeneration);
+    document.getElementById('changeParamsBtn').addEventListener('click', resetInterface);
     document.getElementById('generateAnotherBtn').addEventListener('click', resetInterface);
     document.getElementById('viewBandBtn').addEventListener('click', viewBand);
     document.getElementById('randomizeAllBtn').addEventListener('click', randomizeAll);
@@ -317,6 +327,7 @@ function getSelections() {
 function startGeneration() {
     const btn = document.getElementById('generateBtn');
     btn.disabled = true;
+    btn.textContent = 'Starting...';
     showProgress();
 
     fetch('/api/generate', {
@@ -381,19 +392,23 @@ function updateProgress(data) {
     document.getElementById('progressPercent').textContent = ' ' + pct + '%';
     document.getElementById('progressMessage').textContent = data.message || '';
 
-    // Update step indicators based on progress thresholds
+    // Update ARIA progressbar (C-003)
+    document.querySelector('.ascii-progress').setAttribute('aria-valuenow', pct);
+
+    // Update step indicators based on progress thresholds (H-001: CSS classes)
     const thresholds = [10, 20, 35, 50, 60, 75, 90];
     for (let i = 0; i < thresholds.length; i++) {
         const step = document.getElementById('step' + (i + 1));
         if (!step) continue;
         const indicator = step.querySelector('.step-indicator');
         if (pct >= thresholds[i]) {
+            indicator.classList.remove('step-indicator--active', 'step-indicator--complete');
             if (pct >= (thresholds[i + 1] || 100)) {
                 indicator.textContent = '[X]';
-                indicator.style.color = '#00ff00';
+                indicator.classList.add('step-indicator--complete');
             } else {
                 indicator.textContent = '[>]';
-                indicator.style.color = '#ffff00';
+                indicator.classList.add('step-indicator--active');
             }
         }
     }
@@ -404,6 +419,7 @@ function showProgress() {
     document.getElementById('progressDisplay').style.display = 'block';
     document.getElementById('successDisplay').style.display = 'none';
     document.getElementById('errorDisplay').style.display = 'none';
+    document.getElementById('progressTitle').focus();
 }
 
 function showSuccess(data) {
@@ -422,14 +438,24 @@ function showSuccess(data) {
     msgEl.textContent = 'The fan page is ready!';
     preview.appendChild(nameEl);
     preview.appendChild(msgEl);
+
+    document.querySelector('#successDisplay h3').focus();
 }
 
 function showError(message) {
+    // Clean up timers (H-016)
+    if (statusCheckInterval) clearInterval(statusCheckInterval);
+    if (generationTimeout) clearTimeout(generationTimeout);
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('generateBtn').textContent = '>> GENERATE BAND <<';
+
     document.getElementById('startGeneration').style.display = 'none';
     document.getElementById('progressDisplay').style.display = 'none';
     document.getElementById('successDisplay').style.display = 'none';
     document.getElementById('errorDisplay').style.display = 'block';
     document.getElementById('errorMessage').textContent = message;
+
+    document.querySelector('#errorDisplay h3').focus();
 }
 
 function cancelGeneration() {
@@ -451,6 +477,7 @@ function resetInterface() {
 
     // Re-enable generate button
     document.getElementById('generateBtn').disabled = false;
+    document.getElementById('generateBtn').textContent = '>> GENERATE BAND <<';
 
     // Reset progress display
     document.getElementById('progressBarFill').textContent = '';
@@ -459,11 +486,14 @@ function resetInterface() {
     document.getElementById('progressMessage').textContent = 'Initializing AI systems...';
 
     // Reset step indicators
-    const indicators = document.querySelectorAll('.step-indicator');
-    for (let i = 0; i < indicators.length; i++) {
+    var indicators = document.querySelectorAll('.step-indicator');
+    for (var i = 0; i < indicators.length; i++) {
         indicators[i].textContent = '...';
-        indicators[i].style.color = '';
+        indicators[i].classList.remove('step-indicator--active', 'step-indicator--complete');
     }
+
+    // Reset ARIA progressbar
+    document.querySelector('.ascii-progress').setAttribute('aria-valuenow', 0);
 
     currentGenerationId = null;
     currentDirectory = null;
