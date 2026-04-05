@@ -69,7 +69,7 @@ def gallery():
         bands.append({
             'name': display_name,
             'directory': band_name,
-            'has_photo': os.path.exists(os.path.join(band_name, 'band_photo.jpg'))
+            'has_photo': os.path.exists(os.path.join(app.root_path, band_name, 'band_photo.jpg'))
         })
 
     return render_template('gallery.html', bands=bands)

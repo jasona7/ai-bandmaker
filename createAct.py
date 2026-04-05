@@ -549,7 +549,7 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
             text-align: center;
             margin: 15px 0;
             font-size: 0.75em;
-            color: #999999;
+            color: #aaaaaa;
         }}
         .badge-row span {{
             margin: 0 8px;
@@ -567,6 +567,26 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         }}
         .nav-bar a {{
             margin: 0 5px;
+        }}
+        @media (max-width: 600px) {{
+            .band-title {{
+                font-size: 1.2em !important;
+            }}
+            .header-table {{
+                width: 100% !important;
+            }}
+            .members-table {{
+                width: 100% !important;
+            }}
+            .nav-bar {{
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }}
+            .nav-bar a {{
+                display: block;
+                margin: 2px 0;
+            }}
         }}
         .stars {{
             color: {c3};
@@ -643,7 +663,7 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     <div style="text-align:center; padding:10px;">
         <p><a href="#">Sign the Guestbook!</a> | <a href="#">View Guestbook</a></p>
         <p><a href="mailto:webmaster@{email_band}.geocities.com">Email the Webmaster</a></p>
-        <p style="color:#666666; font-size:0.8em;">
+        <p style="color:#888888; font-size:0.8em;">
             <a href="#">Link to us!</a> |
             <a href="#">Webrings</a> |
             <a href="#">MIDI Archive</a>
@@ -665,7 +685,7 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         <p class="blink">*** This page is always under construction! ***</p>
         <p>&copy; {current_year} {band_name} Fan Page. All rights reserved.<br>
         This is a fan-made page. We are not affiliated with {band_name} or their management.</p>
-        <p><a href="#">Back to Top</a></p>
+        <p><a href="#">Back to Top</a> | <a href="/">Back to AI Band Generator</a></p>
     </div>
     </footer>
 

@@ -441,7 +441,7 @@ a:focus-visible {
 .step-indicator--complete { color: var(--color-accent-green); }
 
 /* Progress bar extracted styles (H-012, C-002) */
-.progress-empty { color: #666688; }
+.progress-empty { color: #8888aa; }
 .progress-pct { color: var(--color-accent-magenta); }
 .step-number-col { width: 50px; }
 
@@ -721,3 +721,4 @@ a:focus-visible {
     .feature-grid .feature-box {
         min-width: 200px;
     }
+}
