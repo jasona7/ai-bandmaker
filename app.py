@@ -11,7 +11,7 @@ import logging
 from createAct import (
     generate_band_profile, create_band_backstory, extract_band_members,
     generate_discography_info, generate_dall_e_image, create_project_directory,
-    build_band_photo_prompt, create_html_content, save_html_to_file
+    build_band_photo_prompt, create_html_content, save_html_to_file, save_band_info
 )
 import glob
 
@@ -65,7 +65,20 @@ def gallery():
 
     for band_dir in glob.glob(os.path.join(app.root_path, "*/home.html")):
         band_name = os.path.basename(os.path.dirname(band_dir))
-        display_name = re.sub(r'([A-Z])', r' \1', band_name).strip()
+        info_path = os.path.join(app.root_path, band_name, 'band_info.json')
+
+        # Skip legacy pages that lack a band_info.json metadata file (C-001/C-002)
+        if not os.path.exists(info_path):
+            continue
+
+        # Read display name from metadata, fall back to regex derivation
+        try:
+            with open(info_path, 'r') as f:
+                band_info = json.load(f)
+            display_name = band_info.get('display_name', re.sub(r'([A-Z])', r' \1', band_name).strip())
+        except (json.JSONDecodeError, OSError):
+            display_name = re.sub(r'([A-Z])', r' \1', band_name).strip()
+
         bands.append({
             'name': display_name,
             'directory': band_name,
@@ -246,6 +259,7 @@ def generate_band_async(generation_id, constraints=None):
 
         html_content = create_html_content(band_profile, backstory, albums, band_members, output_dir)
         save_html_to_file(html_content, output_dir)
+        save_band_info(band_profile, output_dir)
 
         _update_status(generation_id, {
             'status': 'complete',

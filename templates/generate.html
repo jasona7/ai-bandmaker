@@ -280,6 +280,7 @@ let currentGenerationId = null;
 let statusCheckInterval = null;
 let currentDirectory = null;
 let generationTimeout = null;
+let consecutiveErrors = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('bandForm').addEventListener('submit', function(e) {
@@ -364,6 +365,7 @@ function checkStatus() {
     fetch('/api/status/' + currentGenerationId)
     .then(function(response) { return response.json(); })
     .then(function(data) {
+        consecutiveErrors = 0;
         updateProgress(data);
 
         if (data.status === 'complete') {
@@ -379,6 +381,14 @@ function checkStatus() {
     })
     .catch(function(error) {
         console.error('Error checking status:', error);
+        consecutiveErrors++;
+        if (consecutiveErrors >= 5) {
+            clearInterval(statusCheckInterval);
+            if (generationTimeout) clearTimeout(generationTimeout);
+            showError('Connection lost. Please check your network and try again.');
+        } else if (consecutiveErrors >= 3) {
+            document.getElementById('progressMessage').textContent = 'Having trouble reaching the server...';
+        }
     });
 }
 
@@ -497,6 +507,7 @@ function resetInterface() {
 
     currentGenerationId = null;
     currentDirectory = null;
+    consecutiveErrors = 0;
 }
 
 function viewBand() {

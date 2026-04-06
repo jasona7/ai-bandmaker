@@ -351,45 +351,38 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     accent_colors = [
         ("#00ffff", "#ff00ff", "#ffff00"),  # cyan, magenta, yellow
         ("#00ff00", "#ff6600", "#ff00ff"),  # lime, orange, magenta
-        ("#ffff00", "#00ffff", "#ff4444"),  # yellow, cyan, red
+        ("#ffff00", "#00ffff", "#ff6666"),  # yellow, cyan, red (H-001: #ff6666 passes 4.5:1 on dark bg)
         ("#ff69b4", "#00ff00", "#ffff00"),  # hotpink, lime, yellow
     ]
     c1, c2, c3 = random.choice(accent_colors)
 
-    # Build members HTML (escape all AI-generated fields)
+    # Build members HTML using semantic markup (C-003, H-003)
     members_html = ""
     for member in band_members:
         m_name = html.escape(member.get('name', 'Unknown'))
         m_instrument = html.escape(member.get('instrument', ''))
         m_bio = html.escape(member.get('bio', ''))
         members_html += f"""
-        <tr>
-            <td style="color:{c2}; padding:4px 12px; font-weight:bold;">{m_name}</td>
-            <td style="color:{c3}; padding:4px 12px;">{m_instrument}</td>
-        </tr>
-        <tr>
-            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">{m_bio}</td>
-        </tr>"""
+        <div class="member-card">
+            <h3 class="member-name">{m_name}</h3>
+            <p class="member-instrument">{m_instrument}</p>
+            <p class="member-bio">{m_bio}</p>
+        </div>"""
 
-    # Build discography HTML (escape all AI-generated fields)
+    # Build discography HTML using semantic markup (C-004, H-003)
     disco_html = ""
     for title, tracks in albums:
         title_escaped = html.escape(title)
         tracks_html = ""
         for i, track in enumerate(tracks, 1):
-            tracks_html += f'<li style="color:#cccccc;">{html.escape(track)}</li>\n'
+            tracks_html += f'<li>{html.escape(track)}</li>\n'
         disco_html += f"""
-        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="{c2}"
-               style="margin:10px auto; background-color:#111111;">
-            <tr><td colspan="2" style="background-color:#222222; color:{c1}; font-weight:bold; padding:8px; font-size:1.1em;">
-                {title_escaped}
-            </td></tr>
-            <tr><td style="padding:8px;">
-                <ol style="color:{c3}; margin:0; padding-left:20px;">
-                    {tracks_html}
-                </ol>
-            </td></tr>
-        </table>"""
+        <div class="album-card">
+            <h3 class="album-title">{title_escaped}</h3>
+            <ol class="track-list">
+                {tracks_html}
+            </ol>
+        </div>"""
 
     # Visitor counter (fake, random)
     visitor_count = random.randint(1247, 99999)
@@ -407,6 +400,11 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>~*~ {band_name} ~*~ Official Fan Page ~*~</title>
     <style>
+        :root {{
+            --accent-1: {c1};
+            --accent-2: {c2};
+            --accent-3: {c3};
+        }}
         body {{
             background-color: #000000;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='%23111'/%3E%3C/svg%3E");
@@ -443,15 +441,18 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
             margin: 0 auto;
             padding: 10px;
         }}
-        .header-table {{
+        .page-header {{
             width: 100%;
             background: linear-gradient(to right, #000033, #000066, #000033);
             border: 3px ridge {c2};
             margin-bottom: 10px;
-        }}
-        .header-table td {{
             text-align: center;
             padding: 15px;
+        }}
+        .band-subtitle {{
+            color: {c3};
+            font-size: 0.85em;
+            margin: 4px 0;
         }}
         .band-title {{
             font-size: 1.8em;
@@ -513,14 +514,55 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
             line-height: 1.6;
             font-size: 0.95em;
         }}
-        .members-table {{
+        .members-list {{
             margin: 10px auto;
+            width: 90%;
             border: 2px ridge {c1};
             background-color: #0a0a0a;
-            border-collapse: collapse;
         }}
-        .members-table td {{
+        .member-card {{
+            padding: 8px 12px;
             border-bottom: 1px dashed #333333;
+        }}
+        .member-card:last-child {{
+            border-bottom: none;
+        }}
+        .member-name {{
+            color: var(--accent-2);
+            font-size: 1em;
+            font-weight: bold;
+            margin: 0;
+        }}
+        .member-instrument {{
+            color: var(--accent-3);
+            margin: 2px 0;
+        }}
+        .member-bio {{
+            color: #cccccc;
+            font-size: 0.9em;
+            margin: 2px 0 4px 0;
+        }}
+        .album-card {{
+            width: 90%;
+            margin: 10px auto;
+            background-color: #111111;
+            border: 1px solid {c2};
+        }}
+        .album-title {{
+            background-color: #222222;
+            color: var(--accent-1);
+            font-weight: bold;
+            padding: 8px;
+            font-size: 1.1em;
+            margin: 0;
+        }}
+        .track-list {{
+            color: var(--accent-3);
+            margin: 0;
+            padding: 8px 8px 8px 32px;
+        }}
+        .track-list li {{
+            color: #cccccc;
         }}
         .footer-area {{
             text-align: center;
@@ -572,10 +614,10 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
             .band-title {{
                 font-size: 1.2em !important;
             }}
-            .header-table {{
+            .page-header {{
                 width: 100% !important;
             }}
-            .members-table {{
+            .members-list {{
                 width: 100% !important;
             }}
             .nav-bar {{
@@ -601,17 +643,13 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
 <div class="page-wrapper">
 
     <!-- Header -->
-    <header>
-    <table class="header-table" cellpadding="0" cellspacing="0">
-        <tr><td>
-            <span class="stars" aria-hidden="true">* * * * * * * * * * * * *</span><br>
-            <h1 class="band-title">{band_name}</h1>
-            <span style="color:{c3}; font-size:0.85em;">
-                {style_name} | {genre1} / {genre2} | Est. {ref_year} | {nationality}
-            </span><br>
-            <span class="stars" aria-hidden="true">* * * * * * * * * * * * *</span>
-        </td></tr>
-    </table>
+    <header class="page-header">
+        <span class="stars" aria-hidden="true">* * * * * * * * * * * * *</span><br>
+        <h1 class="band-title">{band_name}</h1>
+        <p class="band-subtitle">
+            {style_name} | {genre1} / {genre2} | Est. {ref_year} | {nationality}
+        </p>
+        <span class="stars" aria-hidden="true">* * * * * * * * * * * * *</span>
     </header>
 
     <!-- Navigation -->
@@ -648,9 +686,9 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     <!-- Band Members -->
     <h2 id="members" class="section-header">~ The Members ~</h2>
     <hr class="divider" color="{c2}" size="2" noshade>
-    <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
+    <div class="members-list">
         {members_html}
-    </table>
+    </div>
 
     <!-- Discography -->
     <h2 id="discography" class="section-header">~ Discography ~</h2>
@@ -685,7 +723,7 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         <p class="blink">*** This page is always under construction! ***</p>
         <p>&copy; {current_year} {band_name} Fan Page. All rights reserved.<br>
         This is a fan-made page. We are not affiliated with {band_name} or their management.</p>
-        <p><a href="#">Back to Top</a> | <a href="/">Back to AI Band Generator</a></p>
+        <p><a href="#main">Back to Top</a> | <a href="/">Back to AI Band Generator</a></p>
     </div>
     </footer>
 
@@ -705,6 +743,23 @@ def save_html_to_file(content, output_dir, filename="home.html"):
         logging.info(f"HTML file '{filename}' created successfully in directory '{output_dir}'.")
     except OSError as e:
         logging.error(f"Error writing HTML file '{filename}': {e}")
+        raise
+
+
+def save_band_info(band_profile, output_dir):
+    """Save band metadata for gallery display and template versioning."""
+    info = {
+        'display_name': band_profile['Band Name'],
+        'template_version': 2,
+        'generated_at': datetime.now().isoformat(),
+    }
+    info_path = os.path.join(output_dir, 'band_info.json')
+    try:
+        with open(info_path, 'w') as f:
+            json.dump(info, f, indent=2)
+        logging.info(f"Band info saved to {info_path}")
+    except OSError as e:
+        logging.error(f"Error writing band info: {e}")
         raise
 
 
@@ -753,6 +808,7 @@ if __name__ == "__main__":
         # Create and save the HTML fan page
         html_content = create_html_content(band_profile, backstory, albums, band_members, output_dir)
         save_html_to_file(html_content, output_dir)
+        save_band_info(band_profile, output_dir)
 
         logging.info("Script executed successfully.")
 

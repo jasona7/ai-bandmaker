@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // (purely cosmetic, non-blocking)
     try {
         const stars = document.querySelectorAll('.banner-stars');
-        if (stars.length > 0) {
+        if (stars.length > 0 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             setInterval(function() {
                 stars.forEach(function(el) {
                     el.style.opacity = (Math.random() * 0.4 + 0.6).toFixed(2);
