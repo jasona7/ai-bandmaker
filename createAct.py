@@ -351,7 +351,7 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     accent_colors = [
         ("#00ffff", "#ff00ff", "#ffff00"),  # cyan, magenta, yellow
         ("#00ff00", "#ff6600", "#ff00ff"),  # lime, orange, magenta
-        ("#ffff00", "#00ffff", "#ff6666"),  # yellow, cyan, red (H-001: #ff6666 passes 4.5:1 on dark bg)
+        ("#ffff00", "#00ffff", "#ff7777"),  # yellow, cyan, soft red (N-001: #ff7777 passes 4.5:1 on dark bg)
         ("#ff69b4", "#00ff00", "#ffff00"),  # hotpink, lime, yellow
     ]
     c1, c2, c3 = random.choice(accent_colors)
