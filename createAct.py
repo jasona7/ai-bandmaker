@@ -416,6 +416,10 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         a {{ color: {c1}; }}
         a:visited {{ color: {c2}; }}
         a:hover {{ color: {c3}; text-decoration: none; }}
+        a:focus-visible {{
+            outline: 2px solid #ffff00;
+            outline-offset: 2px;
+        }}
         .skip-link {{
             position: absolute;
             left: -9999px;
