@@ -1,6 +1,7 @@
 import os
 import json
 import random
+import html
 import requests
 import logging
 from datetime import datetime
@@ -56,18 +57,47 @@ def generate_chatgpt_response(prompt, max_tokens=500, temperature=0.9):
         raise
 
 
-def generate_band_profile():
-    """Generate a completely unique band profile using AI — no constraining lists."""
+def generate_band_profile(constraints=None):
+    """Generate a completely unique band profile using AI, with optional user constraints."""
+    constraints = constraints or {}
+
+    # Build constraint instructions for fields the user locked in
+    locked = []
+    if constraints.get('genre1'):
+        locked.append(f"Genre 1 MUST be: {constraints['genre1']}")
+    if constraints.get('genre2'):
+        locked.append(f"Genre 2 MUST be: {constraints['genre2']}")
+    if constraints.get('nationality'):
+        locked.append(f"Nationality MUST be: {constraints['nationality']}")
+    if constraints.get('style_name'):
+        locked.append(f"Style Name MUST be: {constraints['style_name']}")
+
+    era_instruction = ""
+    if constraints.get('era'):
+        era_instruction = f"Reference Year MUST be between {constraints['era'].replace('-', ' and ')}."
+    else:
+        era_instruction = "Reference Year: pick any year between 1955 and 2020."
+
+    constraint_block = ""
+    if locked:
+        constraint_block = "LOCKED FIELDS (use these exactly):\n" + "\n".join(f"- {l}" for l in locked) + "\n\n"
+
     prompt = (
-        "You are a wildly creative music historian. Invent a completely original fictional band. "
-        "Do NOT use any real band names, real people, or cliched combinations. Be surprising and specific.\n\n"
-        "Generate:\n"
-        "- A unique, memorable band name (not generic — make it evocative and strange)\n"
-        "- A writing voice/style inspired by a specific music critic or journalist (real or invented)\n"
-        "- A nationality or region of origin (can be obscure — not just USA/UK)\n"
-        "- Two distinct music genres that the band blends (be inventive — mix unexpected genres)\n"
-        "- A style descriptor (one or two evocative words capturing their artistic vibe)\n"
-        "- A reference year between 1955 and 2020 when they were most active\n\n"
+        "You are a record store clerk who has spent 40 years digging through crates of obscure vinyl. "
+        "You know about bands that never made it past their local scene, one-album wonders, "
+        "cult acts that only got written about in fanzines. "
+        "Invent a fictional band that feels like a real discovery — not an AI creation.\n\n"
+        f"{constraint_block}"
+        "RULES:\n"
+        "- The band name should sound like something humans would actually name a band. "
+        "Avoid AI-sounding names like 'The [Adjective] [Noun]' or 'Ethereal [Something]'. "
+        "Think more like: Slint, Cocteau Twins, Os Mutantes, Fela Kuti, Broadcast, Stereolab, "
+        "Neu!, Can, The Raincoats, Lingua Ignota — real bands with distinctive names.\n"
+        "- The writing voice should be a real music critic (Lester Bangs, Simon Reynolds, Jessica Hopper, "
+        "Kodwo Eshun, Greil Marcus, etc.) — NOT a generic 'passionate music journalist'.\n"
+        "- Be specific about the region. Not just 'USA' — say where exactly.\n"
+        "- Genres should be specific subgenres, not broad categories like 'rock' or 'electronic'.\n"
+        f"- {era_instruction}\n\n"
         "Format your response EXACTLY like this (one field per line, no extra text):\n"
         "Band Name: [name]\n"
         "Author Style: [critic/voice]\n"
@@ -78,7 +108,7 @@ def generate_band_profile():
         "Reference Year: [year]"
     )
 
-    response = generate_chatgpt_response(prompt, max_tokens=200, temperature=1.0)
+    response = generate_chatgpt_response(prompt, max_tokens=200, temperature=1.3)
     logging.info(f"Raw band profile response: {response}")
 
     try:
@@ -120,11 +150,15 @@ def create_band_backstory(band_profile):
         f"- Their full name (first and last, with an optional nickname in quotes)\n"
         f"- Their instrument or role (e.g., lead vocals, bass guitar, drums, synthesizer)\n"
         f"- A brief note about their personality or contribution\n\n"
-        f"Write in the style of {band_profile['Author Style']}. Keep it to 250 words. "
-        f"Make it vivid and specific — this is a fan page, so write with passion and insider knowledge."
+        f"TONE: Write like an enthusiastic fan who saw them live, NOT like a music critic writing for an academic journal. "
+        f"Use plain, conversational language. Tell a story — how they met, a funny anecdote, what it was like to see them play. "
+        f"Avoid abstract descriptions, flowery metaphors, and phrases like 'sonic tapestry', 'ethereal soundscapes', "
+        f"'transcendent', 'luminous', or 'ineffable'. Just tell us about the band like you're talking to a friend at a bar.\n\n"
+        f"You can draw loosely on the voice of {band_profile['Author Style']} but keep it accessible. "
+        f"Keep it to 250 words."
     )
 
-    response = generate_chatgpt_response(prompt, max_tokens=600, temperature=0.85)
+    response = generate_chatgpt_response(prompt, max_tokens=600, temperature=0.9)
     logging.info(f"Generated backstory: {response}")
 
     # Trim to ~250 words at a sentence boundary
@@ -233,39 +267,19 @@ def generate_discography_info(band_profile, backstory):
         raise
 
 
-def get_era_photography_style(reference_year):
-    """Map a band's reference year to an era-appropriate photography description."""
+def get_era_fashion_description(reference_year):
+    """Map a band's reference year to era-appropriate fashion and setting cues."""
     year = int(reference_year)
     if year < 1970:
-        return (
-            "Black and white film photography, grainy high-contrast look, "
-            "period-appropriate fashion and hairstyles from the 1950s-1960s, "
-            "vintage studio lighting with dramatic shadows"
-        )
+        return "1950s-1960s fashion: slim suits, thin ties, pompadour hairdos or bouffants, vintage studio backdrop"
     elif year < 1980:
-        return (
-            "Saturated 1970s color film photography, warm tones, "
-            "bell-bottoms, long hair, mustaches, wood-paneled studio backdrop, "
-            "soft focus lens flare typical of 70s album covers"
-        )
+        return "1970s fashion: bell-bottoms, long hair, mustaches, open collars, wood-paneled or earthy studio backdrop"
     elif year < 1990:
-        return (
-            "1980s glamour photography with dramatic lighting, neon accent colors, "
-            "big hair, bold makeup, synth-pop fashion, leather and denim, "
-            "studio backdrop with colored gels and fog machine"
-        )
+        return "1980s fashion: big hair, leather jackets, bold makeup, denim, studio backdrop with dramatic lighting"
     elif year < 2000:
-        return (
-            "1990s lo-fi photography aesthetic, disposable camera look, "
-            "slightly washed out colors, grunge/flannel fashion, "
-            "candid feel like a Spin Magazine photo shoot, natural lighting"
-        )
+        return "1990s fashion: flannel, grunge, band t-shirts, Doc Martens, candid warehouse or alley setting"
     else:
-        return (
-            "Early 2000s-2010s digital photography, clean lighting, "
-            "contemporary fashion, urban or industrial backdrop, "
-            "high resolution with slight color grading"
-        )
+        return "2000s-2010s fashion: contemporary streetwear, clean styling, urban or industrial backdrop"
 
 
 def generate_dall_e_image(prompt, output_path):
@@ -303,18 +317,19 @@ def generate_dall_e_image(prompt, output_path):
 
 
 def build_band_photo_prompt(band_profile, band_members):
-    """Build a DALL-E prompt with era-appropriate photography style."""
-    photo_style = get_era_photography_style(band_profile['Reference Year'])
+    """Build a DALL-E prompt for a black and white band press photo."""
+    fashion = get_era_fashion_description(band_profile['Reference Year'])
     member_count = len(band_members)
 
     prompt = (
-        f"A promotional band photo of {member_count} musicians from the fictional band "
-        f"'{band_profile['Band Name']}', a {band_profile['Nationality']} "
-        f"{band_profile['Genre 1']}/{band_profile['Genre 2']} group active in {band_profile['Reference Year']}. "
-        f"Photography style: {photo_style}. "
-        f"The band has a {band_profile['Style Name']} aesthetic. "
-        f"This should look like an authentic press kit photo from {band_profile['Reference Year']}. "
-        f"No text or words in the image."
+        f"A professional black and white press kit photograph of {member_count} musicians "
+        f"posing together as a band. Shot on medium-format film, high contrast, dramatic "
+        f"studio lighting with deep shadows. {fashion}. "
+        f"The band plays {band_profile['Genre 1']}/{band_profile['Genre 2']} and has a "
+        f"{band_profile['Style Name']} aesthetic. "
+        f"This should look like an authentic black and white promotional photo from a "
+        f"music magazine circa {band_profile['Reference Year']}. "
+        f"Photorealistic, film grain, no text or words in the image."
     )
 
     logging.info(f"DALL-E prompt: {prompt}")
@@ -323,55 +338,60 @@ def build_band_photo_prompt(band_profile, band_members):
 
 def create_html_content(band_profile, backstory, albums, band_members, output_dir):
     """Generate a retro 90s-style fan page HTML for the band."""
-    band_name = band_profile['Band Name']
-    style_name = band_profile['Style Name']
-    ref_year = band_profile['Reference Year']
-    genre1 = band_profile['Genre 1']
-    genre2 = band_profile['Genre 2']
-    nationality = band_profile['Nationality']
+    # Escape all AI-generated strings to prevent XSS (C-001)
+    band_name = html.escape(band_profile['Band Name'])
+    style_name = html.escape(band_profile['Style Name'])
+    ref_year = int(band_profile['Reference Year'])
+    genre1 = html.escape(band_profile['Genre 1'])
+    genre2 = html.escape(band_profile['Genre 2'])
+    nationality = html.escape(band_profile['Nationality'])
+    backstory_escaped = html.escape(backstory)
 
     # Pick random retro accent colors
     accent_colors = [
         ("#00ffff", "#ff00ff", "#ffff00"),  # cyan, magenta, yellow
         ("#00ff00", "#ff6600", "#ff00ff"),  # lime, orange, magenta
-        ("#ffff00", "#00ffff", "#ff4444"),  # yellow, cyan, red
+        ("#ffff00", "#00ffff", "#ff7777"),  # yellow, cyan, soft red (N-001: #ff7777 passes 4.5:1 on dark bg)
         ("#ff69b4", "#00ff00", "#ffff00"),  # hotpink, lime, yellow
     ]
     c1, c2, c3 = random.choice(accent_colors)
 
-    # Build members HTML
+    # Build members HTML using semantic markup (C-003, H-003)
     members_html = ""
     for member in band_members:
+        m_name = html.escape(member.get('name', 'Unknown'))
+        m_instrument = html.escape(member.get('instrument', ''))
+        m_bio = html.escape(member.get('bio', ''))
         members_html += f"""
-        <tr>
-            <td style="color:{c2}; padding:4px 12px; font-weight:bold;">{member.get('name', 'Unknown')}</td>
-            <td style="color:{c3}; padding:4px 12px;">{member.get('instrument', '')}</td>
-        </tr>
-        <tr>
-            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">{member.get('bio', '')}</td>
-        </tr>"""
+        <div class="member-card">
+            <h3 class="member-name">{m_name}</h3>
+            <p class="member-instrument">{m_instrument}</p>
+            <p class="member-bio">{m_bio}</p>
+        </div>"""
 
-    # Build discography HTML
+    # Build discography HTML using semantic markup (C-004, H-003)
     disco_html = ""
     for title, tracks in albums:
+        title_escaped = html.escape(title)
         tracks_html = ""
         for i, track in enumerate(tracks, 1):
-            tracks_html += f'<li style="color:#cccccc;">{track}</li>\n'
+            tracks_html += f'<li>{html.escape(track)}</li>\n'
         disco_html += f"""
-        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="{c2}"
-               style="margin:10px auto; background-color:#111111;">
-            <tr><td colspan="2" style="background-color:#222222; color:{c1}; font-weight:bold; padding:8px; font-size:1.1em;">
-                {title}
-            </td></tr>
-            <tr><td style="padding:8px;">
-                <ol style="color:{c3}; margin:0; padding-left:20px;">
-                    {tracks_html}
-                </ol>
-            </td></tr>
-        </table>"""
+        <div class="album-card">
+            <h3 class="album-title">{title_escaped}</h3>
+            <ol class="track-list">
+                {tracks_html}
+            </ol>
+        </div>"""
 
     # Visitor counter (fake, random)
     visitor_count = random.randint(1247, 99999)
+
+    # Escaped member names for photo caption
+    member_names_escaped = ', '.join(html.escape(m.get('name', '')) for m in band_members)
+
+    # Safe email-friendly band name (alphanumeric only)
+    email_band = ''.join(c for c in band_profile['Band Name'] if c.isalnum()).lower()
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -380,6 +400,11 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>~*~ {band_name} ~*~ Official Fan Page ~*~</title>
     <style>
+        :root {{
+            --accent-1: {c1};
+            --accent-2: {c2};
+            --accent-3: {c3};
+        }}
         body {{
             background-color: #000000;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='%23111'/%3E%3C/svg%3E");
@@ -391,20 +416,54 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         a {{ color: {c1}; }}
         a:visited {{ color: {c2}; }}
         a:hover {{ color: {c3}; text-decoration: none; }}
+        a:focus-visible {{
+            outline: 2px solid #ffff00;
+            outline-offset: 2px;
+        }}
+        .skip-link {{
+            position: absolute;
+            left: -9999px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }}
+        .skip-link:focus {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: auto;
+            height: auto;
+            padding: 8px 16px;
+            background: #ffff00;
+            color: #000;
+            font-weight: bold;
+            z-index: 100;
+        }}
         .page-wrapper {{
             max-width: 800px;
             margin: 0 auto;
             padding: 10px;
         }}
-        .header-table {{
+        .page-header {{
             width: 100%;
             background: linear-gradient(to right, #000033, #000066, #000033);
             border: 3px ridge {c2};
             margin-bottom: 10px;
-        }}
-        .header-table td {{
             text-align: center;
             padding: 15px;
+        }}
+        .band-subtitle {{
+            color: {c3};
+            font-size: 0.85em;
+            margin: 4px 0;
+        }}
+        .band-title {{
+            font-size: 1.8em;
+            font-weight: bold;
+            color: {c1};
+            text-shadow: 2px 2px 4px {c2};
+            font-family: 'Impact', 'Arial Black', sans-serif;
         }}
         .divider {{
             width: 80%;
@@ -420,13 +479,28 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         .photo-frame {{
             text-align: center;
             margin: 15px auto;
+            position: relative;
+            display: inline-block;
+        }}
+        .photo-wrapper {{
+            text-align: center;
         }}
         .photo-frame img {{
             max-width: 500px;
             width: 100%;
             border: 4px ridge {c2};
             display: block;
-            margin: 0 auto;
+            filter: grayscale(100%);
+        }}
+        .photo-credit {{
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #aaaaaa;
+            font-size: 0.65em;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            text-shadow: 1px 1px 2px #000000;
+            letter-spacing: 0.5px;
         }}
         .photo-caption {{
             color: {c3};
@@ -444,14 +518,55 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
             line-height: 1.6;
             font-size: 0.95em;
         }}
-        .members-table {{
+        .members-list {{
             margin: 10px auto;
+            width: 90%;
             border: 2px ridge {c1};
             background-color: #0a0a0a;
-            border-collapse: collapse;
         }}
-        .members-table td {{
+        .member-card {{
+            padding: 8px 12px;
             border-bottom: 1px dashed #333333;
+        }}
+        .member-card:last-child {{
+            border-bottom: none;
+        }}
+        .member-name {{
+            color: var(--accent-2);
+            font-size: 1em;
+            font-weight: bold;
+            margin: 0;
+        }}
+        .member-instrument {{
+            color: var(--accent-3);
+            margin: 2px 0;
+        }}
+        .member-bio {{
+            color: #cccccc;
+            font-size: 0.9em;
+            margin: 2px 0 4px 0;
+        }}
+        .album-card {{
+            width: 90%;
+            margin: 10px auto;
+            background-color: #111111;
+            border: 1px solid {c2};
+        }}
+        .album-title {{
+            background-color: #222222;
+            color: var(--accent-1);
+            font-weight: bold;
+            padding: 8px;
+            font-size: 1.1em;
+            margin: 0;
+        }}
+        .track-list {{
+            color: var(--accent-3);
+            margin: 0;
+            padding: 8px 8px 8px 32px;
+        }}
+        .track-list li {{
+            color: #cccccc;
         }}
         .footer-area {{
             text-align: center;
@@ -471,11 +586,16 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         @keyframes blinker {{
             50% {{ opacity: 0; }}
         }}
+        @media (prefers-reduced-motion: reduce) {{
+            .blink {{
+                animation: none;
+            }}
+        }}
         .badge-row {{
             text-align: center;
             margin: 15px 0;
             font-size: 0.75em;
-            color: #999999;
+            color: #aaaaaa;
         }}
         .badge-row span {{
             margin: 0 8px;
@@ -494,12 +614,25 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         .nav-bar a {{
             margin: 0 5px;
         }}
-        marquee {{
-            font-size: 1.8em;
-            font-weight: bold;
-            color: {c1};
-            text-shadow: 2px 2px 4px {c2};
-            font-family: 'Impact', 'Arial Black', sans-serif;
+        @media (max-width: 600px) {{
+            .band-title {{
+                font-size: 1.2em !important;
+            }}
+            .page-header {{
+                width: 100% !important;
+            }}
+            .members-list {{
+                width: 100% !important;
+            }}
+            .nav-bar {{
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }}
+            .nav-bar a {{
+                display: block;
+                margin: 2px 0;
+            }}
         }}
         .stars {{
             color: {c3};
@@ -509,91 +642,94 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
 </head>
 <body>
 
+<a href="#main" class="skip-link">Skip to main content</a>
+
 <div class="page-wrapper">
 
     <!-- Header -->
-    <table class="header-table" cellpadding="0" cellspacing="0">
-        <tr><td>
-            <span class="stars">* * * * * * * * * * * * *</span><br>
-            <marquee scrollamount="3">{band_name}</marquee>
-            <br>
-            <span style="color:{c3}; font-size:0.85em;">
-                {style_name} | {genre1} / {genre2} | Est. {ref_year} | {nationality}
-            </span><br>
-            <span class="stars">* * * * * * * * * * * * *</span>
-        </td></tr>
-    </table>
+    <header class="page-header">
+        <span class="stars" aria-hidden="true">* * * * * * * * * * * * *</span><br>
+        <h1 class="band-title">{band_name}</h1>
+        <p class="band-subtitle">
+            {style_name} | {genre1} / {genre2} | Est. {ref_year} | {nationality}
+        </p>
+        <span class="stars" aria-hidden="true">* * * * * * * * * * * * *</span>
+    </header>
 
     <!-- Navigation -->
-    <div class="nav-bar">
+    <nav class="nav-bar" aria-label="Page sections">
         <a href="#backstory">Backstory</a> |
         <a href="#photo">Band Photo</a> |
         <a href="#members">Members</a> |
         <a href="#discography">Discography</a> |
         <a href="#guestbook">Guestbook</a>
-    </div>
+    </nav>
+
+    <main id="main">
 
     <!-- Backstory -->
-    <a name="backstory"></a>
-    <h3 class="section-header">~ The Story ~</h3>
+    <h2 id="backstory" class="section-header">~ The Story ~</h2>
     <hr class="divider" color="{c2}" size="2" noshade>
     <div class="backstory-box">
-        {backstory}
+        {backstory_escaped}
     </div>
 
     <!-- Band Photo -->
-    <a name="photo"></a>
-    <h3 class="section-header">~ Band Photo ~</h3>
+    <h2 id="photo" class="section-header">~ Band Photo ~</h2>
     <hr class="divider" color="{c2}" size="2" noshade>
-    <div class="photo-frame">
-        <img src="band_photo.jpg" alt="{band_name} - Band Photo">
+    <div class="photo-wrapper">
+        <div class="photo-frame">
+            <img src="band_photo.jpg" alt="Promotional photo of {band_name}">
+            <div class="photo-credit">Mgmt: {band_name.split()[0] if ' ' in band_name else band_name} Artists Group / {nationality}</div>
+        </div>
         <div class="photo-caption">
-            {', '.join(m.get('name', '') for m in band_members)}
+            {member_names_escaped}
         </div>
     </div>
 
     <!-- Band Members -->
-    <a name="members"></a>
-    <h3 class="section-header">~ The Members ~</h3>
+    <h2 id="members" class="section-header">~ The Members ~</h2>
     <hr class="divider" color="{c2}" size="2" noshade>
-    <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
+    <div class="members-list">
         {members_html}
-    </table>
+    </div>
 
     <!-- Discography -->
-    <a name="discography"></a>
-    <h3 class="section-header">~ Discography ~</h3>
+    <h2 id="discography" class="section-header">~ Discography ~</h2>
     <hr class="divider" color="{c2}" size="2" noshade>
     {disco_html}
 
     <!-- Guestbook / Links -->
-    <a name="guestbook"></a>
-    <h3 class="section-header">~ Guestbook & Links ~</h3>
+    <h2 id="guestbook" class="section-header">~ Guestbook &amp; Links ~</h2>
     <hr class="divider" color="{c2}" size="2" noshade>
     <div style="text-align:center; padding:10px;">
         <p><a href="#">Sign the Guestbook!</a> | <a href="#">View Guestbook</a></p>
-        <p><a href="mailto:webmaster@{band_name.replace(' ', '').lower()}.geocities.com">Email the Webmaster</a></p>
-        <p style="color:#666666; font-size:0.8em;">
+        <p><a href="mailto:webmaster@{email_band}.geocities.com">Email the Webmaster</a></p>
+        <p style="color:#888888; font-size:0.8em;">
             <a href="#">Link to us!</a> |
             <a href="#">Webrings</a> |
             <a href="#">MIDI Archive</a>
         </p>
     </div>
 
+    </main>
+
     <!-- Badges / Footer -->
-    <div class="badge-row">
+    <footer>
+    <div class="badge-row" aria-hidden="true">
         <span>Best viewed in Netscape Navigator 4.0</span>
         <span>800x600 resolution</span>
         <span>Made with Notepad</span>
     </div>
 
     <div class="footer-area">
-        <p>You are visitor number <strong style="color:{c1};">#{visitor_count:,}</strong> since {ref_year}!</p>
+        <p aria-hidden="true">You are visitor number <strong style="color:{c1};">#{visitor_count:,}</strong> since {ref_year}!</p>
         <p class="blink">*** This page is always under construction! ***</p>
         <p>&copy; {current_year} {band_name} Fan Page. All rights reserved.<br>
         This is a fan-made page. We are not affiliated with {band_name} or their management.</p>
-        <p><a href="#">Back to Top</a></p>
+        <p><a href="#main">Back to Top</a> | <a href="/">Back to AI Band Generator</a></p>
     </div>
+    </footer>
 
 </div>
 
@@ -611,6 +747,23 @@ def save_html_to_file(content, output_dir, filename="home.html"):
         logging.info(f"HTML file '{filename}' created successfully in directory '{output_dir}'.")
     except OSError as e:
         logging.error(f"Error writing HTML file '{filename}': {e}")
+        raise
+
+
+def save_band_info(band_profile, output_dir):
+    """Save band metadata for gallery display and template versioning."""
+    info = {
+        'display_name': band_profile['Band Name'],
+        'template_version': 2,
+        'generated_at': datetime.now().isoformat(),
+    }
+    info_path = os.path.join(output_dir, 'band_info.json')
+    try:
+        with open(info_path, 'w') as f:
+            json.dump(info, f, indent=2)
+        logging.info(f"Band info saved to {info_path}")
+    except OSError as e:
+        logging.error(f"Error writing band info: {e}")
         raise
 
 
@@ -659,6 +812,7 @@ if __name__ == "__main__":
         # Create and save the HTML fan page
         html_content = create_html_content(band_profile, backstory, albums, band_members, output_dir)
         save_html_to_file(html_content, output_dir)
+        save_band_info(band_profile, output_dir)
 
         logging.info("Script executed successfully.")
 
