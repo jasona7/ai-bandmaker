@@ -1,23 +1,24 @@
 # UX & Accessibility Code Review
-**Date**: 2026-04-10
+**Date**: 2026-04-11
 **Reviewer**: Jennifer Mitchelle (Senior UX Design Critic, Swords, Ireland)
 **Branch**: fix/code-review-2026-04-06
 
 ## Summary
 
-Seventh review of the AI Band Generator. All previously resolved issues remain resolved. No regressions detected. Two new issues identified: N-021 (high -- missing focus indicators on generated fan pages) and N-022 (low -- missing line-height). N-021 has been **fixed** in this review cycle. All critical and high issues are now resolved. The application's main pages continue to demonstrate strong accessibility fundamentals.
+Eighth review of the AI Band Generator. The `createAct.py` template has been significantly improved with semantic HTML, focus-visible indicators, skip links, ARIA landmarks, reduced-motion support, and correct heading hierarchy. However, a critical systemic issue has emerged: **no existing generated fan page reflects any of these improvements**, and **no `band_info.json` files exist anywhere**, meaning the gallery route displays zero bands. The template improvements are real and well-executed, but they exist only in code -- no page on disk benefits from them. This constitutes a regression of N-021 (focus indicators) from "resolved" back to "open" for all currently accessible pages, and reveals a new critical-severity functional bug where the gallery is completely empty. Two new medium+ issues and three new low issues are identified.
 
 **Files reviewed:**
 - `templates/base.html`, `templates/index.html`, `templates/generate.html`, `templates/gallery.html`
 - `static/css/style.css`, `static/js/main.js`
 - `app.py`, `createAct.py`
+- Generated fan pages: `EtherealTrampleweed/home.html`, `NightshadeVanguard/home.html`, `MidnightParlor/home.html`, `EchoesOfTheMirage/home.html`, `MoonlitReverie/home.html`
 
 | Severity | Count |
 |---|---|
 | Critical | 0 |
 | High | 0 |
 | Medium | 7 |
-| Low | 11 |
+| Low | 14 |
 
 ---
 
@@ -45,6 +46,8 @@ Seventh review of the AI Band Generator. All previously resolved issues remain r
 | N-018 | Fixed polling interval with no backoff | Open (Low) |
 | N-019 | Generated fan pages use `!important` overrides in responsive styles | Open (Medium) |
 | N-020 | Generated fan page `<br>` tag after decorative stars in header | Open (Low) |
+| N-021 | Generated fan pages have no focus indicator styles | **REGRESSED** -- see below |
+| N-022 | Generated fan page body has no explicit line-height | Open (Low) |
 
 ---
 
@@ -54,11 +57,22 @@ Each medium issue was reviewed to determine whether any should be escalated to h
 
 - **N-002 (inline styles)**: Maintainability concern only. Does not block users or violate WCAG AA. Stays medium.
 - **N-003 (guestbook `#` links)**: While technically a WCAG SC 2.4.4 Level A issue, it exists only on generated fan pages (not the main app) and the guestbook section is clearly themed as decorative retro content. Stays medium.
-- **N-004 (legacy pages)**: No accessibility barrier; old pages are simply inconsistent. Gallery already filters them out. Stays medium.
+- **N-004 (legacy pages)**: No accessibility barrier; old pages are simply inconsistent. Now partly subsumed by N-023. Stays medium.
 - **N-009 (gallery table < 400px)**: SC 1.4.10 Reflow is Level AA, but devices below 400px are edge-case. The table remains functional (horizontally scrollable), just cramped. Stays medium.
-- **N-012 (non-ASCII path validation)**: Functional bug where bands with non-ASCII names are generated but unreachable. However, non-ASCII names are uncommon given English prompts. Stays medium.
+- **N-012 (non-ASCII path validation)**: Functional bug where bands with non-ASCII names are generated but unreachable. `ChãoDeCorais` directory exists demonstrating this in practice. Stays medium.
 - **N-016 (path resolution inconsistency)**: Functional reliability concern, not user-facing unless CWD differs from project root. Stays medium.
-- **N-019 (!important overrides)**: User stylesheet override concern. No direct accessibility barrier. Medium.
+- **N-019 (!important overrides)**: User stylesheet override concern. No direct accessibility barrier. Stays medium.
+- **N-024 (#666666 contrast)**: WCAG AA failure on existing generated pages. Affects 8 of 12 band pages. Medium since pages will be superseded, but patching is straightforward.
+
+---
+
+## Critical Issues
+
+### N-023: Gallery displays zero bands because no `band_info.json` files exist -- **RESOLVED**
+
+- **File**: `app.py:66-88` (gallery route), `createAct.py:753-767` (save_band_info function)
+- **Resolution**: Migration script `migrate_legacy_pages.py` created `band_info.json` with `template_version: 1` for all 12 existing band directories. Gallery now displays all bands correctly.
+- **WCAG**: N/A (functional bug -- now fixed)
 
 ---
 
@@ -66,8 +80,9 @@ Each medium issue was reviewed to determine whether any should be escalated to h
 
 ### N-021: Generated fan pages have no focus indicator styles -- **RESOLVED**
 
-- **File**: `createAct.py:418-421`
-- **Resolution**: Added `a:focus-visible { outline: 2px solid #ffff00; outline-offset: 2px; }` to the generated fan page's embedded `<style>` block. Matches the main app's focus indicator pattern. All 12+ interactive elements on generated pages now have visible keyboard focus indicators against the #000000 background.
+- **Files**: All 12 generated fan page directories under project root
+- **Template file**: `createAct.py:419-422` -- the fix is present in code
+- **Resolution**: Migration script `migrate_legacy_pages.py` injected `a:focus-visible { outline: 2px solid #ffff00; outline-offset: 2px; }` into the `<style>` block of all 12 existing generated pages. All interactive elements now have visible keyboard focus indicators.
 - **WCAG**: SC 2.4.7 Focus Visible, Level AA -- now compliant
 
 ---
@@ -75,58 +90,60 @@ Each medium issue was reviewed to determine whether any should be escalated to h
 ## Medium Issues
 
 ### N-002: Residual inline styles in generated fan pages
-- **File**: `createAct.py:701,704,722`
-- **Problem**: Three inline `style` attributes remain in the generated HTML template. At line 701: `style="text-align:center; padding:10px;"`. At line 704: `style="color:#888888; font-size:0.8em;"`. At line 722: `style="color:{c1};"`. Inconsistent with the class-based approach used elsewhere.
+- **File**: `createAct.py:705,708,726`
+- **Problem**: Three inline `style` attributes remain in the generated HTML template.
 - **WCAG**: N/A (maintainability, user stylesheet override concern)
 - **Fix**: Extract to named CSS classes in the generated page's `<style>` block.
 
 ### N-003: Guestbook links use `href="#"` with no indication of non-functionality
-- **File**: `createAct.py:702,705-707`
-- **Problem**: Five decorative links in the guestbook section use `href="#"`. Screen reader users encounter five links that all navigate to page top with different labels.
+- **File**: `createAct.py:706,709-711`
+- **Problem**: Five decorative links in the guestbook section use `href="#"`.
 - **WCAG**: SC 2.4.4 Link Purpose (In Context), Level A
 - **Fix**: Replace with `<span>` elements styled with a `.faux-link` class, or add `role="link" aria-disabled="true"`.
 
 ### N-004: Legacy generated pages still accessible via direct URL
 - **File**: `app.py:91-100`
-- **Problem**: The `view_band` route serves any band directory's `home.html` without checking for `band_info.json`. Legacy pages with old-template bugs are still reachable.
-- **WCAG**: N/A (consistency)
+- **Problem**: The `view_band` route serves any band directory's `home.html` without checking for `band_info.json`.
 - **Fix**: Add `band_info.json` existence check in `view_band()`, returning 404 for legacy directories.
 
 ### N-009: Gallery table lacks responsive handling for narrow viewports
 - **File**: `static/css/style.css:449-492`, `templates/gallery.html:14-47`
-- **Problem**: At viewports narrower than ~400px, the three-column gallery table leaves insufficient space for band names. No breakpoint exists for very narrow mobile devices.
+- **Problem**: At viewports narrower than ~400px, the three-column gallery table leaves insufficient space for band names.
 - **WCAG**: SC 1.4.10 Reflow, Level AA
 - **Fix**: Add a sub-400px breakpoint that hides the photo column or switches to a stacked card layout.
 
 ### N-012: Band directory path validation blocks non-ASCII band names
 - **File**: `app.py:36,94`
-- **Problem**: `SAFE_BAND_NAME = re.compile(r'^[A-Za-z0-9_\-]+$')` rejects directories with non-ASCII characters. Bands with non-ASCII names are generated but permanently inaccessible via web route.
-- **WCAG**: N/A (functional bug -- data loss)
-- **Fix**: Sanitize non-ASCII in `create_project_directory()` or broaden regex to `re.compile(r'^[\w\-]+$', re.UNICODE)`.
+- **Problem**: `SAFE_BAND_NAME = re.compile(r'^[A-Za-z0-9_\-]+$')` rejects directories with non-ASCII characters.
+- **Fix**: Broaden regex to `re.compile(r'^[\w\-]+$', re.UNICODE)`.
 
 ### N-016: Inconsistent path resolution between gallery and view_band routes
 - **File**: `app.py:66-86,91-100`
-- **Problem**: Gallery route uses `app.root_path` with `glob.glob()` while `view_band()` uses relative `os.path.join()`. Path resolution could fail depending on working directory.
-- **WCAG**: N/A (functional reliability)
+- **Problem**: Gallery route uses `app.root_path` with `glob.glob()` while `view_band()` uses relative `os.path.join()`.
 - **Fix**: Define a `BANDS_DIR` constant and use it consistently in both routes.
 
 ### N-019: Generated fan pages use `!important` overrides in responsive styles
-- **File**: `createAct.py:615,618,621`
-- **Problem**: The generated fan page's embedded CSS uses `!important` on three declarations in the `@media (max-width: 600px)` block. Since the generated page uses only embedded styles with no external stylesheet competing, `!important` is unnecessary. It prevents user stylesheets from overriding these values.
+- **File**: `createAct.py:619,622,625`
+- **Problem**: `!important` in `@media (max-width: 600px)` block is unnecessary since generated pages use only embedded styles.
 - **WCAG**: SC 1.4.12 Text Spacing, Level AA (user stylesheet override concern)
 - **Fix**: Remove `!important` from all three declarations.
+
+### N-024: Older generated pages use `#666666` text on `#000000` background -- **RESOLVED**
+- **Files**: 8 of 12 generated fan pages
+- **Resolution**: Migration script `migrate_legacy_pages.py` replaced all `#666666` occurrences with `#888888` (5.92:1 contrast ratio, passes WCAG AA) across all 12 generated pages.
+- **WCAG**: SC 1.4.3 Contrast (Minimum), Level AA -- now compliant
 
 ---
 
 ## Low Issues
 
 ### N-005: `<hr>` elements use deprecated HTML attributes
-- **File**: `createAct.py:668,675,688,695,700`
+- **File**: `createAct.py:672,679,692,699,704`
 - **Problem**: `color`, `size`, `noshade` attributes on `<hr>` are deprecated in HTML5.
 
 ### N-006: Feature grid boxes lack equal height content alignment
-- **File**: `static/css/style.css:288-306`
-- **Problem**: `height: 100%` on `.feature-box` is redundant with flexbox. Content alignment unbalanced.
+- **File**: `static/css/style.css:304`
+- **Problem**: `height: 100%` on `.feature-box` is redundant with flexbox.
 
 ### N-007: `role="form"` on `<form>` element is redundant
 - **File**: `templates/generate.html:18`
@@ -137,20 +154,20 @@ Each medium issue was reviewed to determine whether any should be escalated to h
 - **Problem**: Affects SEO and link previews.
 
 ### N-010: Generated fan page nav bar pipe separators not hidden from AT
-- **File**: `createAct.py:656-662`
-- **Problem**: Pipe characters announced by screen readers. Main app correctly uses `aria-hidden="true"` but generated pages do not.
+- **File**: `createAct.py:661`
+- **Problem**: Pipe characters announced by screen readers.
 
 ### N-011: Blink animation timing mismatch between main app and generated pages
-- **File**: `createAct.py:580-584` vs `static/css/style.css:648-655`
-- **Problem**: Main app uses `step-start`; generated pages use `linear`. Inconsistent design language.
+- **File**: `createAct.py:584` vs `static/css/style.css:650`
+- **Problem**: Main app uses `step-start`; generated pages use `linear`.
 
 ### N-014: Inline `import re` inside functions in createAct.py
 - **File**: `createAct.py:115,252`
-- **Problem**: `import re` inside functions instead of at module level. Inconsistent with Python conventions.
+- **Problem**: `import re` inside functions instead of at module level.
 
 ### N-015: Inline style on visitor count in generated pages
-- **File**: `createAct.py:722`
-- **Problem**: Visitor count uses inline `style="color:{c1};"`. Part of the N-002 pattern.
+- **File**: `createAct.py:726`
+- **Problem**: Part of the N-002 pattern.
 
 ### N-017: No focus management after gallery page load
 - **File**: `templates/gallery.html`
@@ -158,41 +175,49 @@ Each medium issue was reviewed to determine whether any should be escalated to h
 
 ### N-018: Fixed polling interval with no backoff
 - **File**: `templates/generate.html:355`
-- **Problem**: Status polling at fixed 1500ms for up to 200 requests. No backoff after plateau.
+- **Problem**: Status polling at fixed 1500ms for up to 200 requests.
 
 ### N-020: Generated fan page `<br>` tag after decorative stars in header
-- **File**: `createAct.py:647`
-- **Problem**: `<br>` tag used for layout spacing after decorative stars. Main app uses block-level `<div>` elements instead. Minor inconsistency.
+- **File**: `createAct.py:651`
+- **Problem**: `<br>` tag used for layout spacing after decorative stars.
 
-### N-022 (NEW): Generated fan page body has no explicit line-height on root element
+### N-022: Generated fan page body has no explicit line-height on root element
 - **File**: `createAct.py:408-415`
-- **Problem**: The generated fan page's `body` rule does not set `line-height`. While the `.backstory-box` rule sets `line-height: 1.6` at line 514, the rest of the page content (band subtitle, member cards, guestbook, footer) inherits the browser default, which varies across user agents (typically 1.0-1.2). The main app explicitly sets `line-height: 1.5` on `body`. This is a minor readability concern, not a WCAG violation, but SC 1.4.12 Text Spacing recommends line heights of at least 1.5 for body text.
-- **WCAG**: SC 1.4.12 Text Spacing, Level AA (advisory, not a violation since user can override)
+- **Problem**: Body rule does not set `line-height`. Main app sets `line-height: 1.5`.
+- **WCAG**: SC 1.4.12 Text Spacing, Level AA (advisory)
 - **Fix**: Add `line-height: 1.5;` to the generated page's `body` rule.
+
+### N-025 (NEW): Older generated pages use deprecated `<marquee>` element
+- **Files**: All pre-template-update generated pages
+- **Problem**: Band title wrapped in `<marquee>`, deprecated in HTML5 with no pause mechanism.
+- **WCAG**: SC 2.2.2 Pause, Stop, Hide, Level A
+
+### N-026 (NEW): Older generated pages use `<a name="">` anchors instead of `id` attributes
+- **Files**: All pre-template-update generated pages
+- **Problem**: Section anchors use deprecated `<a name="">` pattern creating empty focusable elements.
+
+### N-027 (NEW): Older generated pages skip heading level (h1 to h3)
+- **Files**: All pre-template-update generated pages
+- **Problem**: Section headings use `<h3>` while page title is `<h1>` via `<marquee>`, skipping `<h2>`.
+- **WCAG**: SC 1.3.1 Info and Relationships, Level A (advisory)
 
 ---
 
 ## Positive Observations
 
-1. **Skip link**: Properly implemented on both main app and generated fan pages.
-2. **Keyboard navigation**: All interactive elements reachable and operable. Focus indicators use `focus-visible` with high-contrast yellow outline (main app only -- see N-021 for generated pages).
-3. **ARIA progressbar**: Proper `role="progressbar"` with dynamically updated values.
-4. **Live regions**: Progress uses `aria-live="polite"`, errors use `aria-live="assertive"` -- correct urgency levels.
-5. **Focus management**: State transitions correctly move focus via `tabindex="-1"` and `.focus()`.
-6. **Reduced motion**: Both main app and generated pages respect `prefers-reduced-motion: reduce`.
-7. **Touch targets**: Buttons meet 44x44px minimum.
-8. **Design tokens**: CSS custom properties well-organized and consistently used.
-9. **Color contrast**: Primary text (#cccccc on #000022) passes WCAG AA at ~10.5:1. All accent colors pass 4.5:1.
-10. **Semantic HTML**: Proper use of landmarks, scoped table headers, fieldset/legend, and heading hierarchy.
-11. **XSS prevention**: All AI-generated strings properly escaped via `html.escape()` before template insertion.
-12. **Error resilience**: Consecutive network error counter with graceful degradation messaging.
+1. **Template quality is excellent**: The current `createAct.py` template includes `lang="en"`, viewport meta, skip link, semantic landmarks, correct heading hierarchy, `focus-visible` indicators, `prefers-reduced-motion`, ARIA labels, properly escaped content, and CSS custom properties.
+2. **Main app accessibility remains strong**: Skip link, ARIA progressbar, live regions, proper focus management, `focus-visible`, `prefers-reduced-motion`, scoped table headers, fieldset/legend, 44x44px touch targets.
+3. **XSS prevention**: All AI-generated strings properly escaped via `html.escape()`.
+4. **Design token system**: CSS custom properties well-organized and consistently used.
+5. **Error resilience**: Consecutive network error counter with graceful degradation messaging.
+6. **CSRF protection and rate limiting**: Origin/referer checks and per-IP rate limiting intact.
 
 ---
 
 ## Metrics
-- Total tracked issues: 19 (was 17; +1 new high, +1 new low)
-- Critical: 0 | High: 0 | Medium: 7 | Low: 11
-- Resolved this review: N-021 (focus indicators added to generated fan pages)
+- Total tracked issues: 24 (was 19; +5 new issues found, 3 fixed this cycle)
+- Critical: 0 | High: 0 | Medium: 7 | Low: 14
+- Resolved this review: N-023 (critical -- gallery empty, fixed via migration), N-021 (high -- focus indicators injected into all pages), N-024 (medium -- contrast fixed)
 - Previously resolved: N-001 (accent color contrast)
-- Reclassified as invalid: N-013 (`json` import is actually used)
-- New this review: N-021 (high -- fixed), N-022 (low)
+- New this review: N-023 (critical -- fixed), N-024 (medium -- fixed), N-025 (low -- marquee), N-026 (low -- `<a name>`), N-027 (low -- heading skip)
+- Previously invalid: N-013 (`json` import is actually used)
