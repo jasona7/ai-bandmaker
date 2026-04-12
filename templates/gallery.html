@@ -4,54 +4,58 @@
 
 {% block content %}
 <h2 class="section-header">~ Band Gallery ~</h2>
-<hr class="pointed-hr" noshade>
+<hr class="pointed-hr">
 
 <div class="center-text">
     <p>Browse the amazing AI-generated bands created so far!</p>
 </div>
 
 {% if bands %}
-<table class="gallery-table" cellpadding="8" cellspacing="0" border="2" bordercolor="#ff00ff">
+<table class="gallery-table">
+    <thead>
     <tr class="table-header-row">
-        <td width="120" align="center"><strong>Photo</strong></td>
-        <td><strong>Band Name</strong></td>
-        <td width="120" align="center"><strong>View</strong></td>
+        <th scope="col" class="gallery-col-photo">Photo</th>
+        <th scope="col">Band Name</th>
+        <th scope="col" class="gallery-col-view">View</th>
     </tr>
+    </thead>
+    <tbody>
     {% for band in bands %}
     <tr class="gallery-row">
-        <td align="center" style="padding:8px;">
+        <td class="gallery-photo-cell">
             {% if band.has_photo %}
             <img src="{{ url_for('band_assets', band_name=band.directory, filename='band_photo.jpg') }}"
-                 alt="{{ band.name }}" class="gallery-thumb">
+                 alt="Promotional photo of {{ band.name }}" class="gallery-thumb">
             {% else %}
-            <span style="color:#666666;">[no photo]</span>
+            <span class="gallery-no-photo">[no photo]</span>
             {% endif %}
         </td>
-        <td style="vertical-align:middle;">
-            <a href="{{ url_for('view_band', band_name=band.directory) }}" style="font-size:1.1em; font-weight:bold;">
+        <td class="gallery-band-cell">
+            <a href="{{ url_for('view_band', band_name=band.directory) }}" class="gallery-band-link">
                 {{ band.name }}
             </a>
         </td>
-        <td align="center" style="vertical-align:middle;">
-            <a href="{{ url_for('view_band', band_name=band.directory) }}" class="retro-button-small">
+        <td class="gallery-view-cell">
+            <a href="{{ url_for('view_band', band_name=band.directory) }}" class="retro-button-small"
+               aria-label="View {{ band.name }} fan page">
                 [ VIEW ]
             </a>
         </td>
     </tr>
     {% endfor %}
+    </tbody>
 </table>
 {% else %}
-<div class="retro-box" style="text-align:center;">
-    <h3 style="color:#ffff00;">No Bands Generated Yet!</h3>
+<div class="retro-box center-text">
+    <h3 class="retro-box-heading retro-box-heading--yellow">No Bands Generated Yet!</h3>
     <p>Be the first to create an AI-generated band!</p>
-    <br>
     <a href="{{ url_for('generate_page') }}" class="big-link">
         &gt;&gt;&gt; Generate Your First Band! &lt;&lt;&lt;
     </a>
 </div>
 {% endif %}
 
-<div class="center-text" style="margin-top:20px;">
+<div class="center-text cta-block">
     <a href="{{ url_for('generate_page') }}" class="big-link">
         &gt;&gt; Generate Another Band! &lt;&lt;
     </a>
