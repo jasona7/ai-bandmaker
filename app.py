@@ -71,6 +71,10 @@ def gallery():
         if not os.path.exists(info_path):
             continue
 
+        # Skip bands whose directory names can't be routed (N-028)
+        if not SAFE_BAND_NAME.match(band_name):
+            continue
+
         # Read display name from metadata, fall back to regex derivation
         try:
             with open(info_path, 'r') as f:
