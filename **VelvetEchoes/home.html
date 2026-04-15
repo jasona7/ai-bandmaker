@@ -105,6 +105,28 @@
                 margin-bottom: 20px;
             }
         
+    
+    /* N-031 migration: skip link */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      padding: 8px 16px;
+      background: #ffff00;
+      color: #000;
+      font-weight: bold;
+      z-index: 100;
+    }
     /* N-021 migration: keyboard focus indicators */
     a:focus-visible {
       outline: 2px solid #ffff00;
@@ -113,6 +135,8 @@
     </style>
     </head>
     <body>
+
+    <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <header>
         <h1>** Velvet Echoes - ** Neon Reverie Sound</h1>
@@ -124,6 +148,7 @@
         <a href="#discography">Discography</a>
     </nav>
 
+    <main id="main-content">
     <div class="container">
         <section id="backstory" class="backstory">
             <h2 class="section-title">Backstory</h2>
@@ -210,6 +235,7 @@ Together, Velvet Echoes were more than a band; they were a movement, a swirling 
         
         </section>
     </div>
+    </main>
 
     <footer>
         <p>&copy; 2025 ** Velvet Echoes. All rights reserved.</p>

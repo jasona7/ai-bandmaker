@@ -614,6 +614,11 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         .nav-bar a {{
             margin: 0 5px;
         }}
+        .faux-link {{
+            color: {c1};
+            text-decoration: underline;
+            cursor: default;
+        }}
         @media (max-width: 600px) {{
             .band-title {{
                 font-size: 1.2em !important;
@@ -703,12 +708,12 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     <h2 id="guestbook" class="section-header">~ Guestbook &amp; Links ~</h2>
     <hr class="divider" color="{c2}" size="2" noshade>
     <div style="text-align:center; padding:10px;">
-        <p><a href="#">Sign the Guestbook!</a> | <a href="#">View Guestbook</a></p>
+        <p><span class="faux-link">Sign the Guestbook!</span> | <span class="faux-link">View Guestbook</span></p>
         <p><a href="mailto:webmaster@{email_band}.geocities.com">Email the Webmaster</a></p>
         <p style="color:#888888; font-size:0.8em;">
-            <a href="#">Link to us!</a> |
-            <a href="#">Webrings</a> |
-            <a href="#">MIDI Archive</a>
+            <span class="faux-link">Link to us!</span> |
+            <span class="faux-link">Webrings</span> |
+            <span class="faux-link">MIDI Archive</span>
         </p>
     </div>
 

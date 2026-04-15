@@ -146,6 +146,46 @@
             letter-spacing: 3px;
         }
     
+    
+    /* N-031 migration: skip link */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      padding: 8px 16px;
+      background: #ffff00;
+      color: #000;
+      font-weight: bold;
+      z-index: 100;
+    }
+    
+    /* N-031 migration: respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      .blink, marquee {
+        animation: none;
+      }
+      marquee {
+        overflow: visible;
+        white-space: normal;
+      }
+    }
+    
+    /* N-003 migration: faux-link for non-functional decorative links */
+    .faux-link {
+      color: #ffff00;
+      text-decoration: underline;
+      cursor: default;
+    }
     /* N-021 migration: keyboard focus indicators */
     a:focus-visible {
       outline: 2px solid #ffff00;
@@ -154,6 +194,8 @@
     </style>
 </head>
 <body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <div class="page-wrapper">
 
@@ -171,13 +213,15 @@
     </table>
 
     <!-- Navigation -->
-    <div class="nav-bar">
+    <nav class="nav-bar" aria-label="Page sections">
         <a href="#backstory">Backstory</a> |
         <a href="#photo">Band Photo</a> |
         <a href="#members">Members</a> |
         <a href="#discography">Discography</a> |
         <a href="#guestbook">Guestbook</a>
-    </div>
+    </nav>
+
+    <main id="main-content">
 
     <!-- Backstory -->
     <a name="backstory"></a>
@@ -332,17 +376,20 @@ Seeing them live is like being caught up in a storm of sound and fun. If you eve
     <h3 class="section-header">~ Guestbook & Links ~</h3>
     <hr class="divider" color="#00ffff" size="2" noshade>
     <div style="text-align:center; padding:10px;">
-        <p><a href="#">Sign the Guestbook!</a> | <a href="#">View Guestbook</a></p>
+        <p><span class="faux-link">Sign the Guestbook!</span> | <span class="faux-link">View Guestbook</span></p>
         <p><a href="mailto:webmaster@eucalyptussaints.geocities.com">Email the Webmaster</a></p>
         <p style="color:#888888; font-size:0.8em;">
-            <a href="#">Link to us!</a> |
-            <a href="#">Webrings</a> |
-            <a href="#">MIDI Archive</a>
+            <span class="faux-link">Link to us!</span> |
+            <span class="faux-link">Webrings</span> |
+            <span class="faux-link">MIDI Archive</span>
         </p>
     </div>
 
+    </main>
+
     <!-- Badges / Footer -->
-    <div class="badge-row">
+    <footer>
+    <div class="badge-row" aria-hidden="true">
         <span>Best viewed in Netscape Navigator 4.0</span>
         <span>800x600 resolution</span>
         <span>Made with Notepad</span>
@@ -353,8 +400,9 @@ Seeing them live is like being caught up in a storm of sound and fun. If you eve
         <p class="blink">*** This page is always under construction! ***</p>
         <p>&copy; 2026 Eucalyptus Saints Fan Page. All rights reserved.<br>
         This is a fan-made page. We are not affiliated with Eucalyptus Saints or their management.</p>
-        <p><a href="#">Back to Top</a></p>
+        <p><a href="#main-content">Back to Top</a></p>
     </div>
+    </footer>
 
 </div>
 
