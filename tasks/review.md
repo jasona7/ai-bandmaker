@@ -1,25 +1,23 @@
 # UX & Accessibility Code Review
-**Date**: 2026-04-15
+**Date**: 2026-04-16
 **Reviewer**: Jennifer Mitchelle (Senior UX Design Critic, Swords, Ireland)
 **Branch**: fix/code-review-2026-04-13
 
 ## Summary
 
-Twelfth periodic review of the AI Band Generator. Two medium issues were escalated to high based on age and WCAG Level A severity, then **fixed this cycle**:
+Thirteenth periodic review of the AI Band Generator. No code changes have been made since the prior review (2026-04-15). All 7 previously resolved issues remain verified as resolved. The 6 open medium issues and 16 open low issues carry forward unchanged. No new issues were identified this cycle.
 
-- **N-031** (skip links, landmarks, prefers-reduced-motion on all 12 fan pages): Escalated from Medium to High, then **RESOLVED**. All 12 fan pages now have: skip links (`<a href="#main-content" class="skip-link">`), `<main id="main-content">` landmark, `<nav>` landmark (converted from `<div class="nav-bar">` on 8 v1-template pages; already present on 4 legacy pages), `<footer>` wrapper (added on 8 v1-template pages; already present on 4 legacy pages), `prefers-reduced-motion` media query (added on 8 v1-template pages that have `.blink` and `<marquee>` animations), `aria-hidden="true"` on decorative badge-row, and skip-link CSS styles.
+All 6 medium issues have now been open for 10+ days. Two low issues -- N-025 (deprecated `<marquee>` element, a WCAG Level A concern) and N-027 (heading level skip, a WCAG Level A advisory) -- were re-evaluated for escalation but remain at their current severity (see Escalation Assessment).
 
-- **N-003** (guestbook href="#" links): Escalated from Medium to High, then **RESOLVED**. All 5 `<a href="#">` links per page ("Sign the Guestbook!", "View Guestbook", "Link to us!", "Webrings", "MIDI Archive") replaced with `<span class="faux-link">` across all 8 v1-template fan pages and in the v2 template in `createAct.py`. The `.faux-link` CSS class preserves the visual appearance (colored, underlined) while removing the element from tab order and announcing it correctly to screen readers as non-interactive text. The "Back to Top" link (previously `href="#"`) was changed to `href="#main-content"` to provide a functional navigation target.
-
-The main application templates (`base.html`, `index.html`, `gallery.html`, `generate.html`) and `style.css` continue in strong shape. The v2 template in `createAct.py` has been updated with the N-003 fix (faux-link). All 12 existing fan pages now have N-021 (focus-visible), N-031 (skip links, landmarks, prefers-reduced-motion), and N-003 (faux-link) migration patches applied.
+The legacy fan pages (EchoesOfTheMirage, TheVelvetEchoes, MoonlitReverie, **VelvetEchoes) continue to present the most concentrated cluster of issues: fixed-position footer occluding content (N-029), empty band members section (N-030), fixed-width 600px band photo with no responsive breakpoints, and no responsive breakpoints. These pages also use a `max-width: 1200px` container versus the 800px used by v1 and v2 templates, creating a visual inconsistency.
 
 8 `band_photo.jpg` files appear as untracked in git status (EtherealTrampleweed, EucalyptusSaints, Inu-k-trkadeka, MidnightParlor, MyopicSunflowers, NightshadeVanguard, TheLuminescentUndertow, ChaoDeCorais). These are binary assets and do not affect the UX/accessibility findings.
 
 **Files reviewed:**
 - `templates/base.html`, `templates/index.html`, `templates/generate.html`, `templates/gallery.html`
 - `static/css/style.css` (724 lines), `static/js/main.js` (19 lines)
-- `app.py` (285 lines), `createAct.py` (826 lines, updated)
-- Generated fan pages: all 12 band directories (all migrated with N-021, N-031, N-003)
+- `app.py` (285 lines), `createAct.py` (826 lines)
+- Generated fan pages: all 12 band directories (spot-checked across v1 and legacy templates)
 - `tasks/review-recheck.md` (prior recheck document, reviewed for context)
 
 | Severity | Count |
@@ -37,7 +35,7 @@ The main application templates (`base.html`, `index.html`, `gallery.html`, `gene
 |---|---|---|
 | N-001 | Color contrast failure in accent color tuple (#ff6666) | **RESOLVED** -- verified, replacement #ff7777 passes at 8.16:1 |
 | N-002 | Residual inline styles in generated fan pages | Open (Medium) |
-| N-003 | Guestbook links use `href="#"` with no indication | **RESOLVED** -- replaced with `<span class="faux-link">` in v2 template and all 12 fan pages |
+| N-003 | Guestbook links use `href="#"` with no indication | **RESOLVED** -- verified, 0 matches across all 12 pages and createAct.py |
 | N-004 | Legacy generated pages still accessible via direct URL without band_info.json check | Open (Medium) |
 | N-005 | `<hr>` elements use deprecated HTML attributes | Open (Low) |
 | N-006 | Feature grid boxes lack equal height content alignment | Open (Low) |
@@ -71,41 +69,37 @@ The main application templates (`base.html`, `index.html`, `gallery.html`, `gene
 
 ## Escalation Assessment
 
-Two medium issues were escalated to high and then fixed this cycle:
+### Medium Issues Re-evaluated
 
-- **N-031**: Escalated to High and **RESOLVED**. All 12 fan pages migrated with skip links, `<main>` landmark, `<nav>` landmark, `<footer>` wrapper, `prefers-reduced-motion`, and `aria-hidden` on decorative elements.
-- **N-003**: Escalated to High and **RESOLVED**. All `href="#"` links replaced with `<span class="faux-link">` in v2 template and all 8 v1-template fan pages. "Back to Top" links changed to `href="#main-content"`.
+All 6 medium issues are now 10+ days old. Each was re-assessed for escalation to High:
 
-The remaining medium issues were re-evaluated and remain at medium:
+- **N-002 (inline styles in v2 template, createAct.py:705,708,726)**: Remains Medium. Three inline `style` attributes (`text-align:center`, `color:#888888`, visitor count color) affect maintainability but do not create a WCAG violation. The inline styles are limited to the guestbook section and footer visitor counter -- cosmetic areas. No escalation warranted.
 
-- **N-002 (inline styles)**: Remains medium. Three inline `style` attributes in the v2 template (`createAct.py:705,708,726`). Affects maintainability but does not violate WCAG A/AA in isolation.
-- **N-004 (legacy pages without band_info.json check)**: Remains medium. No security impact; `send_from_directory` is safe.
-- **N-009 (gallery table responsive)**: Remains medium. SC 1.4.10 Reflow at Level AA; the table is still usable at 320px.
-- **N-012 (non-ASCII path validation)**: Remains medium. Two of 12 bands (16.7%) are hidden from the gallery but not broken.
-- **N-016 (path resolution inconsistency)**: Remains medium. Latent bug, not actively causing issues.
-- **N-019 (!important overrides)**: Remains medium. Limited to mobile breakpoint of generated pages.
+- **N-004 (legacy pages without band_info.json check, app.py:95-104)**: Remains Medium. The `view_band()` route validates via `SAFE_BAND_NAME` regex, and `send_from_directory` is directory-scoped, so there is no security exposure. The issue is functional correctness (serving pages that may not be gallery-indexed). No escalation warranted.
+
+- **N-009 (gallery table not responsive below 400px)**: Remains Medium. At 320px viewport width, the table is cramped but remains functional. Content does not overflow horizontally because the table columns compress. SC 1.4.10 Reflow is AA, and the content remains usable. No escalation warranted.
+
+- **N-012 (non-ASCII band name path validation, app.py:36)**: Remains Medium. Two of 12 bands (ChaoDeCorais, **VelvetEchoes) are filtered from the gallery but their pages are still directly accessible. Users who created these bands can still view them via the success redirect. The data is not lost, merely hidden from the gallery listing. No escalation warranted.
+
+- **N-016 (inconsistent path resolution, app.py:66-86,95-104)**: Remains Medium. Gallery uses `app.root_path`; `view_band()` uses a relative path. Both work correctly in the standard deployment scenario (CWD = project root). This is a latent bug that would only surface in a non-standard deployment. No escalation warranted.
+
+- **N-019 (!important overrides in generated pages, createAct.py:619,622,625)**: Remains Medium. The `!important` declarations are in the mobile breakpoint of generated pages and apply to `.band-title`, `.page-header`, and `.members-list`. They override nothing in the current cascade (specificity is already sufficient), so they are unnecessary clutter rather than an active problem. No escalation warranted.
+
+### Low Issues Re-evaluated for Escalation
+
+All 16 low issues were reassessed. Two warranted closer examination:
+
+- **N-025 (deprecated `<marquee>` element)**: This touches WCAG SC 2.2.2 Pause, Stop, Hide (Level A). However, the N-031 migration already added `prefers-reduced-motion` handling that sets `animation: none` and `overflow: visible; white-space: normal` on `<marquee>` elements in all 8 affected v1 pages. This mitigates the worst accessibility impact (users who need reduced motion get static text). The `<marquee>` element itself is deprecated HTML but not a WCAG failure when motion can be paused. Remains Low.
+
+- **N-027 (heading level skip, h1 to h3)**: SC 1.3.1 Info and Relationships (Level A) -- however, heading level skips are an advisory technique (G141), not a normative requirement. Screen readers handle skipped levels gracefully. Remains Low.
+
+No low issues escalated this cycle.
 
 ---
 
 ## New Issues
 
 No new issues identified this cycle. The codebase has had no changes since the prior review.
-
----
-
-## High Issues (escalated and resolved this cycle)
-
-### N-031: All 12 existing fan pages lack skip links, landmarks, and prefers-reduced-motion [RESOLVED]
-- **Files**: All 12 band directories (`*/home.html`)
-- **Resolution**: Batch migration applied across all 12 pages with two migration strategies:
-  - **8 v1-template pages** (EtherealTrampleweed, EucalyptusSaints, Inu-k-trkadeka, MidnightParlor, MyopicSunflowers, NightshadeVanguard, TheLuminescentUndertow, ChaoDeCorais): Added skip link (`<a href="#main-content" class="skip-link">`), `.skip-link` CSS, `<nav class="nav-bar" aria-label="Page sections">` (replaced `<div class="nav-bar">`), `<main id="main-content">` wrapping all content sections, `<footer>` wrapping badge-row and footer-area, `aria-hidden="true"` on badge-row, `prefers-reduced-motion` media query disabling `.blink` and `<marquee>` animations.
-  - **4 legacy pages** (EchoesOfTheMirage, MoonlitReverie, TheVelvetEchoes, **VelvetEchoes): Added skip link, `.skip-link` CSS, `<main id="main-content">` wrapping the container `<div>`. These pages already had semantic `<header>`, `<nav>`, and `<footer>` elements and do not use `.blink` or `<marquee>` animations.
-- **Verification**: All 12 pages confirmed to have exactly 1 skip-link, 1 `<main>`, and 1 `</main>`.
-
-### N-003: Guestbook links use `href="#"` with no indication of non-functionality [RESOLVED]
-- **Files**: `createAct.py` (v2 template) and all 8 v1-template fan pages
-- **Resolution**: In `createAct.py`, replaced all 5 `<a href="#">` elements with `<span class="faux-link">` and added `.faux-link` CSS class. In all 8 v1-template fan pages, applied the same replacement. The "Back to Top" link (previously `href="#"`) was changed to `href="#main-content"` to provide a valid navigation target. Added `.faux-link` CSS to each page. The 4 legacy pages did not have guestbook links and required no changes for this issue.
-- **Verification**: `grep -c 'href="#"'` returns 0 across all 12 fan pages and `createAct.py`.
 
 ---
 
@@ -129,7 +123,7 @@ No new issues identified this cycle. The codebase has had no changes since the p
 
 ### N-012: Band directory path validation blocks non-ASCII and special-character band names
 - **File**: `app.py:36`
-- **Problem**: `SAFE_BAND_NAME` regex blocks `ChaoDeCorais` (non-ASCII tilde) and `**VelvetEchoes` (asterisks). Both are filtered from gallery (N-028 fix) so they are hidden, but the underlying data is inaccessible.
+- **Problem**: `SAFE_BAND_NAME` regex blocks `ChaoDeCorais` (non-ASCII tilde) and `**VelvetEchoes` (asterisks). Both are filtered from gallery (N-028 fix) so they are hidden, but the underlying data is inaccessible via gallery.
 - **Fix**: Broaden regex for Unicode support or sanitize names at generation time.
 
 ### N-016: Inconsistent path resolution between gallery and view_band routes
@@ -185,7 +179,7 @@ No new issues identified this cycle. The codebase has had no changes since the p
 
 ### N-025: Older generated pages use deprecated `<marquee>` element
 - **Files**: 8 of 12 generated pages (EtherealTrampleweed, EucalyptusSaints, Inu-k-trkadeka, MidnightParlor, MyopicSunflowers, NightshadeVanguard, TheLuminescentUndertow, ChaoDeCorais)
-- **WCAG**: SC 2.2.2 Pause, Stop, Hide, Level A
+- **WCAG**: SC 2.2.2 Pause, Stop, Hide, Level A (mitigated by prefers-reduced-motion)
 
 ### N-026: Older generated pages use `<a name="">` anchors instead of `id`
 - **Files**: 8 of 12 generated pages
@@ -217,17 +211,17 @@ No new issues identified this cycle. The codebase has had no changes since the p
 8. **Gallery filter (N-028 fix)**: SAFE_BAND_NAME check in gallery route correctly prevents dead links from appearing.
 9. **All images have alt text**: Verified across all 12 generated pages and all main app templates. No missing `alt` attributes.
 10. **All pages have lang attribute**: All 12 generated pages and all main templates include `lang="en"`.
-11. **Flask app imports cleanly**: Verified with `OPENAI_API_KEY=test ./venv/bin/python3 -c "import app"` -- no errors.
+11. **Flask app imports cleanly**: Verified with `OPENAI_API_KEY=test python3 -c "import app"` -- no errors.
 
 ---
 
 ## Metrics
 
-- Total tracked issues: 29
+- Total tracked issues: 29 (N-001 through N-032, excluding invalidated N-013)
 - Critical: 0 | High: 0 | Medium: 6 | Low: 16
-- Resolved cumulative: N-001, N-003, N-021, N-023, N-024, N-028, N-031 (7 total; +2 this cycle)
-- Escalated and fixed this cycle: N-031 (Medium -> High -> Resolved), N-003 (Medium -> High -> Resolved)
+- Resolved cumulative: N-001, N-003, N-021, N-023, N-024, N-028, N-031 (7 total; +0 this cycle)
+- Escalated this cycle: none
 - New this review: none
 - Previously invalid: N-013 (`json` import is used in gallery route)
-- Open medium issues aging: N-002, N-004, N-009, N-012, N-016, N-019 are all 9+ days old
-- Recommendation: Prioritize N-002 (inline styles in v2 template) and N-009 (gallery table responsive) as the next fixes. All WCAG Level A violations in the served fan page content have been resolved with the N-031 and N-003 fixes this cycle.
+- Open medium issues aging: N-002, N-004, N-009, N-012, N-016, N-019 are all 10+ days old
+- Recommendation: Prioritize **N-002** (inline styles in v2 template -- simple CSS extraction, 3 lines) and **N-019** (`!important` removal -- 3 lines in createAct.py) as the next fixes. Both are low-effort changes that improve maintainability. After those, **N-009** (gallery table responsive) is the most impactful remaining Medium issue for end users on narrow viewports.
