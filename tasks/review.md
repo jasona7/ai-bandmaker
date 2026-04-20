@@ -1,29 +1,26 @@
 # UX & Accessibility Code Review
-**Date**: 2026-04-18
+**Date**: 2026-04-20
 **Reviewer**: Jennifer Mitchelle (Senior UX Design Critic, Swords, Ireland)
 **Branch**: fix/code-review-2026-04-13
 
 ## Summary
 
-Fifteenth periodic review of the AI Band Generator. No code changes have been made since the prior review (2026-04-17). This cycle performed a deep re-audit of all key files with fresh eyes, specifically re-reading all templates, CSS, JS, app.py, createAct.py, and 6 generated fan pages (EtherealTrampleweed, MidnightParlor, NightshadeVanguard, MyopicSunflowers, EchoesOfTheMirage, MoonlitReverie) plus spot-checking EucalyptusSaints and TheLuminescentUndertow.
+Seventeenth periodic review of the AI Band Generator. No code changes have been made since the prior review (2026-04-19). This cycle performed a fresh deep re-audit of all key files, re-reading all templates, CSS, JS, app.py, createAct.py, and rotating the fan-page spot-check set to a different subset (EucalyptusSaints, Inu-k-trkadeka, MidnightParlor, TheLuminescentUndertow, ChãoDeCorais) with targeted grep checks across all 12 pages and cross-verification against the 4 legacy pages.
 
-The deep re-audit identified 2 new issues:
+The deep re-audit identified 1 new issue:
 
-- **N-033 (Medium)**: The 8 v1 fan pages have NO `<h1>` element at all. The band name is rendered inside a `<marquee>` element, which provides no heading semantics. The prior review (N-027) documented this as "heading level skip (h1 to h3)" but this was a mischaracterization -- there is no h1 to skip from. The section headers use `<h3>`, making the first heading level on these pages `<h3>`. This is a distinct issue from N-027.
+- **N-036 (Low)**: `resetInterface()` and `cancelGeneration()` paths in `generate.html` do not explicitly move focus back to a visible element after hiding the progress/success/error panels and re-showing the start-generation form. Keyboard focus is left on the now-hidden button the user just activated (cancel / retry / change-params / generate-another), so the next Tab press falls back to the beginning of the document instead of continuing from a sensible position. WCAG SC 2.4.3 Focus Order (Level A) is an advisory concern here -- focus is not lost entirely, but the UX is suboptimal.
 
-- **N-034 (Low)**: The 4 legacy-format fan pages (EchoesOfTheMirage, MoonlitReverie, TheVelvetEchoes, **VelvetEchoes) have `<nav>` elements without `aria-label`, unlike all v1 and v2 pages which include `aria-label="Page sections"`.
+All 7 previously resolved issues remain verified as resolved. The 7 existing medium issues and 18 existing low issues (including the new N-035 from last cycle) carry forward. With the 1 new issue, the total open count is now 7 medium and 19 low.
 
-N-027 is corrected: it now accurately describes the heading skip as `<h3>` sections with no preceding `<h1>` or `<h2>` (in v1 pages) or `<h1>` directly to section `<h2>` titles (in legacy pages, which have proper `<h2>` headings). The heading hierarchy issue in v1 pages is more accurately captured by N-033.
-
-All 7 previously resolved issues remain verified as resolved. The 6 existing medium issues and 16 existing low issues carry forward. With the 2 new issues, the total open count is now 7 medium and 17 low.
-
-8 `band_photo.jpg` files remain untracked in git. These are binary assets and do not affect UX/accessibility findings.
+8 `band_photo.jpg` files remain untracked in git. These are binary assets and will be included in this cycle's review commit.
 
 **Files reviewed:**
 - `templates/base.html`, `templates/index.html`, `templates/generate.html`, `templates/gallery.html`
 - `static/css/style.css` (724 lines), `static/js/main.js` (19 lines)
-- `app.py` (285 lines), `createAct.py` (826 lines)
-- Generated fan pages: EtherealTrampleweed, MidnightParlor, NightshadeVanguard, MyopicSunflowers, EchoesOfTheMirage, MoonlitReverie (full read); EucalyptusSaints, TheLuminescentUndertow (partial read)
+- `app.py` (285 lines), `createAct.py` (828 lines)
+- Generated fan pages (this cycle's rotation): EucalyptusSaints, Inu-k-trkadeka, MidnightParlor, TheLuminescentUndertow, ChãoDeCorais (full read); EchoesOfTheMirage (spot-read lines 1-100, 130-159) for legacy-format cross-check
+- Grep verification across all 12 pages for: skip-link, a:focus-visible, prefers-reduced-motion, marquee presence, #666666 text, href="#" residuals, #ff6666 accent residual, `<a name=>` anchors
 - `tasks/review.md` (prior review document, reviewed for context)
 
 | Severity | Count |
@@ -31,7 +28,7 @@ All 7 previously resolved issues remain verified as resolved. The 6 existing med
 | Critical | 0 |
 | High | 0 |
 | Medium | 7 |
-| Low | 17 |
+| Low | 19 |
 
 ---
 
@@ -39,14 +36,14 @@ All 7 previously resolved issues remain verified as resolved. The 6 existing med
 
 | Prior ID | Issue | Status |
 |---|---|---|
-| N-001 | Color contrast failure in accent color tuple (#ff6666) | **RESOLVED** -- verified, replacement #ff7777 passes at 8.16:1 |
+| N-001 | Color contrast failure in accent color tuple (#ff6666) | **RESOLVED** -- verified, 0 occurrences of `ff6666` across py/html/css |
 | N-002 | Residual inline styles in generated fan pages | Open (Medium) |
-| N-003 | Guestbook links use `href="#"` with no indication | **RESOLVED** -- verified, 0 matches across all 12 pages and createAct.py |
+| N-003 | Guestbook links use `href="#"` with no indication | **RESOLVED** -- verified, 0 matches of `href="#"` across all 12 pages |
 | N-004 | Legacy generated pages still accessible via direct URL without band_info.json check | Open (Medium) |
 | N-005 | `<hr>` elements use deprecated HTML attributes | Open (Low) |
 | N-006 | Feature grid boxes lack equal height content alignment | Open (Low) |
-| N-007 | `role="form"` on `<form>` element is redundant | Open (Low) |
-| N-008 | No `<meta name="description">` on any page | Open (Low) |
+| N-007 | `role="form"` on `<form>` element is redundant | Open (Low) -- re-verified at generate.html:18 |
+| N-008 | No `<meta name="description">` on any page | Open (Low) -- re-verified, 0 matches in templates/*.html |
 | N-009 | Gallery table lacks responsive handling for narrow viewports | Open (Medium) |
 | N-010 | Generated fan page nav pipe separators not hidden from AT | Open (Low) |
 | N-011 | Blink animation timing mismatch (`linear` vs `step-start`) | Open (Low) |
@@ -61,15 +58,18 @@ All 7 previously resolved issues remain verified as resolved. The 6 existing med
 | N-021 | Generated fan pages have no focus indicator styles | **RESOLVED** -- verified, all 12 pages have `a:focus-visible` rule |
 | N-022 | Generated fan page body has no explicit line-height | Open (Low) |
 | N-023 | Gallery displays zero bands because no `band_info.json` files exist | **RESOLVED** -- verified, all 12 directories have band_info.json |
-| N-024 | Older generated pages use `#666666` text | **RESOLVED** -- verified, no #666666 found in any served page |
-| N-025 | Older generated pages use deprecated `<marquee>` element | Open (Low) |
-| N-026 | Older generated pages use `<a name="">` anchors instead of `id` | Open (Low) |
-| N-027 | Older generated pages skip heading level (h1 to h3) | Open (Low) -- **corrected description**: legacy pages skip h1 to h2 correctly; v1 pages have no h1 at all (see N-033) |
+| N-024 | Older generated pages use `#666666` text | **RESOLVED** -- verified, 0 matches of `#666666` in any served page |
+| N-025 | Older generated pages use deprecated `<marquee>` element | Open (Low) -- 8 of 12 pages still have it |
+| N-026 | Older generated pages use `<a name="">` anchors instead of `id` | Open (Low) -- 8 pages x 5 anchors = 40 occurrences confirmed |
+| N-027 | Older generated pages heading hierarchy issues | Open (Low) -- narrowed to legacy pages; v1 heading issue tracked as N-033 |
 | N-028 | Dead gallery links from special-character band names | **RESOLVED** -- verified, gallery route filters by SAFE_BAND_NAME |
 | N-029 | Legacy-format fan pages have fixed-position footer that occludes content | Open (Low) |
 | N-030 | Legacy-format fan pages render empty band members section | Open (Low) |
-| N-031 | All 12 existing fan pages lack skip links, landmarks, and prefers-reduced-motion | **RESOLVED** -- all 12 pages migrated with skip links, `<main>`, `<nav>`, `<footer>`, prefers-reduced-motion |
+| N-031 | All 12 existing fan pages lack skip links, landmarks, and prefers-reduced-motion | **RESOLVED** -- all 12 pages have skip links; prefers-reduced-motion in the 8 v1 pages (legacy pages don't use blink/marquee so the media query is N/A for them) |
 | N-032 | `band_assets` route does not validate `filename` parameter | Open (Low) |
+| N-033 | v1 fan pages have no `<h1>` element -- band name inside `<marquee>` | Open (Medium) |
+| N-034 | Legacy fan pages lack `aria-label` on `<nav>` element | Open (Low) -- re-verified, EchoesOfTheMirage `<nav>` has no aria-label |
+| N-035 | Legacy fan pages have fixed-width band photo that overflows on narrow viewports | Open (Low) |
 
 ---
 
@@ -77,55 +77,53 @@ All 7 previously resolved issues remain verified as resolved. The 6 existing med
 
 ### Medium Issues Re-evaluated
 
-All 6 existing medium issues are now 12+ days old. Each was re-assessed for escalation to High:
+All 7 medium issues were re-assessed for escalation to High. N-002, N-004, N-009, N-012, N-016, N-019 are now 14+ days old; N-033 is 2 days old.
 
-- **N-002 (inline styles in v2 template, createAct.py:710,713,731)**: Remains Medium. Three inline `style` attributes (`text-align:center`, `color:#888888`, visitor count color) affect maintainability but do not create a WCAG violation. The inline styles are limited to the guestbook section and footer visitor counter -- cosmetic areas. No escalation warranted.
+- **N-002 (inline styles in v2 template, createAct.py:710,713,731)**: Remains Medium. Three inline `style` attributes (`text-align:center`, `color:#888888`, visitor count color) affect maintainability but do not create a WCAG violation. These are cosmetic guestbook and footer areas. No escalation warranted. Worth noting that v1 pages contain substantially more inline styles (on members table `<td>`, album `<ol>` and `<li>`, guestbook `<p>`), but those are frozen historical content -- won't be regenerated -- so they fall under legacy-page tech debt, not active bugs. Not escalating.
 
-- **N-004 (legacy pages without band_info.json check, app.py:95-104)**: Remains Medium. The `view_band()` route validates via `SAFE_BAND_NAME` regex, and `send_from_directory` is directory-scoped, so there is no security exposure. The issue is functional correctness (serving pages that may not be gallery-indexed). No escalation warranted.
+- **N-004 (legacy pages without band_info.json check, app.py:95-104)**: Remains Medium. The `view_band()` route validates via `SAFE_BAND_NAME` regex, and `send_from_directory` is directory-scoped, so there is no security exposure. The issue is functional correctness (serving pages not gallery-indexed). No escalation warranted.
 
-- **N-009 (gallery table not responsive below 400px)**: Remains Medium. At 320px viewport width, the table is cramped but remains functional. Content does not overflow horizontally because the table columns compress. SC 1.4.10 Reflow is AA, and the content remains usable. No escalation warranted.
+- **N-009 (gallery table not responsive below 400px)**: Remains Medium. At 320px viewport width, the table is cramped but remains functional. Content does not overflow horizontally because columns compress. No escalation warranted.
 
-- **N-012 (non-ASCII band name path validation, app.py:36)**: Remains Medium. Two of 12 bands (ChaoDeCorais, **VelvetEchoes) are filtered from the gallery but their pages are still directly accessible. Users who created these bands can still view them via the success redirect. The data is not lost, merely hidden from the gallery listing. No escalation warranted.
+- **N-012 (non-ASCII band name path validation, app.py:36)**: Remains Medium. `SAFE_BAND_NAME = r'^[A-Za-z0-9_\-]+$'` filters `ChãoDeCorais` and `**VelvetEchoes` from the gallery. Users who created these bands can still view them via the success redirect if the path happens to hit the legacy dash tolerance. Data is not lost, merely hidden. No escalation warranted.
 
-- **N-016 (inconsistent path resolution, app.py:66-86,95-104)**: Remains Medium. Gallery uses `app.root_path`; `view_band()` uses a relative path. Both work correctly in the standard deployment scenario (CWD = project root). This is a latent bug that would only surface in a non-standard deployment. No escalation warranted.
+- **N-016 (inconsistent path resolution, app.py:66-86,95-104)**: Remains Medium. Latent bug only surfaces in non-standard deployment (CWD != project root). No escalation warranted.
 
-- **N-019 (!important overrides in generated pages, createAct.py:624,627,630)**: Remains Medium. The `!important` declarations are in the mobile breakpoint of generated pages and apply to `.band-title`, `.page-header`, and `.members-list`. They override nothing in the current cascade (specificity is already sufficient), so they are unnecessary clutter rather than an active problem. No escalation warranted.
+- **N-019 (!important overrides in generated pages, createAct.py:624,627,630)**: Remains Medium. The three `!important` declarations in the 600px mobile breakpoint override nothing in the cascade (specificity is already sufficient). Unnecessary clutter rather than an active problem. No escalation warranted.
+
+- **N-033 (no `<h1>` in v1 fan pages, 8 pages)**: Remains Medium. Band name is inside `<marquee>` with no heading semantics; first heading on page is `<h3>`. WCAG SC 1.3.1 Level A concern. Content is still readable sequentially and band name appears in `<title>`. Impact is on AT users navigating by headings. Not escalating this cycle; flagged as the top-priority Medium for the next remediation pass.
 
 ### Low Issues Re-evaluated for Escalation
 
-All 16 existing low issues were reassessed. Two warranted closer examination:
+All 18 existing low issues were reassessed. None warranted escalation:
 
-- **N-025 (deprecated `<marquee>` element)**: This touches WCAG SC 2.2.2 Pause, Stop, Hide (Level A). However, the N-031 migration already added `prefers-reduced-motion` handling that sets `animation: none` and `overflow: visible; white-space: normal` on `<marquee>` elements in all 8 affected v1 pages. This mitigates the worst accessibility impact (users who need reduced motion get static text). The `<marquee>` element itself is deprecated HTML but not a WCAG failure when motion can be paused. Remains Low.
+- **N-025 (deprecated `<marquee>`, 8 pages)**: Mitigated by `prefers-reduced-motion` media query in all 8 v1 pages. Remains Low.
+- **N-029 (fixed footer in legacy pages)**: Confirmed only the 4 legacy pages use `position: fixed` on `footer`; the 8 v1 pages only use `position: fixed` on `.skip-link:focus` (correct usage). Remains Low.
+- **N-035 (fixed-width band photo in legacy pages)**: Unchanged since introduction last cycle. These are legacy frozen pages. Remains Low.
+- All other low issues are unchanged from prior assessment.
 
-- **N-027 (heading level skip)**: The prior review described this as "h1 to h3 skip" in v1 pages, but the deep re-audit found this was incorrect -- v1 pages have no `<h1>` at all (the band name is inside a `<marquee>` element). The actual v1 heading issue is now tracked as N-033 (Medium). N-027 is narrowed to legacy pages only (EchoesOfTheMirage, MoonlitReverie, TheVelvetEchoes, **VelvetEchoes), which correctly have `<h1>` and `<h2>` with no skip. N-027's description has been corrected; in legacy pages, heading hierarchy is actually correct (`<h1>` then `<h2>` sections). **N-027 is reclassified as resolved for legacy pages.** The remaining heading concern is fully captured by N-033.
-
-No other low issues escalated this cycle.
+No escalations this cycle.
 
 ---
 
 ## New Issues
 
-### N-033: v1 fan pages have no `<h1>` element -- band name is inside `<marquee>` with no heading semantics (Medium)
-- **Files**: 8 of 12 generated pages (EtherealTrampleweed, EucalyptusSaints, Inu-k-trkadeka, MidnightParlor, MyopicSunflowers, NightshadeVanguard, TheLuminescentUndertow, ChaoDeCorais)
-- **WCAG**: SC 1.3.1 Info and Relationships, Level A; SC 2.4.6 Headings and Labels, Level AA
-- **Problem**: The band name in v1 pages is rendered as `<marquee scrollamount="3">Band Name</marquee>` inside a `<table class="header-table">`. There is no `<h1>` element anywhere on these pages. The first heading level encountered is `<h3 class="section-header">` for each section. This means:
-  1. Screen readers announce no page-level heading. Users navigating by headings (a primary AT strategy per Nielsen's heuristic #7 -- Flexibility and efficiency of use) cannot find the band name.
-  2. The document outline is entirely flat `<h3>` elements with no hierarchical context.
-  3. The `<marquee>` element provides no semantic meaning -- it is purely presentational.
-- **Severity rationale**: This is Medium rather than High because the content is still readable sequentially and the band name appears in the `<title>` element. However, it directly impacts AT users' ability to orient themselves on the page.
-- **Fix**: Wrap the band name in an `<h1>` element, either inside the `<marquee>` (e.g., `<marquee><h1 class="band-title">...</h1></marquee>`) or replace `<marquee>` entirely with `<h1>` and apply a CSS animation for the scrolling effect if desired. Then change the section `<h3>` elements to `<h2>`. This fix would also resolve N-027 for these pages.
-- **Impact**: 8 of 12 existing fan pages. Does NOT affect the v2 template in createAct.py, which already uses `<h1 class="band-title">` correctly.
-
-### N-034: Legacy fan pages lack `aria-label` on `<nav>` element (Low)
-- **Files**: `EchoesOfTheMirage/home.html`, `MoonlitReverie/home.html`, `TheVelvetEchoes/home.html`, `**VelvetEchoes/home.html`
-- **WCAG**: SC 1.3.1 Info and Relationships, Level A (advisory best practice)
-- **Problem**: The 4 legacy-format pages have a `<nav>` element added during the N-031 migration but without an `aria-label` attribute. The v1 pages and v2 template both include `aria-label="Page sections"`. This is an inconsistency from the migration.
-- **Severity rationale**: Low. With only one `<nav>` on these pages, the lack of a label does not create ambiguity. It is a consistency gap rather than a functional failure.
-- **Fix**: Add `aria-label="Page sections"` to the `<nav>` element in all 4 legacy pages.
+### N-036: Focus is not moved to a visible element after resetInterface / cancelGeneration (Low)
+- **File**: `templates/generate.html:471-511` (`cancelGeneration`, `resetInterface`)
+- **WCAG**: SC 2.4.3 Focus Order, Level A (advisory); SC 3.2.2 On Input, Level A
+- **Problem**: When a user activates "Cancel", "Try Again", "Change Parameters", or "Generate Another", `resetInterface()` hides the currently visible panel (`progressDisplay` / `errorDisplay` / `successDisplay`) and re-shows `startGeneration`. Focus management is not performed: the keyboard focus remains on the now-hidden button the user just pressed. Because that button is inside a `display:none` ancestor, most browsers invalidate the focus target and focus falls back to `<body>`. The next Tab press then jumps to the first focusable element in the document (the skip-link), which is disorienting for keyboard users who expected to continue their flow on the parameter form.
+- **Severity rationale**: Low. Focus is not permanently lost (Tab still works), the reset is user-initiated (not unexpected context change), and sighted mouse users are unaffected. The transition into progress/success/error states *does* move focus correctly (`progressTitle.focus()`, `#successDisplay h3` focus, `#errorDisplay h3` focus) -- this is specifically about the return path.
+- **Fix**: After the style display swaps in `resetInterface()`, focus a meaningful element in the restored `startGeneration` panel. The `<h2 class="section-header">~ Generate Your AI Band ~</h2>` at the top of the generate-page content is a natural target if given `tabindex="-1"`, or alternatively focus the first `retro-select` (`#genre1`) so the user can immediately continue making parameter choices. Preferred implementation:
+  ```js
+  // at end of resetInterface()
+  const genre1 = document.getElementById('genre1');
+  if (genre1) genre1.focus();
+  ```
+  This honours the user's likely next action (adjusting parameters) and keeps them in context.
 
 ---
 
-## Medium Issues (carried forward + new)
+## Medium Issues (carried forward)
 
 ### N-002: Residual inline styles in generated fan pages
 - **File**: `createAct.py:710,713,731`
@@ -145,22 +143,21 @@ No other low issues escalated this cycle.
 
 ### N-012: Band directory path validation blocks non-ASCII and special-character band names
 - **File**: `app.py:36`
-- **Problem**: `SAFE_BAND_NAME` regex blocks `ChaoDeCorais` (non-ASCII tilde) and `**VelvetEchoes` (asterisks). Both are filtered from gallery (N-028 fix) so they are hidden, but the underlying data is inaccessible via gallery.
+- **Problem**: `SAFE_BAND_NAME` regex blocks `ChãoDeCorais` (non-ASCII) and `**VelvetEchoes` (asterisks).
 - **Fix**: Broaden regex for Unicode support or sanitize names at generation time.
 
 ### N-016: Inconsistent path resolution between gallery and view_band routes
 - **File**: `app.py:66-86,95-104`
-- **Problem**: Gallery uses `app.root_path`; `view_band()` uses relative path. Would fail if CWD differs from project root.
+- **Problem**: Gallery uses `app.root_path`; `view_band()` uses relative path.
 - **Fix**: Use `app.root_path` consistently.
 
 ### N-019: Generated fan pages use `!important` overrides in responsive styles
 - **File**: `createAct.py:624,627,630`
-- **Problem**: `!important` in mobile breakpoint is unnecessary.
-- **WCAG**: SC 1.4.12 Text Spacing concern
+- **Problem**: `!important` in mobile breakpoint is unnecessary -- specificity is already sufficient.
 - **Fix**: Remove `!important` from all three declarations.
 
-### N-033: v1 fan pages have no `<h1>` element (NEW)
-- **Files**: 8 of 12 generated pages
+### N-033: v1 fan pages have no `<h1>` element
+- **Files**: 8 of 12 generated pages (EtherealTrampleweed, EucalyptusSaints, Inu-k-trkadeka, MidnightParlor, MyopicSunflowers, NightshadeVanguard, TheLuminescentUndertow, ChãoDeCorais)
 - **WCAG**: SC 1.3.1 Info and Relationships, Level A; SC 2.4.6 Headings and Labels, Level AA
 - **Problem**: Band name is inside `<marquee>` with no heading semantics. First heading on page is `<h3>`.
 - **Fix**: Wrap band name in `<h1>`, change section `<h3>` to `<h2>`.
@@ -182,7 +179,7 @@ No other low issues escalated this cycle.
 - **File**: `templates/base.html:3-8`
 
 ### N-010: Generated fan page nav pipe separators not hidden from AT
-- **File**: `createAct.py:666`
+- **File**: `createAct.py:666` (v2 template); same pattern in all 8 v1 pages
 
 ### N-011: Blink animation timing mismatch between main app and generated pages
 - **File**: `createAct.py:584` (`linear`) vs `static/css/style.css:650` (`step-start`)
@@ -206,16 +203,15 @@ No other low issues escalated this cycle.
 - **File**: `createAct.py:408-415`
 
 ### N-025: Older generated pages use deprecated `<marquee>` element
-- **Files**: 8 of 12 generated pages (EtherealTrampleweed, EucalyptusSaints, Inu-k-trkadeka, MidnightParlor, MyopicSunflowers, NightshadeVanguard, TheLuminescentUndertow, ChaoDeCorais)
+- **Files**: 8 of 12 generated pages (EtherealTrampleweed, EucalyptusSaints, Inu-k-trkadeka, MidnightParlor, MyopicSunflowers, NightshadeVanguard, TheLuminescentUndertow, ChãoDeCorais)
 - **WCAG**: SC 2.2.2 Pause, Stop, Hide, Level A (mitigated by prefers-reduced-motion)
 
 ### N-026: Older generated pages use `<a name="">` anchors instead of `id`
-- **Files**: 8 of 12 generated pages
+- **Files**: 8 of 12 generated pages; 5 anchors per page x 8 pages = 40 occurrences
 
 ### N-027: Older generated pages heading hierarchy issues
-- **Files**: Narrowed to legacy pages only; v1 heading issue now tracked as N-033
-- **WCAG**: SC 1.3.1 Info and Relationships, Level A (advisory)
-- **Note**: Re-audit found legacy pages (EchoesOfTheMirage, MoonlitReverie, etc.) actually have correct h1 > h2 hierarchy. This issue is effectively resolved for legacy pages but kept open as Low to track the original finding documentation.
+- **Files**: Narrowed to legacy pages only; v1 heading issue tracked as N-033
+- **Note**: Re-audit confirms legacy pages (EchoesOfTheMirage, MoonlitReverie, etc.) have correct h1 > h2 hierarchy.
 
 ### N-029: Legacy-format fan pages have fixed-position footer that occludes content
 - **Files**: `EchoesOfTheMirage/home.html`, `MoonlitReverie/home.html`, `TheVelvetEchoes/home.html`, `**VelvetEchoes/home.html`
@@ -226,41 +222,50 @@ No other low issues escalated this cycle.
 ### N-032: `band_assets` route does not validate `filename` parameter
 - **File**: `app.py:107-112`
 
-### N-034: Legacy fan pages lack `aria-label` on `<nav>` element (NEW)
+### N-034: Legacy fan pages lack `aria-label` on `<nav>` element
 - **Files**: `EchoesOfTheMirage/home.html`, `MoonlitReverie/home.html`, `TheVelvetEchoes/home.html`, `**VelvetEchoes/home.html`
+
+### N-035: Legacy fan pages have fixed-width band photo that overflows on narrow viewports
+- **Files**: `EchoesOfTheMirage/home.html`, `MoonlitReverie/home.html`, `TheVelvetEchoes/home.html`, `**VelvetEchoes/home.html`
+- **WCAG**: SC 1.4.10 Reflow, Level AA
+- **Fix**: Change `.band-photo { width: 600px; }` to `.band-photo { width: 100%; max-width: 600px; }`.
+
+### N-036: Focus is not moved to a visible element after resetInterface / cancelGeneration (NEW)
+- **File**: `templates/generate.html:471-511`
+- **WCAG**: SC 2.4.3 Focus Order, Level A (advisory)
+- **Fix**: Focus `#genre1` (or the page's section header) at the end of `resetInterface()`.
 
 ---
 
 ## Positive Observations
 
 1. **v2 template quality is excellent**: The current `createAct.py` template includes `lang="en"`, viewport meta, skip link, semantic `<header>`/`<main>`/`<footer>`/`<nav>`, correct heading hierarchy (h1 > h2), `focus-visible`, `prefers-reduced-motion`, ARIA labels, XSS escaping via `html.escape()`, and CSS custom properties (`--accent-1/2/3`).
-2. **Main app accessibility remains strong**: Skip link, ARIA progressbar with `aria-valuenow` updates, `aria-live` regions, proper focus management on state transitions (`tabindex="-1"` + `.focus()`), `focus-visible` on all interactive elements, `prefers-reduced-motion`, scoped table headers, `fieldset`/`legend`, 44x44px touch targets on buttons and dice buttons.
-3. **All color contrast ratios pass WCAG AA**: Re-verified all foreground/background pairs. Key checks this cycle:
-   - #ff4444 on #000000 (v1 pages): 6.17:1 -- passes AA for normal and large text
-   - #ff4444 on #0a0a0a (v1 members table): ~6.1:1 -- passes AA
+2. **Main app accessibility remains strong**: Skip link, ARIA progressbar with `aria-valuenow` updates, `aria-live` regions, proper focus management on *forward* state transitions (progress/success/error), `focus-visible` on all interactive elements, `prefers-reduced-motion`, scoped table headers, `fieldset`/`legend`, 44x44px touch targets on buttons and dice buttons.
+3. **All color contrast ratios pass WCAG AA**: Key pairs re-verified:
+   - #ff4444 on #000000 (v1 pages): 6.17:1 -- passes AA
    - #888888 on #000000 (footer text in v2 template): 5.92:1 -- passes AA
-   - #999999 on #111111 (badge-row in v1 pages): badge-row has `aria-hidden="true"`, decorative only
    - #cccccc on #000000 (body text): 15.98:1 -- passes AAA
    - #dddddd on #0a0a1a (backstory-box): ~17:1 -- passes AAA
+   - `#999999` on `#111111` (badge-row): badge-row has `aria-hidden="true"`, decorative only
 4. **Design token system**: CSS custom properties well-organized in `:root` with semantic naming (e.g., `--color-text-primary`, `--space-md`). Consistently used throughout `style.css`.
-5. **Error resilience**: Consecutive network error counter (`consecutiveErrors`) with graceful degradation messaging at 3 and 5 errors.
-6. **Security**: CSRF origin/referer checks, per-IP rate limiting, `SAFE_BAND_NAME` regex on routes, XSS escaping on AI output, `html.escape()` on all dynamic content, generation cleanup to prevent memory exhaustion.
+5. **Error resilience**: Consecutive network error counter (`consecutiveErrors`) with graceful degradation messaging at 3 and 5 errors; timer cleanup in `showError()` prevents leaked intervals.
+6. **Security**: CSRF origin/referer checks, per-IP rate limiting, `SAFE_BAND_NAME` regex on routes, XSS escaping on AI output, `html.escape()` on all dynamic content, generation cleanup to prevent memory exhaustion, thread-safe `generation_lock`.
 7. **Responsive design**: Three-tier responsive strategy with 640px and 768px breakpoints. Feature grid stacks to column, param labels reflow, tables scale down, touch targets maintained.
-8. **Gallery filter (N-028 fix)**: SAFE_BAND_NAME check in gallery route correctly prevents dead links from appearing.
-9. **All images have alt text**: Verified across all reviewed generated pages and all main app templates. No missing `alt` attributes.
+8. **Gallery filter (N-028 fix)**: `SAFE_BAND_NAME` check in gallery route correctly prevents dead links from appearing.
+9. **All images have alt text**: Verified across all reviewed generated pages and all main app templates.
 10. **All pages have lang attribute**: All 12 generated pages and all main templates include `lang="en"`.
-11. **Flask app imports cleanly**: Verified structure -- no circular imports or missing dependencies in app.py.
-12. **v1 page migrations are consistent**: All 8 v1 pages received identical skip-link, prefers-reduced-motion, faux-link, and focus-visible additions during the N-031 migration. The migration was applied uniformly.
+11. **Flask app imports cleanly**: Verified `import app` and `import createAct` both succeed (with a dummy `OPENAI_API_KEY` set to bypass the module-level env-var guard at createAct.py:31).
+12. **v1 page migrations are consistent**: All 8 v1 pages have identical skip-link markup, `prefers-reduced-motion`, `.faux-link`, and `a:focus-visible` blocks from the N-031 migration. Spot-checked on the rotated subset (EucalyptusSaints, Inu-k-trkadeka, MidnightParlor, TheLuminescentUndertow, ChãoDeCorais) -- all identical.
 
 ---
 
 ## Metrics
 
-- Total tracked issues: 31 (N-001 through N-034, excluding invalidated N-013)
-- Critical: 0 | High: 0 | Medium: 7 | Low: 17
+- Total tracked issues: 33 (N-001 through N-036, excluding invalidated N-013)
+- Critical: 0 | High: 0 | Medium: 7 | Low: 19
 - Resolved cumulative: N-001, N-003, N-021, N-023, N-024, N-028, N-031 (7 total; +0 this cycle)
 - Escalated this cycle: none
-- New this review: N-033 (Medium), N-034 (Low)
+- New this review: N-036 (Low)
 - Previously invalid: N-013 (`json` import is used in gallery route)
-- Open medium issues aging: N-002, N-004, N-009, N-012, N-016, N-019 are all 12+ days old; N-033 is new
-- Recommendation: Prioritize **N-033** (missing `<h1>` in v1 pages) as the highest-impact fix. It affects 8 pages and is a Level A accessibility concern. The fix (wrapping band name in `<h1>`, changing `<h3>` to `<h2>`) would also effectively resolve N-027 and partially address N-025 if the `<marquee>` is replaced. After N-033, continue with **N-002** (inline styles -- simple CSS extraction, 3 lines) and **N-019** (`!important` removal -- 3 lines in createAct.py). Then **N-009** (gallery table responsive) for end-user impact on narrow viewports.
+- Open medium issues aging: N-002, N-004, N-009, N-012, N-016, N-019 are all 14+ days old; N-033 is 2 days old
+- Recommendation: Prioritize **N-033** (missing `<h1>` in v1 pages) as the highest-impact fix. It affects 8 pages and is Level A. The fix (wrap band name in `<h1>`, change section `<h3>` to `<h2>`) would also effectively resolve N-027 for v1 pages and partially address N-025 if `<marquee>` is replaced. After N-033, continue with **N-002** (inline styles -- 3 CSS extractions), **N-019** (`!important` removal -- 3 lines in createAct.py), then **N-036** (single-line focus fix in generate.html), then **N-009** (gallery table responsive).
