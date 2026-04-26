@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~*~ The Luminescent Undertow ~*~ Official Fan Page ~*~</title>
+    <style>
+        body {
+            background-color: #000000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='%23111'/%3E%3C/svg%3E");
+            color: #cccccc;
+            font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        a { color: #ffff00; }
+        a:visited { color: #00ffff; }
+        a:hover { color: #ff4444; text-decoration: none; }
+        .page-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .header-table {
+            width: 100%;
+            background: linear-gradient(to right, #000033, #000066, #000033);
+            border: 3px ridge #00ffff;
+            margin-bottom: 10px;
+        }
+        .header-table td {
+            text-align: center;
+            padding: 15px;
+        }
+        .divider {
+            width: 80%;
+            margin: 15px auto;
+        }
+        .section-header {
+            color: #ffff00;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0 10px 0;
+            text-shadow: 1px 1px 2px #00ffff;
+        }
+        .photo-frame {
+            text-align: center;
+            margin: 15px auto;
+        }
+        .photo-frame img {
+            max-width: 500px;
+            width: 100%;
+            border: 4px ridge #00ffff;
+            display: block;
+            margin: 0 auto;
+        }
+        .photo-caption {
+            color: #ff4444;
+            font-style: italic;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .backstory-box {
+            background-color: #0a0a1a;
+            border: 2px inset #ffff00;
+            padding: 15px;
+            margin: 10px auto;
+            width: 90%;
+            color: #dddddd;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        .members-table {
+            margin: 10px auto;
+            border: 2px ridge #ffff00;
+            background-color: #0a0a0a;
+            border-collapse: collapse;
+        }
+        .members-table td {
+            border-bottom: 1px dashed #333333;
+        }
+        .footer-area {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            border-top: 2px ridge #00ffff;
+            font-size: 0.8em;
+            color: #888888;
+        }
+        .footer-area a {
+            color: #00ffff;
+            font-size: 0.85em;
+        }
+        .blink {
+            animation: blinker 1.2s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+        .badge-row {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 0.75em;
+            color: #999999;
+        }
+        .badge-row span {
+            margin: 0 8px;
+            padding: 3px 8px;
+            border: 1px solid #444444;
+            background-color: #111111;
+        }
+        .nav-bar {
+            text-align: center;
+            padding: 8px;
+            background-color: #111111;
+            border: 1px solid #333333;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        .nav-bar a {
+            margin: 0 5px;
+        }
+        marquee {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 2px 2px 4px #00ffff;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }
+        .stars {
+            color: #ff4444;
+            letter-spacing: 3px;
+        }
+    
+    
+    /* N-031 migration: skip link */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      padding: 8px 16px;
+      background: #ffff00;
+      color: #000;
+      font-weight: bold;
+      z-index: 100;
+    }
+    
+    /* N-031 migration: respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      .blink, marquee {
+        animation: none;
+      }
+      marquee {
+        overflow: visible;
+        white-space: normal;
+      }
+    }
+    
+    /* N-003 migration: faux-link for non-functional decorative links */
+    .faux-link {
+      color: #ffff00;
+      text-decoration: underline;
+      cursor: default;
+    }
+    /* N-021 migration: keyboard focus indicators */
+    a:focus-visible {
+      outline: 2px solid #ffff00;
+      outline-offset: 2px;
+    }
+    </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <table class="header-table" cellpadding="0" cellspacing="0">
+        <tr><td>
+            <span class="stars">* * * * * * * * * * * * *</span><br>
+            <marquee scrollamount="3">The Luminescent Undertow</marquee>
+            <br>
+            <span style="color:#ff4444; font-size:0.85em;">
+                Ethereal Disarray | Dream Punk / Neo-Baroque Skronk | Est. 1986 | Faroese
+            </span><br>
+            <span class="stars">* * * * * * * * * * * * *</span>
+        </td></tr>
+    </table>
+
+    <!-- Navigation -->
+    <nav class="nav-bar" aria-label="Page sections">
+        <a href="#backstory">Backstory</a> |
+        <a href="#photo">Band Photo</a> |
+        <a href="#members">Members</a> |
+        <a href="#discography">Discography</a> |
+        <a href="#guestbook">Guestbook</a>
+    </nav>
+
+    <main id="main-content">
+
+    <!-- Backstory -->
+    <a name="backstory"></a>
+    <h3 class="section-header">~ The Story ~</h3>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div class="backstory-box">
+        **The Luminescent Undertow: A Symphony of Ethereal Disarray**
+
+In the cloaked mist of 1986, amidst the haunting echoes of the Faroese cliffs, emerged The Luminescent Undertow—a band like no other, weaving an alchemy of Dream Punk and Neo-Baroque Skronk. Their melodies danced like phosphorescent whispers over turbulent seas.
+
+**Ragnar "The Oracle" Thorsson** - Lead Vocals and Harpsichord  
+Ragnar's voice, a spectral wail, guides listeners through mystical realms. His harpsichord adds a baroque flourish, casting enchantments rooted in both past and future. A seer through sound, Ragnar's charisma bewilders and binds.
+
+**Ingrid "Echo" Larssen** - Synthesizer and Soundscapes  
+Crafting sonic tapestries with her ethereal synth, Ingrid conjures dreamscapes where reality blurs into phantasmagoria. Known for her introspective demeanor, she communicates in tones and textures, her notes a silent dialogue with the cosmos.
+
+**Magnus "The Gale" Østergaard** - Lead Guitar  
+Magnus wields his guitar like a tempest—fierce yet disciplined. His riffs ripple with Neo-Baroque complexities, each strum a gust of raw, sublime energy. Beneath his stormy exterior lies a soul attuned to the world’s resonant beauty.
+
+**Sigrid "Siren" Mikkelsen** - Bass Guitar  
+Sigrid's basslines pulse with a hypnotic undertow, anchoring the chaos above as though tethering clouds to the ocean floor. Her magnetic presence and surreal humor infuse live performances with unpredictable whimsy.
+
+**Einar "Pulse" Hansen** - Drums and Percussion  
+Einar's rhythms are the heartbeat of this ethereal entity. His percussive artistry is both chaotic and precise, an embodiment of the dream-punk ethos. A silent philosopher, Einar's beats articulate the unspoken.
+
+Together, The Luminescent Undertow beckons us to lose ourselves—a siren song from the edge of the known world.
+    </div>
+
+    <!-- Band Photo -->
+    <a name="photo"></a>
+    <h3 class="section-header">~ Band Photo ~</h3>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div class="photo-frame">
+        <img src="band_photo.jpg" alt="The Luminescent Undertow - Band Photo">
+        <div class="photo-caption">
+            Ragnar "The Oracle" Thorsson, Ingrid "Echo" Larssen, Magnus "The Gale" Østergaard, Sigrid "Siren" Mikkelsen, Einar "Pulse" Hansen
+        </div>
+    </div>
+
+    <!-- Band Members -->
+    <a name="members"></a>
+    <h3 class="section-header">~ The Members ~</h3>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
+        
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Ragnar "The Oracle" Thorsson</td>
+            <td style="color:#ff4444; padding:4px 12px;">Lead Vocals and Harpsichord</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Ragnar's voice, a spectral wail, guides listeners through mystical realms.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Ingrid "Echo" Larssen</td>
+            <td style="color:#ff4444; padding:4px 12px;">Synthesizer and Soundscapes</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Ingrid conjures dreamscapes where reality blurs into phantasmagoria.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Magnus "The Gale" Østergaard</td>
+            <td style="color:#ff4444; padding:4px 12px;">Lead Guitar</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Magnus wields his guitar like a tempest—fierce yet disciplined.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Sigrid "Siren" Mikkelsen</td>
+            <td style="color:#ff4444; padding:4px 12px;">Bass Guitar</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Sigrid's basslines pulse with a hypnotic undertow, anchoring the chaos above.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Einar "Pulse" Hansen</td>
+            <td style="color:#ff4444; padding:4px 12px;">Drums and Percussion</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Einar's rhythms are the heartbeat of this ethereal entity.</td>
+        </tr>
+    </table>
+
+    <!-- Discography -->
+    <a name="discography"></a>
+    <h3 class="section-header">~ Discography ~</h3>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Echoes of the Abyss (1986)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Phosphorescent Reverie</li>
+<li style="color:#cccccc;">Baroque Whirlwind</li>
+<li style="color:#cccccc;">Skronk Serenade</li>
+<li style="color:#cccccc;">Ethereal Tide</li>
+<li style="color:#cccccc;">Dreamweaver's Lament</li>
+<li style="color:#cccccc;">Undertow's Embrace</li>
+<li style="color:#cccccc;">Fata Morgana Waltz</li>
+<li style="color:#cccccc;">Nocturnal Drift</li>
+<li style="color:#cccccc;">Shadows on the Cliffs</li>
+<li style="color:#cccccc;">Alchemical Rhapsody</li>
+<li style="color:#cccccc;">Mirage of the Echoing Fjord</li>
+<li style="color:#cccccc;">Luminescent Phantasia</li>
+<li style="color:#cccccc;">Elysian Gales</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Chromatic Reverberations (1987)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Kaleidoscope Haze</li>
+<li style="color:#cccccc;">Harmonium of the Deep</li>
+<li style="color:#cccccc;">Aurora’s Caress</li>
+<li style="color:#cccccc;">Celestial Discord</li>
+<li style="color:#cccccc;">Twilight Sonata</li>
+<li style="color:#cccccc;">The Skronk Ballet</li>
+<li style="color:#cccccc;">Nebula's Conundrum</li>
+<li style="color:#cccccc;">Refractions of Solitude</li>
+<li style="color:#cccccc;">Prismatica</li>
+<li style="color:#cccccc;">Sonata of the Drowned</li>
+<li style="color:#cccccc;">Echoes of the Enigma</li>
+<li style="color:#cccccc;">Luminous Labyrinth</li>
+<li style="color:#cccccc;">Siren's Fugue</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Resplendent Dissonance (1988)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Hues of the Abyss</li>
+<li style="color:#cccccc;">Opalescent Crescendo</li>
+<li style="color:#cccccc;">Baroque Tempest</li>
+<li style="color:#cccccc;">Reverberant Whispers</li>
+<li style="color:#cccccc;">The Dream Punk Waltz</li>
+<li style="color:#cccccc;">Astral Asymmetry</li>
+<li style="color:#cccccc;">Skronk Nocturne</li>
+<li style="color:#cccccc;">Chimeric Harmonies</li>
+<li style="color:#cccccc;">Ephemeral Elegy</li>
+<li style="color:#cccccc;">Fractured Euphony</li>
+<li style="color:#cccccc;">Shadows of the Aurora</li>
+<li style="color:#cccccc;">Resplendent Lullaby</li>
+<li style="color:#cccccc;">Harmonic Delirium</li>
+<li style="color:#cccccc;">Phantasmagoric Fugue</li>
+<li style="color:#cccccc;">The Undertow's Resurgence</li>
+
+                </ol>
+            </td></tr>
+        </table>
+
+    <!-- Guestbook / Links -->
+    <a name="guestbook"></a>
+    <h3 class="section-header">~ Guestbook & Links ~</h3>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div style="text-align:center; padding:10px;">
+        <p><span class="faux-link">Sign the Guestbook!</span> | <span class="faux-link">View Guestbook</span></p>
+        <p><a href="mailto:webmaster@theluminescentundertow.geocities.com">Email the Webmaster</a></p>
+        <p style="color:#888888; font-size:0.8em;">
+            <span class="faux-link">Link to us!</span> |
+            <span class="faux-link">Webrings</span> |
+            <span class="faux-link">MIDI Archive</span>
+        </p>
+    </div>
+
+    </main>
+
+    <!-- Badges / Footer -->
+    <footer>
+    <div class="badge-row" aria-hidden="true">
+        <span>Best viewed in Netscape Navigator 4.0</span>
+        <span>800x600 resolution</span>
+        <span>Made with Notepad</span>
+    </div>
+
+    <div class="footer-area">
+        <p>You are visitor number <strong style="color:#ffff00;">#28,411</strong> since 1986!</p>
+        <p class="blink">*** This page is always under construction! ***</p>
+        <p>&copy; 2026 The Luminescent Undertow Fan Page. All rights reserved.<br>
+        This is a fan-made page. We are not affiliated with The Luminescent Undertow or their management.</p>
+        <p><a href="#main-content">Back to Top</a></p>
+    </div>
+    </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~*~ Ethereal Trampleweed ~*~ Official Fan Page ~*~</title>
+    <style>
+        body {
+            background-color: #000000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='%23111'/%3E%3C/svg%3E");
+            color: #cccccc;
+            font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        a { color: #00ffff; }
+        a:visited { color: #ff00ff; }
+        a:hover { color: #ffff00; text-decoration: none; }
+        .page-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .header-table {
+            width: 100%;
+            background: linear-gradient(to right, #000033, #000066, #000033);
+            border: 3px ridge #ff00ff;
+            margin-bottom: 10px;
+        }
+        .header-table td {
+            text-align: center;
+            padding: 15px;
+        }
+        .divider {
+            width: 80%;
+            margin: 15px auto;
+        }
+        .section-header {
+            color: #00ffff;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0 10px 0;
+            text-shadow: 1px 1px 2px #ff00ff;
+        }
+        .photo-frame {
+            text-align: center;
+            margin: 15px auto;
+            position: relative;
+            display: inline-block;
+        }
+        .photo-wrapper {
+            text-align: center;
+        }
+        .photo-frame img {
+            max-width: 500px;
+            width: 100%;
+            border: 4px ridge #ff00ff;
+            display: block;
+            filter: grayscale(100%);
+        }
+        .photo-credit {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #aaaaaa;
+            font-size: 0.65em;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            text-shadow: 1px 1px 2px #000000;
+            letter-spacing: 0.5px;
+        }
+        .photo-caption {
+            color: #ffff00;
+            font-style: italic;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .backstory-box {
+            background-color: #0a0a1a;
+            border: 2px inset #00ffff;
+            padding: 15px;
+            margin: 10px auto;
+            width: 90%;
+            color: #dddddd;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        .members-table {
+            margin: 10px auto;
+            border: 2px ridge #00ffff;
+            background-color: #0a0a0a;
+            border-collapse: collapse;
+        }
+        .members-table td {
+            border-bottom: 1px dashed #333333;
+        }
+        .footer-area {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            border-top: 2px ridge #ff00ff;
+            font-size: 0.8em;
+            color: #888888;
+        }
+        .footer-area a {
+            color: #ff00ff;
+            font-size: 0.85em;
+        }
+        .blink {
+            animation: blinker 1.2s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+        .badge-row {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 0.75em;
+            color: #999999;
+        }
+        .badge-row span {
+            margin: 0 8px;
+            padding: 3px 8px;
+            border: 1px solid #444444;
+            background-color: #111111;
+        }
+        .nav-bar {
+            text-align: center;
+            padding: 8px;
+            background-color: #111111;
+            border: 1px solid #333333;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        .nav-bar a {
+            margin: 0 5px;
+        }
+        marquee {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 2px 2px 4px #ff00ff;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }
+        .stars {
+            color: #ffff00;
+            letter-spacing: 3px;
+        }
+    
+    
+    /* N-031 migration: skip link */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      padding: 8px 16px;
+      background: #ffff00;
+      color: #000;
+      font-weight: bold;
+      z-index: 100;
+    }
+    
+    /* N-031 migration: respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      .blink, marquee {
+        animation: none;
+      }
+      marquee {
+        overflow: visible;
+        white-space: normal;
+      }
+    }
+    
+    /* N-003 migration: faux-link for non-functional decorative links */
+    .faux-link {
+      color: #00ffff;
+      text-decoration: underline;
+      cursor: default;
+    }
+    /* N-021 migration: keyboard focus indicators */
+    a:focus-visible {
+      outline: 2px solid #ffff00;
+      outline-offset: 2px;
+    }
+    </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <table class="header-table" cellpadding="0" cellspacing="0">
+        <tr><td>
+            <span class="stars">* * * * * * * * * * * * *</span><br>
+            <marquee scrollamount="3">Ethereal Trampleweed</marquee>
+            <br>
+            <span style="color:#ffff00; font-size:0.85em;">
+                Ferocious Elegance | Cosmic Yodeling / Industrial Shanties | Est. 1983 | Faroese
+            </span><br>
+            <span class="stars">* * * * * * * * * * * * *</span>
+        </td></tr>
+    </table>
+
+    <!-- Navigation -->
+    <nav class="nav-bar" aria-label="Page sections">
+        <a href="#backstory">Backstory</a> |
+        <a href="#photo">Band Photo</a> |
+        <a href="#members">Members</a> |
+        <a href="#discography">Discography</a> |
+        <a href="#guestbook">Guestbook</a>
+    </nav>
+
+    <main id="main-content">
+
+    <!-- Backstory -->
+    <a name="backstory"></a>
+    <h3 class="section-header">~ The Story ~</h3>
+    <hr class="divider" color="#ff00ff" size="2" noshade>
+    <div class="backstory-box">
+        In the misty year of 1983, on the windswept shores of the Faroe Islands, a singular phenomenon known as Ethereal Trampleweed emerged. Like a tempest from the North Atlantic, their Ferocious Elegance style took the world by storm, blending Cosmic Yodeling with Industrial Shanties to create a sound both otherworldly and primal.
+
+At the heart of this sonic maelstrom stands Magnus "The Whistler" Greysen, the enigmatic lead vocalist and cosmic yodeler. With a voice that can summon the auroras themselves, Magnus infuses every performance with a haunting allure.
+
+Beside him strums Ingrid "Fierce Strings" Halverson, the visionary bassist. Her thunderous lines conjure images of rolling seas and anchor the band's ethereal melodies to the earth. Ingrid's quiet intensity and unyielding dedication are the backbone of the Trampleweed's rhythm.
+
+Tickling the keys with both grace and raw power is Eirik "Tinker" Bjarnason on the synthesizer. Eirik's experimental spirit turns the ordinary into the extraordinary, weaving futuristic soundscapes with a mischievous twinkle in his eye.
+
+On drums, the indomitable Freya "Stormfire" Josdottir commands with precision and passion. Her drumming is a force of nature, echoing the crashing waves and thunderous skies of their island home. Freya's fiery spirit fuels the band's untamed energy.
+
+Finally, weaving tales through a tapestry of lyrics is the poetic genius, Rolf "Saga" Thomsen. His words capture the mystique of the Faroese landscape, painting stories that resonate with timeless depth and emotion.
+
+Together, Ethereal Trampleweed is not just a band; they are an elemental force — a testament to the wild beauty of their homeland.
+    </div>
+
+    <!-- Band Photo -->
+    <a name="photo"></a>
+    <h3 class="section-header">~ Band Photo ~</h3>
+    <hr class="divider" color="#ff00ff" size="2" noshade>
+    <div class="photo-wrapper">
+        <div class="photo-frame">
+            <img src="band_photo.jpg" alt="Ethereal Trampleweed - Band Photo">
+            <div class="photo-credit">Mgmt: Ethereal Artists Group / Faroese</div>
+        </div>
+        <div class="photo-caption">
+            Magnus "The Whistler" Greysen, Ingrid "Fierce Strings" Halverson, Eirik "Tinker" Bjarnason, Freya "Stormfire" Josdottir, Rolf "Saga" Thomsen
+        </div>
+    </div>
+
+    <!-- Band Members -->
+    <a name="members"></a>
+    <h3 class="section-header">~ The Members ~</h3>
+    <hr class="divider" color="#ff00ff" size="2" noshade>
+    <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
+        
+        <tr>
+            <td style="color:#ff00ff; padding:4px 12px; font-weight:bold;">Magnus "The Whistler" Greysen</td>
+            <td style="color:#ffff00; padding:4px 12px;">lead vocalist and cosmic yodeler</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">With a voice that can summon the auroras themselves, Magnus infuses every performance with a haunting allure.</td>
+        </tr>
+        <tr>
+            <td style="color:#ff00ff; padding:4px 12px; font-weight:bold;">Ingrid "Fierce Strings" Halverson</td>
+            <td style="color:#ffff00; padding:4px 12px;">bassist</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Her thunderous lines conjure images of rolling seas and anchor the band's ethereal melodies to the earth.</td>
+        </tr>
+        <tr>
+            <td style="color:#ff00ff; padding:4px 12px; font-weight:bold;">Eirik "Tinker" Bjarnason</td>
+            <td style="color:#ffff00; padding:4px 12px;">synthesizer</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Eirik's experimental spirit turns the ordinary into the extraordinary, weaving futuristic soundscapes with a mischievous twinkle in his eye.</td>
+        </tr>
+        <tr>
+            <td style="color:#ff00ff; padding:4px 12px; font-weight:bold;">Freya "Stormfire" Josdottir</td>
+            <td style="color:#ffff00; padding:4px 12px;">drums</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Her drumming is a force of nature, echoing the crashing waves and thunderous skies of their island home.</td>
+        </tr>
+        <tr>
+            <td style="color:#ff00ff; padding:4px 12px; font-weight:bold;">Rolf "Saga" Thomsen</td>
+            <td style="color:#ffff00; padding:4px 12px;">lyricist</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">His words capture the mystique of the Faroese landscape, painting stories that resonate with timeless depth and emotion.</td>
+        </tr>
+    </table>
+
+    <!-- Discography -->
+    <a name="discography"></a>
+    <h3 class="section-header">~ Discography ~</h3>
+    <hr class="divider" color="#ff00ff" size="2" noshade>
+    
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#ff00ff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#00ffff; font-weight:bold; padding:8px; font-size:1.1em;">
+                Echos of the Nebula Wharf (1983)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ffff00; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Cosmic Yodeler’s Call</li>
+<li style="color:#cccccc;">Sirens of the Steel Currents</li>
+<li style="color:#cccccc;">Aurora Harpoon</li>
+<li style="color:#cccccc;">Industrial Tides</li>
+<li style="color:#cccccc;">The Nordic Chant of Gears</li>
+<li style="color:#cccccc;">Trampleweed Reverie</li>
+<li style="color:#cccccc;">Harsh Winds & Harmonicas</li>
+<li style="color:#cccccc;">Celestial Rust</li>
+<li style="color:#cccccc;">The Ferryman’s Electrified Shanty</li>
+<li style="color:#cccccc;">Orbital Harmonies</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#ff00ff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#00ffff; font-weight:bold; padding:8px; font-size:1.1em;">
+                Steel Waves & Cosmic Haze (1984)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ffff00; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Yodeling in the Machine</li>
+<li style="color:#cccccc;">Iron Sails Under Northern Stars</li>
+<li style="color:#cccccc;">Pulsar Ballad</li>
+<li style="color:#cccccc;">Echoes of the Foundry</li>
+<li style="color:#cccccc;">The Galaxial Chant</li>
+<li style="color:#cccccc;">Sixty Hertz Sea Shanty</li>
+<li style="color:#cccccc;">Astrophonic Cascades</li>
+<li style="color:#cccccc;">Metallic Whirlpools</li>
+<li style="color:#cccccc;">The Cosmic Net</li>
+<li style="color:#cccccc;">Harmonized Havoc</li>
+<li style="color:#cccccc;">Lighthouses in Fog</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#ff00ff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#00ffff; font-weight:bold; padding:8px; font-size:1.1em;">
+                Celestial Havens & Maritime Sparks (1985)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ffff00; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Stars in the String Quartet</li>
+<li style="color:#cccccc;">Gale-force Harmonium</li>
+<li style="color:#cccccc;">The Cosmic Codex</li>
+<li style="color:#cccccc;">Whispers of the Galley</li>
+<li style="color:#cccccc;">Interstellar Brigantine</li>
+<li style="color:#cccccc;">Yodeling Through the Stratosphere</li>
+<li style="color:#cccccc;">Solar Sails & Steam</li>
+<li style="color:#cccccc;">The Helmsman’s Hymn</li>
+<li style="color:#cccccc;">Astral Undertow</li>
+<li style="color:#cccccc;">Nebular Nocturne</li>
+<li style="color:#cccccc;">The Shanty of the Cosmic Forge</li>
+<li style="color:#cccccc;">Ferocious Elegance Finale</li>
+
+                </ol>
+            </td></tr>
+        </table>
+
+    <!-- Guestbook / Links -->
+    <a name="guestbook"></a>
+    <h3 class="section-header">~ Guestbook & Links ~</h3>
+    <hr class="divider" color="#ff00ff" size="2" noshade>
+    <div style="text-align:center; padding:10px;">
+        <p><span class="faux-link">Sign the Guestbook!</span> | <span class="faux-link">View Guestbook</span></p>
+        <p><a href="mailto:webmaster@etherealtrampleweed.geocities.com">Email the Webmaster</a></p>
+        <p style="color:#888888; font-size:0.8em;">
+            <span class="faux-link">Link to us!</span> |
+            <span class="faux-link">Webrings</span> |
+            <span class="faux-link">MIDI Archive</span>
+        </p>
+    </div>
+
+    </main>
+
+    <!-- Badges / Footer -->
+    <footer>
+    <div class="badge-row" aria-hidden="true">
+        <span>Best viewed in Netscape Navigator 4.0</span>
+        <span>800x600 resolution</span>
+        <span>Made with Notepad</span>
+    </div>
+
+    <div class="footer-area">
+        <p>You are visitor number <strong style="color:#00ffff;">#56,836</strong> since 1983!</p>
+        <p class="blink">*** This page is always under construction! ***</p>
+        <p>&copy; 2026 Ethereal Trampleweed Fan Page. All rights reserved.<br>
+        This is a fan-made page. We are not affiliated with Ethereal Trampleweed or their management.</p>
+        <p><a href="#main-content">Back to Top</a></p>
+    </div>
+    </footer>
+
+</div>
+
+</body>
+</html>

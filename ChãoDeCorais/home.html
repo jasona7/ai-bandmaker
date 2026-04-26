@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~*~ Chão de Corais ~*~ Official Fan Page ~*~</title>
+    <style>
+        body {
+            background-color: #000000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='%23111'/%3E%3C/svg%3E");
+            color: #cccccc;
+            font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        a { color: #ff69b4; }
+        a:visited { color: #00ff00; }
+        a:hover { color: #ffff00; text-decoration: none; }
+        .page-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .header-table {
+            width: 100%;
+            background: linear-gradient(to right, #000033, #000066, #000033);
+            border: 3px ridge #00ff00;
+            margin-bottom: 10px;
+        }
+        .header-table td {
+            text-align: center;
+            padding: 15px;
+        }
+        .divider {
+            width: 80%;
+            margin: 15px auto;
+        }
+        .section-header {
+            color: #ff69b4;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0 10px 0;
+            text-shadow: 1px 1px 2px #00ff00;
+        }
+        .photo-frame {
+            text-align: center;
+            margin: 15px auto;
+            position: relative;
+            display: inline-block;
+        }
+        .photo-wrapper {
+            text-align: center;
+        }
+        .photo-frame img {
+            max-width: 500px;
+            width: 100%;
+            border: 4px ridge #00ff00;
+            display: block;
+            filter: grayscale(100%);
+        }
+        .photo-credit {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #aaaaaa;
+            font-size: 0.65em;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            text-shadow: 1px 1px 2px #000000;
+            letter-spacing: 0.5px;
+        }
+        .photo-caption {
+            color: #ffff00;
+            font-style: italic;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .backstory-box {
+            background-color: #0a0a1a;
+            border: 2px inset #ff69b4;
+            padding: 15px;
+            margin: 10px auto;
+            width: 90%;
+            color: #dddddd;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        .members-table {
+            margin: 10px auto;
+            border: 2px ridge #ff69b4;
+            background-color: #0a0a0a;
+            border-collapse: collapse;
+        }
+        .members-table td {
+            border-bottom: 1px dashed #333333;
+        }
+        .footer-area {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            border-top: 2px ridge #00ff00;
+            font-size: 0.8em;
+            color: #888888;
+        }
+        .footer-area a {
+            color: #00ff00;
+            font-size: 0.85em;
+        }
+        .blink {
+            animation: blinker 1.2s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+        .badge-row {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 0.75em;
+            color: #999999;
+        }
+        .badge-row span {
+            margin: 0 8px;
+            padding: 3px 8px;
+            border: 1px solid #444444;
+            background-color: #111111;
+        }
+        .nav-bar {
+            text-align: center;
+            padding: 8px;
+            background-color: #111111;
+            border: 1px solid #333333;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        .nav-bar a {
+            margin: 0 5px;
+        }
+        marquee {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ff69b4;
+            text-shadow: 2px 2px 4px #00ff00;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }
+        .stars {
+            color: #ffff00;
+            letter-spacing: 3px;
+        }
+    
+    
+    /* N-031 migration: skip link */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      padding: 8px 16px;
+      background: #ffff00;
+      color: #000;
+      font-weight: bold;
+      z-index: 100;
+    }
+    
+    /* N-031 migration: respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      .blink, marquee {
+        animation: none;
+      }
+      marquee {
+        overflow: visible;
+        white-space: normal;
+      }
+    }
+    
+    /* N-003 migration: faux-link for non-functional decorative links */
+    .faux-link {
+      color: #ff69b4;
+      text-decoration: underline;
+      cursor: default;
+    }
+    /* N-021 migration: keyboard focus indicators */
+    a:focus-visible {
+      outline: 2px solid #ffff00;
+      outline-offset: 2px;
+    }
+    </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <table class="header-table" cellpadding="0" cellspacing="0">
+        <tr><td>
+            <span class="stars">* * * * * * * * * * * * *</span><br>
+            <marquee scrollamount="3">Chão de Corais</marquee>
+            <br>
+            <span style="color:#ffff00; font-size:0.85em;">
+                Sun-bleached | Tropicalia / Funk | Est. 1974 | Brazilian
+            </span><br>
+            <span class="stars">* * * * * * * * * * * * *</span>
+        </td></tr>
+    </table>
+
+    <!-- Navigation -->
+    <nav class="nav-bar" aria-label="Page sections">
+        <a href="#backstory">Backstory</a> |
+        <a href="#photo">Band Photo</a> |
+        <a href="#members">Members</a> |
+        <a href="#discography">Discography</a> |
+        <a href="#guestbook">Guestbook</a>
+    </nav>
+
+    <main id="main-content">
+
+    <!-- Backstory -->
+    <a name="backstory"></a>
+    <h3 class="section-header">~ The Story ~</h3>
+    <hr class="divider" color="#00ff00" size="2" noshade>
+    <div class="backstory-box">
+        Oh man, let me tell you about Chão de Corais, the band that took Brazil by storm in '74 with their sun-bleached Tropicalia and Funk vibes. These guys weren't just a band; they were a force of nature. I was lucky enough to catch them live once, and it was like being invited to the coolest beach party ever.
+
+The heart of the group was João "Sol" Pereira, the lead vocalist whose voice was like a gust of fresh ocean breeze. Sol was the one who brought everyone together, with his infectious charisma and knack for getting the audience to dance like nobody was watching.
+
+Then there's Marco "Cajú" Almeida on the bass. Cajú was the laid-back groove master, always chill, always in the pocket. People said he could make anyone move with just a single bassline. He had this way of locking eyes with the crowd—he made every gig feel personal.
+
+The beat behind it all was Luciana "Luz" Ferreira on drums. Luz was a powerhouse, a whirlwind of energy who kept everyone on their toes. She had a wild spirit, and her drumming was the pulse of Chão de Corais.
+
+And we can't forget Paulo Andrade, the mysterious genius on synthesizer. Paulo was kinda like the mad scientist of the band, with all these crazy sounds and textures that gave their music this electric feel. 
+
+These four came together in Rio, jamming on the beaches and stumbling upon a sound that was straight-up magic. Seeing them live was unforgettable—like summer in a bottle. Long live Chão de Corais!
+    </div>
+
+    <!-- Band Photo -->
+    <a name="photo"></a>
+    <h3 class="section-header">~ Band Photo ~</h3>
+    <hr class="divider" color="#00ff00" size="2" noshade>
+    <div class="photo-wrapper">
+        <div class="photo-frame">
+            <img src="band_photo.jpg" alt="Chão de Corais - Band Photo">
+            <div class="photo-credit">Mgmt: Chão Artists Group / Brazilian</div>
+        </div>
+        <div class="photo-caption">
+            João "Sol" Pereira, Marco "Cajú" Almeida, Luciana "Luz" Ferreira, Paulo Andrade
+        </div>
+    </div>
+
+    <!-- Band Members -->
+    <a name="members"></a>
+    <h3 class="section-header">~ The Members ~</h3>
+    <hr class="divider" color="#00ff00" size="2" noshade>
+    <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
+        
+        <tr>
+            <td style="color:#00ff00; padding:4px 12px; font-weight:bold;">João "Sol" Pereira</td>
+            <td style="color:#ffff00; padding:4px 12px;">lead vocals</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">The heart of the group, whose voice was like a gust of fresh ocean breeze.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ff00; padding:4px 12px; font-weight:bold;">Marco "Cajú" Almeida</td>
+            <td style="color:#ffff00; padding:4px 12px;">bass</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">The laid-back groove master who could make anyone move with just a single bassline.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ff00; padding:4px 12px; font-weight:bold;">Luciana "Luz" Ferreira</td>
+            <td style="color:#ffff00; padding:4px 12px;">drums</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">A powerhouse and whirlwind of energy, whose drumming was the pulse of Chão de Corais.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ff00; padding:4px 12px; font-weight:bold;">Paulo Andrade</td>
+            <td style="color:#ffff00; padding:4px 12px;">synthesizer</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">The mysterious genius and mad scientist of the band, creating crazy sounds and textures.</td>
+        </tr>
+    </table>
+
+    <!-- Discography -->
+    <a name="discography"></a>
+    <h3 class="section-header">~ Discography ~</h3>
+    <hr class="divider" color="#00ff00" size="2" noshade>
+    
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ff00"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ff69b4; font-weight:bold; padding:8px; font-size:1.1em;">
+                Maré Solar (1974)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ffff00; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Sol Nascente</li>
+<li style="color:#cccccc;">Dança das Ondas</li>
+<li style="color:#cccccc;">Tropicália Urbana</li>
+<li style="color:#cccccc;">Cores do Amanhã</li>
+<li style="color:#cccccc;">Funk das Falésias</li>
+<li style="color:#cccccc;">Beijo de Areia</li>
+<li style="color:#cccccc;">Céu de Janeiro</li>
+<li style="color:#cccccc;">Samba da Maré</li>
+<li style="color:#cccccc;">Horizonte Azul</li>
+<li style="color:#cccccc;">Fim de Tarde no Pier</li>
+<li style="color:#cccccc;">Noites Tropicais</li>
+<li style="color:#cccccc;">Baía do Amor</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ff00"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ff69b4; font-weight:bold; padding:8px; font-size:1.1em;">
+                Ritmos de Verão (1975)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ffff00; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Festa Sob o Sol</li>
+<li style="color:#cccccc;">Brisa de Carnaval</li>
+<li style="color:#cccccc;">Melodia de Palafitas</li>
+<li style="color:#cccccc;">Cores Tropicais</li>
+<li style="color:#cccccc;">Funk de Ipanema</li>
+<li style="color:#cccccc;">Estrela Cadente</li>
+<li style="color:#cccccc;">Serenata Praiana</li>
+<li style="color:#cccccc;">Lua Cheia na Praia</li>
+<li style="color:#cccccc;">Vento e Mar</li>
+<li style="color:#cccccc;">Batida Solar</li>
+<li style="color:#cccccc;">Sereias do Entardecer</li>
+<li style="color:#cccccc;">Carnaval Sem Fim</li>
+<li style="color:#cccccc;">Ondas de Verão</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ff00"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ff69b4; font-weight:bold; padding:8px; font-size:1.1em;">
+                Horizonte Selvagem (1976)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ffff00; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Caminho de Conchas</li>
+<li style="color:#cccccc;">Solitude à Beira-Mar</li>
+<li style="color:#cccccc;">Alvorada do Funk</li>
+<li style="color:#cccccc;">Tropicália Selvagem</li>
+<li style="color:#cccccc;">Sons da Mata</li>
+<li style="color:#cccccc;">Luar de Verão</li>
+<li style="color:#cccccc;">Ritmo do Amanhã</li>
+<li style="color:#cccccc;">Praia Invisível</li>
+<li style="color:#cccccc;">Funk do Horizonte</li>
+<li style="color:#cccccc;">Ecos Noturnos</li>
+<li style="color:#cccccc;">Aquarela do Sul</li>
+<li style="color:#cccccc;">Canto das Marés</li>
+<li style="color:#cccccc;">Fogo do Pôr do Sol</li>
+
+                </ol>
+            </td></tr>
+        </table>
+
+    <!-- Guestbook / Links -->
+    <a name="guestbook"></a>
+    <h3 class="section-header">~ Guestbook & Links ~</h3>
+    <hr class="divider" color="#00ff00" size="2" noshade>
+    <div style="text-align:center; padding:10px;">
+        <p><span class="faux-link">Sign the Guestbook!</span> | <span class="faux-link">View Guestbook</span></p>
+        <p><a href="mailto:webmaster@chãodecorais.geocities.com">Email the Webmaster</a></p>
+        <p style="color:#888888; font-size:0.8em;">
+            <span class="faux-link">Link to us!</span> |
+            <span class="faux-link">Webrings</span> |
+            <span class="faux-link">MIDI Archive</span>
+        </p>
+    </div>
+
+    </main>
+
+    <!-- Badges / Footer -->
+    <footer>
+    <div class="badge-row" aria-hidden="true">
+        <span>Best viewed in Netscape Navigator 4.0</span>
+        <span>800x600 resolution</span>
+        <span>Made with Notepad</span>
+    </div>
+
+    <div class="footer-area">
+        <p>You are visitor number <strong style="color:#ff69b4;">#62,910</strong> since 1974!</p>
+        <p class="blink">*** This page is always under construction! ***</p>
+        <p>&copy; 2026 Chão de Corais Fan Page. All rights reserved.<br>
+        This is a fan-made page. We are not affiliated with Chão de Corais or their management.</p>
+        <p><a href="#main-content">Back to Top</a></p>
+    </div>
+    </footer>
+
+</div>
+
+</body>
+</html>
