@@ -1,9 +1,53 @@
 # UX & Accessibility Code Review
-**Date**: 2026-04-26
+**Date**: 2026-04-27
 **Reviewer**: Jennifer Mitchelle (Senior UX Design Critic, Swords, Ireland)
 **Branch**: fix/code-review-2026-04-13
 
-## 2026-04-26 Audit (Jennifer Mitchelle, UX)
+## 2026-04-27 Audit (Jennifer Mitchelle, UX)
+
+Twenty-fourth periodic review. **No code changes since 2026-04-26.** Re-audit performed against 8 source files (line counts unchanged: 2596 total — exact match to last cycle; MD5 hashes confirm zero drift on all 8 files) plus all 12 generated fan pages. Rotation this cycle: deep-read of `EchoesOfTheMirage` (legacy, full 269-line read — last fully deep-read 2026-04-24) plus structural body sampling on `NightshadeVanguard` (v1) at lines 180-280. Cross-page grep sweep across 12 structural markers; tooling checks (Python AST, pyflakes, Jinja2 compile, CSS brace balance, CSS custom-property reference audit, Flask `test_client` on 8 routes including 2 adversarial). v2 template structural lines 575-742 in `createAct.py` re-inspected to re-validate N-002, N-005, N-011, N-019, N-033, N-038 line references.
+
+**No new issues identified this cycle.** All 7 previously resolved issues remain verified. Open count is unchanged: 7 Medium, 22 Low. This is now the **sixth** "no new findings" cycle in the last 10 (2026-04-16, 2026-04-23, 2026-04-24, 2026-04-25, 2026-04-26, 2026-04-27). Codebase is genuinely stable; the audit surface is saturated for the current state.
+
+**Aging watch — N-033 is now 9 days old (CRITICAL ESCALATION WINDOW).** Threshold for auto-escalation to High is 10 days, hitting **tomorrow (2026-04-28 — next cycle)**. Per the agreed escalation rule, if N-033 is still unremediated at next cycle's audit it should escalate from Medium to High and trigger a Phase 2 fix. Mechanical fix is well-understood: the v2 template at `createAct.py:657` already correctly uses `<h1 class="band-title">{band_name}</h1>`, so the v2-generated pages have no issue. The 8 v1 pages predate that template change and use `<marquee>` without an `<h1>` wrapper. Recommended remediation: a targeted structural pass via `migrate_legacy_pages.py` to wrap the v1 pages' `<marquee>` element in an `<h1>` (preserving the visual marquee animation). Strongly recommend addressing this before next cycle.
+
+| Severity | Count | Change |
+|---|---|---|
+| Critical | 0 | — |
+| High | 0 | — |
+| Medium | 7 | — |
+| Low | 22 | — |
+
+### Phase 1 — Audit findings by category
+
+**Critical**: 0 (none)
+**High**: 0 (none)
+**Medium**: 0 new (7 carried — N-002, N-004, N-009, N-012, N-016, N-019, N-033)
+**Low**: 0 new (22 carried — N-005, N-006, N-007, N-008, N-010, N-011, N-014, N-017, N-018, N-020, N-022, N-025, N-026, N-027, N-029, N-030, N-032, N-034, N-035, N-036, N-037, N-038, N-039)
+
+Per the instructions, no Critical or High issues were identified this cycle, so Phase 2 makes **zero code changes**. All carried Medium and Low findings remain logged unchanged with their existing recommended fixes. Phase 3 verification is recorded below.
+
+### Verification this cycle (Phase 3)
+| Check | Result |
+|---|---|
+| Python AST parse on app.py and createAct.py | PASS |
+| `pyflakes` on app.py + createAct.py | 3 warnings → still N-037 (`flask.session`, `datetime.datetime`, `datetime.timedelta`) |
+| Jinja2 compile on 4 top-level templates | PASS (base/index/generate/gallery all compile) |
+| CSS brace balance | 128/128 |
+| CSS custom-property reference audit | 21 referenced / 24 defined — 3 unreferenced (`--space-2xl`, `--space-lg`, `--space-xl`); 0 missing definitions |
+| Flask `test_client` on 8 routes (incl. `/band/$(evil)/` 400 and `/band/%2E%2E%2Fetc/` 404) | 8/8 as expected (200×5, 400×1, 404×2) |
+| Structural marker grep across 12 fan pages, 12 markers | All match prior-cycle figures: skip-link 12/12, lang="en" 12/12, viewport 12/12, DOCTYPE 12/12, h1 4/12, marquee 8/12, href="#" 0/12, id="main-content" 12/12, id="main" 0/12, Back to Top 8/12, bgcolor 0/12, font color 0/12 |
+| Source file line counts | 2596 total — exact match to 2026-04-26 |
+| MD5 hashes on all 8 source files | match prior cycle (no drift) |
+| `EchoesOfTheMirage` deep-read (legacy, 269 lines) | Confirms N-029 (footer fixed-bottom at lines 91-93), N-030 (empty members section at lines 168-170), N-034 (plain `<nav>` at line 145), N-035 (`width: 600px` at line 96), N-039 (no Back-to-Top) all unchanged |
+| `NightshadeVanguard` v1 sampling (lines 180-280) | Confirms N-005 (`<hr ... color="#00ffff" size="2" noshade>` at lines 229,247,261), N-026 (`<a name=...>` at 227,245,259), N-033 (band name in `<marquee>` at line 206 with no `<h1>`), N-002 (inline `style=` on member rows 265-269,272-279) all unchanged |
+| createAct.py v2 template lines 575-742 re-inspection | Confirms N-002 (inline styles at 710,713,731), N-005 (deprecated `<hr color="..." size="2" noshade>` at 677,684,697,704,709), N-011 (`linear` at 584 vs CSS `step-start`), N-019 (3× `!important` at 624,627,630), N-038 (`#main`/`id="main"` at 650,673,735) all unchanged. v2 template at line 657 already uses correct `<h1 class="band-title">` (so N-033 only affects 8 v1 legacy pages, not future generations) |
+
+No code changes this cycle. Only `tasks/review.md` updated. Recommendation priority ordering: **N-033 is the top priority and faces auto-escalation tomorrow (2026-04-28) if still unremediated.** All other open findings are unchanged from 2026-04-26.
+
+---
+
+## 2026-04-26 Audit (prior cycle — preserved for history)
 
 Twenty-third periodic review. **No code changes since 2026-04-25.** Re-audit performed against 8 source files (line counts unchanged: 2596 total — exact match to last cycle, MD5 hashes confirm zero drift) plus all 12 generated fan pages. Rotation this cycle: deep-read of `**VelvetEchoes` (legacy, full 245-line read — first full deep-read since 2026-04-22; previously only grep-surveyed) plus structural body sampling on `ChãoDeCorais` (v1) and `MyopicSunflowers` (v1) at lines 180-280. Cross-page grep sweep across 11 structural markers; tooling checks (Python AST, pyflakes, Jinja2 compile, CSS brace balance, CSS custom-property reference audit, Flask `test_client` on 8 routes including 2 adversarial). v2 template structural lines 575-742 in `createAct.py` re-inspected to re-validate N-002, N-005, N-019, N-038 line references.
 
