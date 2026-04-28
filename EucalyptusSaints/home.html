@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~*~ Eucalyptus Saints ~*~ Official Fan Page ~*~</title>
+    <style>
+        body {
+            background-color: #000000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='%23111'/%3E%3C/svg%3E");
+            color: #cccccc;
+            font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        a { color: #ffff00; }
+        a:visited { color: #00ffff; }
+        a:hover { color: #ff4444; text-decoration: none; }
+        .page-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .header-table {
+            width: 100%;
+            background: linear-gradient(to right, #000033, #000066, #000033);
+            border: 3px ridge #00ffff;
+            margin-bottom: 10px;
+        }
+        .header-table td {
+            text-align: center;
+            padding: 15px;
+        }
+        .divider {
+            width: 80%;
+            margin: 15px auto;
+        }
+        .section-header {
+            color: #ffff00;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0 10px 0;
+            text-shadow: 1px 1px 2px #00ffff;
+        }
+        .photo-frame {
+            text-align: center;
+            margin: 15px auto;
+            position: relative;
+            display: inline-block;
+        }
+        .photo-wrapper {
+            text-align: center;
+        }
+        .photo-frame img {
+            max-width: 500px;
+            width: 100%;
+            border: 4px ridge #00ffff;
+            display: block;
+            filter: grayscale(100%);
+        }
+        .photo-credit {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #aaaaaa;
+            font-size: 0.65em;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            text-shadow: 1px 1px 2px #000000;
+            letter-spacing: 0.5px;
+        }
+        .photo-caption {
+            color: #ff4444;
+            font-style: italic;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .backstory-box {
+            background-color: #0a0a1a;
+            border: 2px inset #ffff00;
+            padding: 15px;
+            margin: 10px auto;
+            width: 90%;
+            color: #dddddd;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        .members-table {
+            margin: 10px auto;
+            border: 2px ridge #ffff00;
+            background-color: #0a0a0a;
+            border-collapse: collapse;
+        }
+        .members-table td {
+            border-bottom: 1px dashed #333333;
+        }
+        .footer-area {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            border-top: 2px ridge #00ffff;
+            font-size: 0.8em;
+            color: #888888;
+        }
+        .footer-area a {
+            color: #00ffff;
+            font-size: 0.85em;
+        }
+        .blink {
+            animation: blinker 1.2s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+        .badge-row {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 0.75em;
+            color: #999999;
+        }
+        .badge-row span {
+            margin: 0 8px;
+            padding: 3px 8px;
+            border: 1px solid #444444;
+            background-color: #111111;
+        }
+        .nav-bar {
+            text-align: center;
+            padding: 8px;
+            background-color: #111111;
+            border: 1px solid #333333;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        .nav-bar a {
+            margin: 0 5px;
+        }
+        marquee {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 2px 2px 4px #00ffff;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }
+        .stars {
+            color: #ff4444;
+            letter-spacing: 3px;
+        }
+    
+    
+    /* N-031 migration: skip link */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      padding: 8px 16px;
+      background: #ffff00;
+      color: #000;
+      font-weight: bold;
+      z-index: 100;
+    }
+    
+    /* N-031 migration: respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      .blink, marquee {
+        animation: none;
+      }
+      marquee {
+        overflow: visible;
+        white-space: normal;
+      }
+    }
+    
+    /* N-003 migration: faux-link for non-functional decorative links */
+    .faux-link {
+      color: #ffff00;
+      text-decoration: underline;
+      cursor: default;
+    }
+    /* N-021 migration: keyboard focus indicators */
+    a:focus-visible {
+      outline: 2px solid #ffff00;
+      outline-offset: 2px;
+    }
+    </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <table class="header-table" cellpadding="0" cellspacing="0">
+        <tr><td>
+            <span class="stars">* * * * * * * * * * * * *</span><br>
+            <h1 class="band-title"><marquee scrollamount="3">Eucalyptus Saints</marquee></h1>
+            <br>
+            <span style="color:#ff4444; font-size:0.85em;">
+                Confrontational | Tropicalia / Punk | Est. 2001 | Tbilisi, Georgia
+            </span><br>
+            <span class="stars">* * * * * * * * * * * * *</span>
+        </td></tr>
+    </table>
+
+    <!-- Navigation -->
+    <nav class="nav-bar" aria-label="Page sections">
+        <a href="#backstory">Backstory</a> |
+        <a href="#photo">Band Photo</a> |
+        <a href="#members">Members</a> |
+        <a href="#discography">Discography</a> |
+        <a href="#guestbook">Guestbook</a>
+    </nav>
+
+    <main id="main-content">
+
+    <!-- Backstory -->
+    <a name="backstory"></a>
+    <h3 class="section-header">~ The Story ~</h3>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div class="backstory-box">
+        Oh man, the first time I saw Eucalyptus Saints in Tbilisi is something I'll never forget! These guys came out of nowhere around 2001, blending Tropicalia and Punk like it was the most natural thing in the world, and they tore up the local scene.
+
+First, there’s Luka "The Hurricane" Arveladze on lead vocals. This guy is pure energy on stage, always wearing those flamboyant shirts that make him look like he’s at a beach party, even in the middle of winter. His voice can make you want to dance and start a mosh pit at the same time.
+
+Then there's Nino "Strings" Ioseliani on the bass guitar. Nino’s super chill offstage but transforms into a total powerhouse when she picks up that bass. You can feel every groove in your bones when she plays.
+
+Giorgi "Gio" Abashidze handles the drums with serious charisma. I once saw him break two drumsticks during a show and didn’t miss a beat—literally. The dude’s a machine and the heartbeat of their confrontational style.
+
+Finally, there’s Tamari Kinkladze on synthesizer. She adds that tropical twist to the band's punk vibe with keys that can make you sway as much as headbang. Tamari's always got a smile and seems to love tossing in the unexpected sound that makes everyone cheer.
+
+Seeing them live is like being caught up in a storm of sound and fun. If you ever get the chance to catch the Eucalyptus Saints, do it! You'll walk out with your ears ringing and a grin on your face.
+    </div>
+
+    <!-- Band Photo -->
+    <a name="photo"></a>
+    <h3 class="section-header">~ Band Photo ~</h3>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div class="photo-wrapper">
+        <div class="photo-frame">
+            <img src="band_photo.jpg" alt="Eucalyptus Saints - Band Photo">
+            <div class="photo-credit">Mgmt: Eucalyptus Artists Group / Tbilisi, Georgia</div>
+        </div>
+        <div class="photo-caption">
+            Luka "The Hurricane" Arveladze, Nino "Strings" Ioseliani, Giorgi "Gio" Abashidze, Tamari Kinkladze
+        </div>
+    </div>
+
+    <!-- Band Members -->
+    <a name="members"></a>
+    <h3 class="section-header">~ The Members ~</h3>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
+        
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Luka "The Hurricane" Arveladze</td>
+            <td style="color:#ff4444; padding:4px 12px;">lead vocals</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">This guy is pure energy on stage, always wearing those flamboyant shirts that make him look like he’s at a beach party, even in the middle of winter.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Nino "Strings" Ioseliani</td>
+            <td style="color:#ff4444; padding:4px 12px;">bass guitar</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Nino’s super chill offstage but transforms into a total powerhouse when she picks up that bass.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Giorgi "Gio" Abashidze</td>
+            <td style="color:#ff4444; padding:4px 12px;">drums</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">The dude’s a machine and the heartbeat of their confrontational style.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Tamari Kinkladze</td>
+            <td style="color:#ff4444; padding:4px 12px;">synthesizer</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">She adds that tropical twist to the band's punk vibe with keys that can make you sway as much as headbang.</td>
+        </tr>
+    </table>
+
+    <!-- Discography -->
+    <a name="discography"></a>
+    <h3 class="section-header">~ Discography ~</h3>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Tropical Turmoil (2001)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Jungle Revolt</li>
+<li style="color:#cccccc;">Concrete Paradise</li>
+<li style="color:#cccccc;">Banana Republic Breakdown</li>
+<li style="color:#cccccc;">Rhythms of Rebellion</li>
+<li style="color:#cccccc;">Sunburned Souls</li>
+<li style="color:#cccccc;">Amazonian Echoes</li>
+<li style="color:#cccccc;">Punk Parrot Parade</li>
+<li style="color:#cccccc;">The Tbilisi Tangle</li>
+<li style="color:#cccccc;">Street Samba Saviors</li>
+<li style="color:#cccccc;">Riot in the Rainforest</li>
+<li style="color:#cccccc;">Urban Jungle Jam</li>
+<li style="color:#cccccc;">Cacophony of Cacti</li>
+<li style="color:#cccccc;">Dissonant Dance</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Sonic Rainforest (2002)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Kudzu Confrontation</li>
+<li style="color:#cccccc;">The Sound of Thorns</li>
+<li style="color:#cccccc;">Feral Freedom</li>
+<li style="color:#cccccc;">Wildflower Warriors</li>
+<li style="color:#cccccc;">Desert Breeze Riot</li>
+<li style="color:#cccccc;">Tbilisi Twilight Terrors</li>
+<li style="color:#cccccc;">Hibiscus Havoc</li>
+<li style="color:#cccccc;">Savage Samba</li>
+<li style="color:#cccccc;">Insurgent Vibes</li>
+<li style="color:#cccccc;">Flora and Fury</li>
+<li style="color:#cccccc;">Guerrilla Groove</li>
+<li style="color:#cccccc;">Chameleon Chaos</li>
+<li style="color:#cccccc;">Rebellion Roots</li>
+<li style="color:#cccccc;">Petals of Punk</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Punkadelic Tropics (2003)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Agave Anthem</li>
+<li style="color:#cccccc;">Revolution on the Rocks</li>
+<li style="color:#cccccc;">The Canopy Clash</li>
+<li style="color:#cccccc;">Cactus Combat</li>
+<li style="color:#cccccc;">Liberation Lullaby</li>
+<li style="color:#cccccc;">Tbilisi Tropicana</li>
+<li style="color:#cccccc;">Outback Onslaught</li>
+<li style="color:#cccccc;">Rhythmic Resistance</li>
+<li style="color:#cccccc;">The Pit and the Palms</li>
+<li style="color:#cccccc;">Euphoric Eucalyptus</li>
+<li style="color:#cccccc;">Sonic Sandstorm</li>
+<li style="color:#cccccc;">Algae Anarchy</li>
+<li style="color:#cccccc;">Desert Dreamers</li>
+<li style="color:#cccccc;">The Last Resort Rebellion</li>
+
+                </ol>
+            </td></tr>
+        </table>
+
+    <!-- Guestbook / Links -->
+    <a name="guestbook"></a>
+    <h3 class="section-header">~ Guestbook & Links ~</h3>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div style="text-align:center; padding:10px;">
+        <p><span class="faux-link">Sign the Guestbook!</span> | <span class="faux-link">View Guestbook</span></p>
+        <p><a href="mailto:webmaster@eucalyptussaints.geocities.com">Email the Webmaster</a></p>
+        <p style="color:#888888; font-size:0.8em;">
+            <span class="faux-link">Link to us!</span> |
+            <span class="faux-link">Webrings</span> |
+            <span class="faux-link">MIDI Archive</span>
+        </p>
+    </div>
+
+    </main>
+
+    <!-- Badges / Footer -->
+    <footer>
+    <div class="badge-row" aria-hidden="true">
+        <span>Best viewed in Netscape Navigator 4.0</span>
+        <span>800x600 resolution</span>
+        <span>Made with Notepad</span>
+    </div>
+
+    <div class="footer-area">
+        <p>You are visitor number <strong style="color:#ffff00;">#31,749</strong> since 2001!</p>
+        <p class="blink">*** This page is always under construction! ***</p>
+        <p>&copy; 2026 Eucalyptus Saints Fan Page. All rights reserved.<br>
+        This is a fan-made page. We are not affiliated with Eucalyptus Saints or their management.</p>
+        <p><a href="#main-content">Back to Top</a></p>
+    </div>
+    </footer>
+
+</div>
+
+</body>
+</html>
