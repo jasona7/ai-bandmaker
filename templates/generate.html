@@ -4,79 +4,231 @@
 
 {% block content %}
 <h2 class="section-header">~ Generate Your AI Band ~</h2>
-<hr class="pointed-hr" noshade>
+<hr class="pointed-hr">
 
 <div class="center-text">
-    <p>Watch as our AI creates a unique band with a full backstory, discography, and photos!</p>
+    <p>Customize your band or let the dice decide. Hit generate when ready!</p>
 </div>
 
 <!-- Start Generation -->
 <div id="startGeneration">
-    <div class="retro-box" style="text-align:center;">
-        <h3 style="color:#00ffff; margin-bottom:10px;">Ready to Create Music History?</h3>
-        <p>Click the button below to generate a completely unique AI-powered band:</p>
-        <ul class="checklist">
-            <li>Unique band name and style</li>
-            <li>Complete backstory with band members</li>
-            <li>Full discography with albums and tracks</li>
-            <li>AI-generated band photo</li>
-            <li>Retro fan page</li>
-        </ul>
-        <br>
-        <button id="generateBtn" class="retro-button">
-            &gt;&gt; GENERATE BAND &lt;&lt;
-        </button>
+    <div class="retro-box">
+        <h3 class="retro-box-heading">~ Band Parameters ~</h3>
+
+        <form id="bandForm" role="form" aria-label="Band generation parameters" onsubmit="return false;">
+        <fieldset class="band-params-fieldset">
+            <legend class="sr-only">Band Parameters</legend>
+            <div class="param-row">
+                <label for="genre1" class="param-label">Genre 1:</label>
+                <div class="param-controls">
+                    <select id="genre1" class="retro-select">
+                        <option value="">Random (AI picks)</option>
+                        <option value="Post-Punk">Post-Punk</option>
+                        <option value="Shoegaze">Shoegaze</option>
+                        <option value="Krautrock">Krautrock</option>
+                        <option value="Afrobeat">Afrobeat</option>
+                        <option value="Dub Reggae">Dub Reggae</option>
+                        <option value="Tropicalia">Tropicalia</option>
+                        <option value="Garage Rock">Garage Rock</option>
+                        <option value="Italo Disco">Italo Disco</option>
+                        <option value="Dream Pop">Dream Pop</option>
+                        <option value="Highlife">Highlife</option>
+                        <option value="Zydeco">Zydeco</option>
+                        <option value="Cumbia">Cumbia</option>
+                        <option value="Surf Rock">Surf Rock</option>
+                        <option value="Free Jazz">Free Jazz</option>
+                        <option value="Industrial">Industrial</option>
+                        <option value="Psychedelic Rock">Psychedelic Rock</option>
+                        <option value="Noise Pop">Noise Pop</option>
+                        <option value="Bossa Nova">Bossa Nova</option>
+                        <option value="Darkwave">Darkwave</option>
+                        <option value="Skiffle">Skiffle</option>
+                        <option value="C86 Jangle Pop">C86 Jangle Pop</option>
+                        <option value="Go-Go">Go-Go</option>
+                        <option value="Samba Rock">Samba Rock</option>
+                        <option value="Swamp Blues">Swamp Blues</option>
+                        <option value="Space Disco">Space Disco</option>
+                    </select>
+                    <button type="button" class="dice-btn" data-target="genre1" title="Randomize genre 1" aria-label="Randomize genre 1">&#127922;</button>
+                </div>
+            </div>
+            <div class="param-row">
+                <label for="genre2" class="param-label">Genre 2:</label>
+                <div class="param-controls">
+                    <select id="genre2" class="retro-select">
+                        <option value="">Random (AI picks)</option>
+                        <option value="Electronic">Electronic</option>
+                        <option value="Folk">Folk</option>
+                        <option value="Funk">Funk</option>
+                        <option value="Hip Hop">Hip Hop</option>
+                        <option value="Jazz Fusion">Jazz Fusion</option>
+                        <option value="Metal">Metal</option>
+                        <option value="Country">Country</option>
+                        <option value="Ambient">Ambient</option>
+                        <option value="Punk">Punk</option>
+                        <option value="Soul">Soul</option>
+                        <option value="Reggaeton">Reggaeton</option>
+                        <option value="Flamenco">Flamenco</option>
+                        <option value="Bluegrass">Bluegrass</option>
+                        <option value="New Wave">New Wave</option>
+                        <option value="Gospel">Gospel</option>
+                        <option value="Math Rock">Math Rock</option>
+                        <option value="Trip Hop">Trip Hop</option>
+                        <option value="Synthpop">Synthpop</option>
+                        <option value="Grunge">Grunge</option>
+                        <option value="Doo-Wop">Doo-Wop</option>
+                        <option value="Dancehall">Dancehall</option>
+                        <option value="Qawwali">Qawwali</option>
+                        <option value="Boogie">Boogie</option>
+                        <option value="No Wave">No Wave</option>
+                        <option value="Celtic">Celtic</option>
+                    </select>
+                    <button type="button" class="dice-btn" data-target="genre2" title="Randomize genre 2" aria-label="Randomize genre 2">&#127922;</button>
+                </div>
+            </div>
+            <div class="param-row">
+                <label for="nationality" class="param-label">Region:</label>
+                <div class="param-controls">
+                    <select id="nationality" class="retro-select">
+                        <option value="">Random (AI picks)</option>
+                        <option value="Detroit, USA">Detroit, USA</option>
+                        <option value="Manchester, UK">Manchester, UK</option>
+                        <option value="Berlin, Germany">Berlin, Germany</option>
+                        <option value="Lagos, Nigeria">Lagos, Nigeria</option>
+                        <option value="Kingston, Jamaica">Kingston, Jamaica</option>
+                        <option value="Sao Paulo, Brazil">Sao Paulo, Brazil</option>
+                        <option value="Melbourne, Australia">Melbourne, Australia</option>
+                        <option value="Reykjavik, Iceland">Reykjavik, Iceland</option>
+                        <option value="Tokyo, Japan">Tokyo, Japan</option>
+                        <option value="Belgrade, Serbia">Belgrade, Serbia</option>
+                        <option value="Havana, Cuba">Havana, Cuba</option>
+                        <option value="Dakar, Senegal">Dakar, Senegal</option>
+                        <option value="New Orleans, USA">New Orleans, USA</option>
+                        <option value="Sheffield, UK">Sheffield, UK</option>
+                        <option value="Stockholm, Sweden">Stockholm, Sweden</option>
+                        <option value="Bogota, Colombia">Bogota, Colombia</option>
+                        <option value="Accra, Ghana">Accra, Ghana</option>
+                        <option value="Montreal, Canada">Montreal, Canada</option>
+                        <option value="Tbilisi, Georgia">Tbilisi, Georgia</option>
+                        <option value="Bandung, Indonesia">Bandung, Indonesia</option>
+                        <option value="Osaka, Japan">Osaka, Japan</option>
+                        <option value="Napoli, Italy">Napoli, Italy</option>
+                        <option value="Austin, USA">Austin, USA</option>
+                        <option value="Kinshasa, DR Congo">Kinshasa, DR Congo</option>
+                    </select>
+                    <button type="button" class="dice-btn" data-target="nationality" title="Randomize region" aria-label="Randomize region">&#127922;</button>
+                </div>
+            </div>
+            <div class="param-row">
+                <label for="styleName" class="param-label">Vibe:</label>
+                <div class="param-controls">
+                    <select id="styleName" class="retro-select">
+                        <option value="">Random (AI picks)</option>
+                        <option value="Lo-fi">Lo-fi</option>
+                        <option value="Abrasive">Abrasive</option>
+                        <option value="Ethereal">Ethereal</option>
+                        <option value="Swaggering">Swaggering</option>
+                        <option value="Paranoid">Paranoid</option>
+                        <option value="Sun-bleached">Sun-bleached</option>
+                        <option value="Nocturnal">Nocturnal</option>
+                        <option value="Unhinged">Unhinged</option>
+                        <option value="Melancholic">Melancholic</option>
+                        <option value="Feral">Feral</option>
+                        <option value="Devotional">Devotional</option>
+                        <option value="Cinematic">Cinematic</option>
+                        <option value="Gritty">Gritty</option>
+                        <option value="Woozy">Woozy</option>
+                        <option value="Confrontational">Confrontational</option>
+                        <option value="Narcotic">Narcotic</option>
+                        <option value="Pastoral">Pastoral</option>
+                        <option value="Frantic">Frantic</option>
+                        <option value="Hymnal">Hymnal</option>
+                        <option value="Grimy">Grimy</option>
+                    </select>
+                    <button type="button" class="dice-btn" data-target="styleName" title="Randomize vibe" aria-label="Randomize vibe">&#127922;</button>
+                </div>
+            </div>
+            <div class="param-row">
+                <label for="era" class="param-label">Era:</label>
+                <div class="param-controls">
+                    <select id="era" class="retro-select">
+                        <option value="">Random (AI picks)</option>
+                        <option value="1955-1963">Late 50s / Early 60s</option>
+                        <option value="1964-1969">Mid-to-Late 60s</option>
+                        <option value="1970-1976">Early-to-Mid 70s</option>
+                        <option value="1977-1983">Late 70s / Early 80s</option>
+                        <option value="1984-1989">Mid-to-Late 80s</option>
+                        <option value="1990-1996">Early-to-Mid 90s</option>
+                        <option value="1997-2003">Late 90s / Early 00s</option>
+                        <option value="2004-2012">Mid 00s / Early 10s</option>
+                        <option value="2013-2020">Mid-to-Late 10s</option>
+                    </select>
+                    <button type="button" class="dice-btn" data-target="era" title="Randomize era" aria-label="Randomize era">&#127922;</button>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="button-area">
+            <button type="button" id="randomizeAllBtn" class="retro-button-secondary retro-button-small">
+                &#127922; RANDOMIZE ALL
+            </button>
+            <br>
+            <button type="submit" id="generateBtn" class="retro-button">
+                &gt;&gt; GENERATE BAND &lt;&lt;
+            </button>
+        </div>
+        </form>
     </div>
 </div>
 
 <!-- Progress Display -->
 <div id="progressDisplay" style="display:none;">
     <div class="retro-box">
-        <h3 id="progressTitle" style="color:#00ff00; text-align:center;">Creating Your Band...</h3>
-        <p id="progressMessage" style="text-align:center; color:#cccccc;">Initializing AI systems...</p>
+        <h3 id="progressTitle" tabindex="-1" class="retro-box-heading retro-box-heading--green">Creating Your Band...</h3>
+        <p id="progressMessage" class="center-text" aria-live="polite">Initializing AI systems...</p>
 
         <!-- ASCII progress bar -->
-        <div class="ascii-progress">
-            <span style="color:#ffff00;">Progress: [</span><span id="progressBarFill" style="color:#00ff00;"></span><span id="progressBarEmpty" style="color:#333333;"></span><span style="color:#ffff00;">]</span>
-            <span id="progressPercent" style="color:#ff00ff;"> 0%</span>
+        <div class="ascii-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Band generation progress">
+            <span class="step-number">Progress: [</span><span id="progressBarFill" class="step-label"></span><span id="progressBarEmpty" class="progress-empty"></span><span class="step-number">]</span>
+            <span id="progressPercent" class="progress-pct"> 0%</span>
         </div>
 
-        <table class="progress-steps-table" cellpadding="4" cellspacing="0" border="1" bordercolor="#333333">
+        <table class="progress-steps-table">
             <tr class="table-header-row">
-                <td width="30" align="center">?</td>
-                <td>Step</td>
+                <th scope="col"><span class="sr-only">Status</span><span aria-hidden="true">?</span></th>
+                <th scope="col">Step</th>
             </tr>
             <tr id="step1" class="step-row">
-                <td align="center" class="step-indicator">...</td>
+                <td class="step-indicator">...</td>
                 <td>Creating Profile</td>
             </tr>
             <tr id="step2" class="step-row">
-                <td align="center" class="step-indicator">...</td>
+                <td class="step-indicator">...</td>
                 <td>Setting Up Directory</td>
             </tr>
             <tr id="step3" class="step-row">
-                <td align="center" class="step-indicator">...</td>
+                <td class="step-indicator">...</td>
                 <td>Writing Backstory</td>
             </tr>
             <tr id="step4" class="step-row">
-                <td align="center" class="step-indicator">...</td>
+                <td class="step-indicator">...</td>
                 <td>Identifying Members</td>
             </tr>
             <tr id="step5" class="step-row">
-                <td align="center" class="step-indicator">...</td>
+                <td class="step-indicator">...</td>
                 <td>Creating Discography</td>
             </tr>
             <tr id="step6" class="step-row">
-                <td align="center" class="step-indicator">...</td>
+                <td class="step-indicator">...</td>
                 <td>Taking Band Photo</td>
             </tr>
             <tr id="step7" class="step-row">
-                <td align="center" class="step-indicator">...</td>
+                <td class="step-indicator">...</td>
                 <td>Building Fan Page</td>
             </tr>
         </table>
 
-        <div style="text-align:center; margin-top:15px;">
+        <div class="button-area button-area--spaced">
             <button id="cancelBtn" class="retro-button retro-button-secondary">
                 [ CANCEL ]
             </button>
@@ -86,18 +238,17 @@
 
 <!-- Success Display -->
 <div id="successDisplay" style="display:none;">
-    <div class="retro-box" style="text-align:center;">
-        <h3 style="color:#00ff00;">** Band Created Successfully!! **</h3>
+    <div class="retro-box center-text">
+        <h3 tabindex="-1" class="retro-box-heading retro-box-heading--green">** Band Created Successfully!! **</h3>
         <p>Your AI-generated band is ready to rock!</p>
 
         <div id="bandPreview" class="band-preview-retro">
         </div>
 
-        <div style="margin-top:15px;">
+        <div class="button-area button-area--spaced">
             <button id="viewBandBtn" class="retro-button">
                 &gt;&gt; VIEW BAND PAGE &lt;&lt;
             </button>
-            &nbsp;&nbsp;
             <button id="generateAnotherBtn" class="retro-button retro-button-secondary">
                 [ GENERATE ANOTHER ]
             </button>
@@ -107,12 +258,17 @@
 
 <!-- Error Display -->
 <div id="errorDisplay" style="display:none;">
-    <div class="retro-box error-box" style="text-align:center;">
-        <h3 style="color:#ff4444;">!! ERROR !!</h3>
-        <p id="errorMessage">Something went wrong. Please try again.</p>
-        <button id="retryBtn" class="retro-button">
-            [ TRY AGAIN ]
-        </button>
+    <div class="retro-box error-box center-text">
+        <h3 tabindex="-1" class="retro-box-heading retro-box-heading--error">!! ERROR !!</h3>
+        <p id="errorMessage" aria-live="assertive">Something went wrong. Please try again.</p>
+        <div class="button-area button-area--spaced">
+            <button id="retryBtn" class="retro-button">
+                [ TRY AGAIN ]
+            </button>
+            <button id="changeParamsBtn" class="retro-button retro-button-secondary">
+                [ CHANGE PARAMETERS ]
+            </button>
+        </div>
     </div>
 </div>
 
@@ -123,24 +279,65 @@
 let currentGenerationId = null;
 let statusCheckInterval = null;
 let currentDirectory = null;
+let generationTimeout = null;
+let consecutiveErrors = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('generateBtn').addEventListener('click', startGeneration);
+    document.getElementById('bandForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        startGeneration();
+    });
     document.getElementById('cancelBtn').addEventListener('click', cancelGeneration);
     document.getElementById('retryBtn').addEventListener('click', startGeneration);
+    document.getElementById('changeParamsBtn').addEventListener('click', resetInterface);
     document.getElementById('generateAnotherBtn').addEventListener('click', resetInterface);
     document.getElementById('viewBandBtn').addEventListener('click', viewBand);
+    document.getElementById('randomizeAllBtn').addEventListener('click', randomizeAll);
+
+    // Dice buttons: pick a random option from the dropdown
+    document.querySelectorAll('.dice-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const sel = document.getElementById(btn.dataset.target);
+            const opts = sel.querySelectorAll('option');
+            // Pick from non-empty options (skip the "Random" default)
+            const choices = [];
+            for (let i = 1; i < opts.length; i++) choices.push(i);
+            if (choices.length > 0) {
+                sel.selectedIndex = choices[Math.floor(Math.random() * choices.length)];
+            }
+        });
+    });
 });
 
+function randomizeAll() {
+    document.querySelectorAll('.dice-btn').forEach(function(btn) {
+        btn.click();
+    });
+}
+
+function getSelections() {
+    return {
+        genre1: document.getElementById('genre1').value,
+        genre2: document.getElementById('genre2').value,
+        nationality: document.getElementById('nationality').value,
+        style_name: document.getElementById('styleName').value,
+        era: document.getElementById('era').value
+    };
+}
+
 function startGeneration() {
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.textContent = 'Starting...';
     showProgress();
 
     fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(getSelections())
     })
-    .then(response => response.json())
-    .then(data => {
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
         if (data.success) {
             currentGenerationId = data.generation_id;
             startStatusCheck();
@@ -148,7 +345,7 @@ function startGeneration() {
             showError(data.error);
         }
     })
-    .catch(error => {
+    .catch(function(error) {
         console.error('Error:', error);
         showError('Failed to start generation. Please try again.');
     });
@@ -156,53 +353,72 @@ function startGeneration() {
 
 function startStatusCheck() {
     statusCheckInterval = setInterval(checkStatus, 1500);
+    generationTimeout = setTimeout(function() {
+        clearInterval(statusCheckInterval);
+        showError('Generation timed out. Please try again.');
+    }, 300000);
 }
 
 function checkStatus() {
     if (!currentGenerationId) return;
 
     fetch('/api/status/' + currentGenerationId)
-    .then(response => response.json())
-    .then(data => {
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        consecutiveErrors = 0;
         updateProgress(data);
 
         if (data.status === 'complete') {
             clearInterval(statusCheckInterval);
+            if (generationTimeout) clearTimeout(generationTimeout);
             currentDirectory = data.directory;
             showSuccess(data);
         } else if (data.status === 'error') {
             clearInterval(statusCheckInterval);
+            if (generationTimeout) clearTimeout(generationTimeout);
             showError(data.message);
         }
     })
-    .catch(error => {
+    .catch(function(error) {
         console.error('Error checking status:', error);
+        consecutiveErrors++;
+        if (consecutiveErrors >= 5) {
+            clearInterval(statusCheckInterval);
+            if (generationTimeout) clearTimeout(generationTimeout);
+            showError('Connection lost. Please check your network and try again.');
+        } else if (consecutiveErrors >= 3) {
+            document.getElementById('progressMessage').textContent = 'Having trouble reaching the server...';
+        }
     });
 }
 
 function updateProgress(data) {
-    var pct = data.progress || 0;
-    var filled = Math.round(pct / 5);
-    var empty = 20 - filled;
+    const pct = data.progress || 0;
+    const filled = Math.round(pct / 5);
+    const empty = 20 - filled;
 
     document.getElementById('progressBarFill').textContent = '='.repeat(filled);
     document.getElementById('progressBarEmpty').textContent = '-'.repeat(empty);
     document.getElementById('progressPercent').textContent = ' ' + pct + '%';
     document.getElementById('progressMessage').textContent = data.message || '';
 
-    // Update step indicators based on progress thresholds
-    var thresholds = [10, 20, 35, 50, 60, 75, 90];
-    for (var i = 0; i < thresholds.length; i++) {
-        var step = document.getElementById('step' + (i + 1));
+    // Update ARIA progressbar (C-003)
+    document.querySelector('.ascii-progress').setAttribute('aria-valuenow', pct);
+
+    // Update step indicators based on progress thresholds (H-001: CSS classes)
+    const thresholds = [10, 20, 35, 50, 60, 75, 90];
+    for (let i = 0; i < thresholds.length; i++) {
+        const step = document.getElementById('step' + (i + 1));
         if (!step) continue;
-        var indicator = step.querySelector('.step-indicator');
+        const indicator = step.querySelector('.step-indicator');
         if (pct >= thresholds[i]) {
+            indicator.classList.remove('step-indicator--active', 'step-indicator--complete');
             if (pct >= (thresholds[i + 1] || 100)) {
                 indicator.textContent = '[X]';
-                indicator.style.color = '#00ff00';
+                indicator.classList.add('step-indicator--complete');
             } else {
                 indicator.textContent = '[>]';
-                indicator.style.color = '#ffff00';
+                indicator.classList.add('step-indicator--active');
             }
         }
     }
@@ -213,6 +429,7 @@ function showProgress() {
     document.getElementById('progressDisplay').style.display = 'block';
     document.getElementById('successDisplay').style.display = 'none';
     document.getElementById('errorDisplay').style.display = 'none';
+    document.getElementById('progressTitle').focus();
 }
 
 function showSuccess(data) {
@@ -221,23 +438,43 @@ function showSuccess(data) {
     document.getElementById('successDisplay').style.display = 'block';
     document.getElementById('errorDisplay').style.display = 'none';
 
-    var preview = document.getElementById('bandPreview');
-    preview.innerHTML = '<p style="color:#00ffff; font-size:1.3em;">' +
-        '~*~ ' + (data.band_name || 'Your Band') + ' ~*~</p>' +
-        '<p style="color:#cccccc;">The fan page is ready!</p>';
+    const preview = document.getElementById('bandPreview');
+    preview.textContent = '';
+    const nameEl = document.createElement('p');
+    nameEl.className = 'band-preview-name';
+    nameEl.textContent = '~*~ ' + (data.band_name || 'Your Band') + ' ~*~';
+    const msgEl = document.createElement('p');
+    msgEl.className = 'band-preview-msg';
+    msgEl.textContent = 'The fan page is ready!';
+    preview.appendChild(nameEl);
+    preview.appendChild(msgEl);
+
+    document.querySelector('#successDisplay h3').focus();
 }
 
 function showError(message) {
+    // Clean up timers (H-016)
+    if (statusCheckInterval) clearInterval(statusCheckInterval);
+    if (generationTimeout) clearTimeout(generationTimeout);
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('generateBtn').textContent = '>> GENERATE BAND <<';
+
     document.getElementById('startGeneration').style.display = 'none';
     document.getElementById('progressDisplay').style.display = 'none';
     document.getElementById('successDisplay').style.display = 'none';
     document.getElementById('errorDisplay').style.display = 'block';
     document.getElementById('errorMessage').textContent = message;
+
+    document.querySelector('#errorDisplay h3').focus();
 }
 
 function cancelGeneration() {
+    if (!confirm('Cancel band generation? The server will continue processing in the background.')) return;
     if (statusCheckInterval) {
         clearInterval(statusCheckInterval);
+    }
+    if (generationTimeout) {
+        clearTimeout(generationTimeout);
     }
     resetInterface();
 }
@@ -247,6 +484,10 @@ function resetInterface() {
     document.getElementById('progressDisplay').style.display = 'none';
     document.getElementById('successDisplay').style.display = 'none';
     document.getElementById('errorDisplay').style.display = 'none';
+
+    // Re-enable generate button
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('generateBtn').textContent = '>> GENERATE BAND <<';
 
     // Reset progress display
     document.getElementById('progressBarFill').textContent = '';
@@ -258,11 +499,15 @@ function resetInterface() {
     var indicators = document.querySelectorAll('.step-indicator');
     for (var i = 0; i < indicators.length; i++) {
         indicators[i].textContent = '...';
-        indicators[i].style.color = '';
+        indicators[i].classList.remove('step-indicator--active', 'step-indicator--complete');
     }
+
+    // Reset ARIA progressbar
+    document.querySelector('.ascii-progress').setAttribute('aria-valuenow', 0);
 
     currentGenerationId = null;
     currentDirectory = null;
+    consecutiveErrors = 0;
 }
 
 function viewBand() {

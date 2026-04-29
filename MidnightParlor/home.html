@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~*~ Midnight Parlor ~*~ Official Fan Page ~*~</title>
+    <style>
+        body {
+            background-color: #000000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='%23111'/%3E%3C/svg%3E");
+            color: #cccccc;
+            font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        a { color: #ffff00; }
+        a:visited { color: #00ffff; }
+        a:hover { color: #ff4444; text-decoration: none; }
+        .page-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .header-table {
+            width: 100%;
+            background: linear-gradient(to right, #000033, #000066, #000033);
+            border: 3px ridge #00ffff;
+            margin-bottom: 10px;
+        }
+        .header-table td {
+            text-align: center;
+            padding: 15px;
+        }
+        .divider {
+            width: 80%;
+            margin: 15px auto;
+        }
+        .section-header {
+            color: #ffff00;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0 10px 0;
+            text-shadow: 1px 1px 2px #00ffff;
+        }
+        .photo-frame {
+            text-align: center;
+            margin: 15px auto;
+            position: relative;
+            display: inline-block;
+        }
+        .photo-wrapper {
+            text-align: center;
+        }
+        .photo-frame img {
+            max-width: 500px;
+            width: 100%;
+            border: 4px ridge #00ffff;
+            display: block;
+            filter: grayscale(100%);
+        }
+        .photo-credit {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #aaaaaa;
+            font-size: 0.65em;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            text-shadow: 1px 1px 2px #000000;
+            letter-spacing: 0.5px;
+        }
+        .photo-caption {
+            color: #ff4444;
+            font-style: italic;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .backstory-box {
+            background-color: #0a0a1a;
+            border: 2px inset #ffff00;
+            padding: 15px;
+            margin: 10px auto;
+            width: 90%;
+            color: #dddddd;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        .members-table {
+            margin: 10px auto;
+            border: 2px ridge #ffff00;
+            background-color: #0a0a0a;
+            border-collapse: collapse;
+        }
+        .members-table td {
+            border-bottom: 1px dashed #333333;
+        }
+        .footer-area {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            border-top: 2px ridge #00ffff;
+            font-size: 0.8em;
+            color: #888888;
+        }
+        .footer-area a {
+            color: #00ffff;
+            font-size: 0.85em;
+        }
+        .blink {
+            animation: blinker 1.2s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+        .badge-row {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 0.75em;
+            color: #999999;
+        }
+        .badge-row span {
+            margin: 0 8px;
+            padding: 3px 8px;
+            border: 1px solid #444444;
+            background-color: #111111;
+        }
+        .nav-bar {
+            text-align: center;
+            padding: 8px;
+            background-color: #111111;
+            border: 1px solid #333333;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        .nav-bar a {
+            margin: 0 5px;
+        }
+        marquee {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 2px 2px 4px #00ffff;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }
+        .stars {
+            color: #ff4444;
+            letter-spacing: 3px;
+        }
+    
+    
+    /* N-031 migration: skip link */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      padding: 8px 16px;
+      background: #ffff00;
+      color: #000;
+      font-weight: bold;
+      z-index: 100;
+    }
+    
+    /* N-031 migration: respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      .blink, marquee {
+        animation: none;
+      }
+      marquee {
+        overflow: visible;
+        white-space: normal;
+      }
+    }
+    
+    /* N-003 migration: faux-link for non-functional decorative links */
+    .faux-link {
+      color: #ffff00;
+      text-decoration: underline;
+      cursor: default;
+    }
+    /* N-021 migration: keyboard focus indicators */
+    a:focus-visible {
+      outline: 2px solid #ffff00;
+      outline-offset: 2px;
+    }
+    </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <table class="header-table" cellpadding="0" cellspacing="0">
+        <tr><td>
+            <span class="stars">* * * * * * * * * * * * *</span><br>
+            <h1 class="band-title"><marquee scrollamount="3">Midnight Parlor</marquee></h1>
+            <br>
+            <span style="color:#ff4444; font-size:0.85em;">
+                Afro-Radiant Rhythms | Go-Go / Soul | Est. 1974 | Lagos, Nigeria
+            </span><br>
+            <span class="stars">* * * * * * * * * * * * *</span>
+        </td></tr>
+    </table>
+
+    <!-- Navigation -->
+    <nav class="nav-bar" aria-label="Page sections">
+        <a href="#backstory">Backstory</a> |
+        <a href="#photo">Band Photo</a> |
+        <a href="#members">Members</a> |
+        <a href="#discography">Discography</a> |
+        <a href="#guestbook">Guestbook</a>
+    </nav>
+
+    <main id="main-content">
+
+    <!-- Backstory -->
+    <a name="backstory"></a>
+    <h2 class="section-header">~ The Story ~</h2>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div class="backstory-box">
+        Hey, let me tell you about this incredible band I saw live back in the day called Midnight Parlor. They came together in Lagos in 1974 and had this killer Afro-Radiant Rhythms vibe, mixing Go-Go and Soul in a way you wouldn't believe!
+
+First up, there's Kofi "Groove" Mensah on the bass guitar. Kofi was the backbone of the band, man. His energy was infectious. Always smiling, always keeping the groove tight. He made you feel like you were part of something bigger just by watching him play.
+
+Then there was Bisi "Soulfire" Adeyemi on the lead vocals. Her voice... oh, it was something else! She could light up the room—warm and electric at the same time. She had this way of captivating the audience with her charisma and soulful spirit. People said she could sing the phone book and make it sound like a hit.
+
+On the drums, they had Tunde "Tick-Tock" Ogunleye. He was the heartbeat of the group. Always had a joke at the ready and somehow managed to keep perfect time while making everyone laugh. You could just tell he loved what he did.
+
+And finally, Emeka "Keys" Okafor on the synthesizer. Emeka was a bit of a mystery—quiet but always thinking ahead. He'd come up with these wild sounds that seemed to take you on a journey. Somehow, he tied everything together.
+
+They met through the local music scene, jamming in basements and bars, and it was magic from the start. Seeing them live was like witnessing pure joy and talent come together. Midnight Parlor wasn't just a band; they were an experience.
+    </div>
+
+    <!-- Band Photo -->
+    <a name="photo"></a>
+    <h2 class="section-header">~ Band Photo ~</h2>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div class="photo-wrapper">
+        <div class="photo-frame">
+            <img src="band_photo.jpg" alt="Midnight Parlor - Band Photo">
+            <div class="photo-credit">Mgmt: Midnight Artists Group / Lagos, Nigeria</div>
+        </div>
+        <div class="photo-caption">
+            Kofi "Groove" Mensah, Bisi "Soulfire" Adeyemi, Tunde "Tick-Tock" Ogunleye, Emeka "Keys" Okafor
+        </div>
+    </div>
+
+    <!-- Band Members -->
+    <a name="members"></a>
+    <h2 class="section-header">~ The Members ~</h2>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
+        
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Kofi "Groove" Mensah</td>
+            <td style="color:#ff4444; padding:4px 12px;">bass guitar</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Kofi was the backbone of the band, man, with infectious energy and always keeping the groove tight.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Bisi "Soulfire" Adeyemi</td>
+            <td style="color:#ff4444; padding:4px 12px;">lead vocals</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">Her voice was warm and electric, captivating the audience with her charisma and soulful spirit.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Tunde "Tick-Tock" Ogunleye</td>
+            <td style="color:#ff4444; padding:4px 12px;">drums</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">He was the heartbeat of the group, always ready with a joke and perfect timing.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Emeka "Keys" Okafor</td>
+            <td style="color:#ff4444; padding:4px 12px;">synthesizer</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">A quiet mystery, Emeka tied everything together with wild sounds that took you on a journey.</td>
+        </tr>
+    </table>
+
+    <!-- Discography -->
+    <a name="discography"></a>
+    <h2 class="section-header">~ Discography ~</h2>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Midnight Groove (1974)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Lagos Twilight Serenade</li>
+<li style="color:#cccccc;">Rhythms of the Heartbeat</li>
+<li style="color:#cccccc;">Kofi's Bass Parade</li>
+<li style="color:#cccccc;">Soulful Sunrise</li>
+<li style="color:#cccccc;">Go-Go Spirit Dance</li>
+<li style="color:#cccccc;">Afrofunk Awakening</li>
+<li style="color:#cccccc;">A Night in the Parlor</li>
+<li style="color:#cccccc;">Radiant Love Affair</li>
+<li style="color:#cccccc;">Groove Under the Stars</li>
+<li style="color:#cccccc;">The Midnight Caller</li>
+<li style="color:#cccccc;">Echoes of the River</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Radiant Visions (1975)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Stars of Liberty</li>
+<li style="color:#cccccc;">Samba in the Moonlight</li>
+<li style="color:#cccccc;">Soul Journey</li>
+<li style="color:#cccccc;">Afrobeat Dreamscape</li>
+<li style="color:#cccccc;">Dance of the Dawn</li>
+<li style="color:#cccccc;">The Glow of Ages</li>
+<li style="color:#cccccc;">Mystic Sway</li>
+<li style="color:#cccccc;">Rhythmic Echoes</li>
+<li style="color:#cccccc;">Groove Oasis</li>
+<li style="color:#cccccc;">Visions of the Night</li>
+<li style="color:#cccccc;">Transcendence Groove</li>
+<li style="color:#cccccc;">Electric Serenade</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Funk Resonance (1976)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Sunrise in Motion</li>
+<li style="color:#cccccc;">Rhythmic Revival</li>
+<li style="color:#cccccc;">Kofi’s Golden Groove</li>
+<li style="color:#cccccc;">Soul Celebration</li>
+<li style="color:#cccccc;">Cosmic Go-Go Jam</li>
+<li style="color:#cccccc;">Serenade of the Stars</li>
+<li style="color:#cccccc;">Dance Revolution</li>
+<li style="color:#cccccc;">Midnight's Embrace</li>
+<li style="color:#cccccc;">Afro Radiant Pulse</li>
+<li style="color:#cccccc;">Groove of Tomorrow</li>
+<li style="color:#cccccc;">Echoes of Freedom</li>
+<li style="color:#cccccc;">The Final Serenade</li>
+
+                </ol>
+            </td></tr>
+        </table>
+
+    <!-- Guestbook / Links -->
+    <a name="guestbook"></a>
+    <h2 class="section-header">~ Guestbook & Links ~</h2>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div style="text-align:center; padding:10px;">
+        <p><span class="faux-link">Sign the Guestbook!</span> | <span class="faux-link">View Guestbook</span></p>
+        <p><a href="mailto:webmaster@midnightparlor.geocities.com">Email the Webmaster</a></p>
+        <p style="color:#888888; font-size:0.8em;">
+            <span class="faux-link">Link to us!</span> |
+            <span class="faux-link">Webrings</span> |
+            <span class="faux-link">MIDI Archive</span>
+        </p>
+    </div>
+
+    </main>
+
+    <!-- Badges / Footer -->
+    <footer>
+    <div class="badge-row" aria-hidden="true">
+        <span>Best viewed in Netscape Navigator 4.0</span>
+        <span>800x600 resolution</span>
+        <span>Made with Notepad</span>
+    </div>
+
+    <div class="footer-area">
+        <p>You are visitor number <strong style="color:#ffff00;">#86,614</strong> since 1974!</p>
+        <p class="blink">*** This page is always under construction! ***</p>
+        <p>&copy; 2026 Midnight Parlor Fan Page. All rights reserved.<br>
+        This is a fan-made page. We are not affiliated with Midnight Parlor or their management.</p>
+        <p><a href="#main-content">Back to Top</a></p>
+    </div>
+    </footer>
+
+</div>
+
+</body>
+</html>

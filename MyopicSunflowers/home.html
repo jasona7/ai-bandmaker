@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~*~ Myopic Sunflowers ~*~ Official Fan Page ~*~</title>
+    <style>
+        body {
+            background-color: #000000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='3'%3E%3Crect width='1' height='1' fill='%23111'/%3E%3C/svg%3E");
+            color: #cccccc;
+            font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        a { color: #ffff00; }
+        a:visited { color: #00ffff; }
+        a:hover { color: #ff4444; text-decoration: none; }
+        .page-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .header-table {
+            width: 100%;
+            background: linear-gradient(to right, #000033, #000066, #000033);
+            border: 3px ridge #00ffff;
+            margin-bottom: 10px;
+        }
+        .header-table td {
+            text-align: center;
+            padding: 15px;
+        }
+        .divider {
+            width: 80%;
+            margin: 15px auto;
+        }
+        .section-header {
+            color: #ffff00;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 20px 0 10px 0;
+            text-shadow: 1px 1px 2px #00ffff;
+        }
+        .photo-frame {
+            text-align: center;
+            margin: 15px auto;
+            position: relative;
+            display: inline-block;
+        }
+        .photo-wrapper {
+            text-align: center;
+        }
+        .photo-frame img {
+            max-width: 500px;
+            width: 100%;
+            border: 4px ridge #00ffff;
+            display: block;
+            filter: grayscale(100%);
+        }
+        .photo-credit {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #aaaaaa;
+            font-size: 0.65em;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            text-shadow: 1px 1px 2px #000000;
+            letter-spacing: 0.5px;
+        }
+        .photo-caption {
+            color: #ff4444;
+            font-style: italic;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .backstory-box {
+            background-color: #0a0a1a;
+            border: 2px inset #ffff00;
+            padding: 15px;
+            margin: 10px auto;
+            width: 90%;
+            color: #dddddd;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        .members-table {
+            margin: 10px auto;
+            border: 2px ridge #ffff00;
+            background-color: #0a0a0a;
+            border-collapse: collapse;
+        }
+        .members-table td {
+            border-bottom: 1px dashed #333333;
+        }
+        .footer-area {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            border-top: 2px ridge #00ffff;
+            font-size: 0.8em;
+            color: #888888;
+        }
+        .footer-area a {
+            color: #00ffff;
+            font-size: 0.85em;
+        }
+        .blink {
+            animation: blinker 1.2s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+        .badge-row {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 0.75em;
+            color: #999999;
+        }
+        .badge-row span {
+            margin: 0 8px;
+            padding: 3px 8px;
+            border: 1px solid #444444;
+            background-color: #111111;
+        }
+        .nav-bar {
+            text-align: center;
+            padding: 8px;
+            background-color: #111111;
+            border: 1px solid #333333;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        .nav-bar a {
+            margin: 0 5px;
+        }
+        marquee {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 2px 2px 4px #00ffff;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+        }
+        .stars {
+            color: #ff4444;
+            letter-spacing: 3px;
+        }
+    
+    
+    /* N-031 migration: skip link */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-link:focus {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      padding: 8px 16px;
+      background: #ffff00;
+      color: #000;
+      font-weight: bold;
+      z-index: 100;
+    }
+    
+    /* N-031 migration: respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      .blink, marquee {
+        animation: none;
+      }
+      marquee {
+        overflow: visible;
+        white-space: normal;
+      }
+    }
+    
+    /* N-003 migration: faux-link for non-functional decorative links */
+    .faux-link {
+      color: #ffff00;
+      text-decoration: underline;
+      cursor: default;
+    }
+    /* N-021 migration: keyboard focus indicators */
+    a:focus-visible {
+      outline: 2px solid #ffff00;
+      outline-offset: 2px;
+    }
+    </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <table class="header-table" cellpadding="0" cellspacing="0">
+        <tr><td>
+            <span class="stars">* * * * * * * * * * * * *</span><br>
+            <h1 class="band-title"><marquee scrollamount="3">Myopic Sunflowers</marquee></h1>
+            <br>
+            <span style="color:#ff4444; font-size:0.85em;">
+                Cosmic Grit | Post-Punk / Highlife | Est. 1987 | Icelandic-Ghanaian
+            </span><br>
+            <span class="stars">* * * * * * * * * * * * *</span>
+        </td></tr>
+    </table>
+
+    <!-- Navigation -->
+    <nav class="nav-bar" aria-label="Page sections">
+        <a href="#backstory">Backstory</a> |
+        <a href="#photo">Band Photo</a> |
+        <a href="#members">Members</a> |
+        <a href="#discography">Discography</a> |
+        <a href="#guestbook">Guestbook</a>
+    </nav>
+
+    <main id="main-content">
+
+    <!-- Backstory -->
+    <a name="backstory"></a>
+    <h2 class="section-header">~ The Story ~</h2>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div class="backstory-box">
+        In the twilight of the 1980s, nestled between the auroras of Iceland and the warmth of Ghanaian sunrises, emerged a band as enigmatic as an untamed dream — Myopic Sunflowers. Their sound, a kaleidoscope of Cosmic Grit, blended Post-Punk's brooding introspection with the vibrant rhythm of Highlife, creating an auditory tapestry that defied the ordinary.
+
+At the heart of this sonic tapestry was Óskar "Starry" Einarsson, the ethereal voice that led listeners through realms of lyrical mysticism. His voice, a haunting echo from the fjords, resonated with a clarity that pierced the soul. Starry's presence was that of a celestial navigator, guiding the band through cosmic soundscapes.
+
+Miriam "Mimi" Mensah, the rhythmic pulse on the drums, infused each beat with a heartbeat of African warmth, her personality as vibrant as a sunrise over Accra. She was the heartbeat and the light, grounding the band with rhythms that danced on the edge of time.
+
+Gunnar "Gus" Sigurdsson wielded his bass guitar like a brush, painting deep, resonant lines across the aural canvas. An introvert by nature, Gus was the invisible thread weaving the band’s diverse influences into a harmonious whole.
+
+Lastly, Yaa "Sunshine" Addo, with her nimble fingers on the synthesizer, conjured galaxies from sounds. Her whimsical nature brought an air of magic, turning each performance into an odyssey.
+
+Together, Myopic Sunflowers blossomed into legends, their music a transcendent blend of celestial and earthly, an opus for the ages.
+    </div>
+
+    <!-- Band Photo -->
+    <a name="photo"></a>
+    <h2 class="section-header">~ Band Photo ~</h2>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div class="photo-wrapper">
+        <div class="photo-frame">
+            <img src="band_photo.jpg" alt="Myopic Sunflowers - Band Photo">
+            <div class="photo-credit">Mgmt: Myopic Artists Group / Icelandic-Ghanaian</div>
+        </div>
+        <div class="photo-caption">
+            Óskar "Starry" Einarsson, Miriam "Mimi" Mensah, Gunnar "Gus" Sigurdsson, Yaa "Sunshine" Addo
+        </div>
+    </div>
+
+    <!-- Band Members -->
+    <a name="members"></a>
+    <h2 class="section-header">~ The Members ~</h2>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
+        
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Óskar "Starry" Einarsson</td>
+            <td style="color:#ff4444; padding:4px 12px;">lead vocals</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">The ethereal voice that led listeners through realms of lyrical mysticism.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Miriam "Mimi" Mensah</td>
+            <td style="color:#ff4444; padding:4px 12px;">drums</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">The rhythmic pulse on the drums, infusing each beat with a heartbeat of African warmth.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Gunnar "Gus" Sigurdsson</td>
+            <td style="color:#ff4444; padding:4px 12px;">bass guitar</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">An introvert by nature, wielding his bass guitar like a brush to paint deep, resonant lines.</td>
+        </tr>
+        <tr>
+            <td style="color:#00ffff; padding:4px 12px; font-weight:bold;">Yaa "Sunshine" Addo</td>
+            <td style="color:#ff4444; padding:4px 12px;">synthesizer</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">With her nimble fingers, she conjured galaxies from sounds, bringing an air of magic to each performance.</td>
+        </tr>
+    </table>
+
+    <!-- Discography -->
+    <a name="discography"></a>
+    <h2 class="section-header">~ Discography ~</h2>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Celestial Shadows (1987)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Glacial Reflections</li>
+<li style="color:#cccccc;">Midnight Palm Sway</li>
+<li style="color:#cccccc;">Echoes of the Nordic Sun</li>
+<li style="color:#cccccc;">Mirage in the Harmattan</li>
+<li style="color:#cccccc;">Moonlit Savannah</li>
+<li style="color:#cccccc;">Neon Dusk</li>
+<li style="color:#cccccc;">Frostbitten Rhythms</li>
+<li style="color:#cccccc;">Aurora's Lament</li>
+<li style="color:#cccccc;">Gritty Highlife Serenade</li>
+<li style="color:#cccccc;">Luminous Erosion</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Ethereal Dissonance (1988)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Astral Plains</li>
+<li style="color:#cccccc;">Electric Griot Tales</li>
+<li style="color:#cccccc;">Twilight on the Volta</li>
+<li style="color:#cccccc;">Sub-Saharan Murmur</li>
+<li style="color:#cccccc;">Prism Dance</li>
+<li style="color:#cccccc;">Icy Harmonies</li>
+<li style="color:#cccccc;">Dissonant Tropics</li>
+<li style="color:#cccccc;">Eclipsed Reverie</li>
+<li style="color:#cccccc;">Sonic Palimpsest</li>
+<li style="color:#cccccc;">Timbre of the North Star</li>
+<li style="color:#cccccc;">Echoing Savannah</li>
+
+                </ol>
+            </td></tr>
+        </table>
+        <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="#00ffff"
+               style="margin:10px auto; background-color:#111111;">
+            <tr><td colspan="2" style="background-color:#222222; color:#ffff00; font-weight:bold; padding:8px; font-size:1.1em;">
+                Transcendent Tapestry (1989)
+            </td></tr>
+            <tr><td style="padding:8px;">
+                <ol style="color:#ff4444; margin:0; padding-left:20px;">
+                    <li style="color:#cccccc;">Cosmic Driftwood</li>
+<li style="color:#cccccc;">Kaleidoscope Currents</li>
+<li style="color:#cccccc;">Harmonized Convulsion</li>
+<li style="color:#cccccc;">Sunflower's Nocturne</li>
+<li style="color:#cccccc;">Temporal Oasis</li>
+<li style="color:#cccccc;">Rhythmic Constellations</li>
+<li style="color:#cccccc;">Grit and Glimmer</li>
+<li style="color:#cccccc;">Serengeti Twilight</li>
+<li style="color:#cccccc;">Nordics in Reverie</li>
+<li style="color:#cccccc;">Echoes of Yesternight</li>
+<li style="color:#cccccc;">The Infinite Unveiling</li>
+<li style="color:#cccccc;">Dreamweaver's Epilogue</li>
+
+                </ol>
+            </td></tr>
+        </table>
+
+    <!-- Guestbook / Links -->
+    <a name="guestbook"></a>
+    <h2 class="section-header">~ Guestbook & Links ~</h2>
+    <hr class="divider" color="#00ffff" size="2" noshade>
+    <div style="text-align:center; padding:10px;">
+        <p><span class="faux-link">Sign the Guestbook!</span> | <span class="faux-link">View Guestbook</span></p>
+        <p><a href="mailto:webmaster@myopicsunflowers.geocities.com">Email the Webmaster</a></p>
+        <p style="color:#888888; font-size:0.8em;">
+            <span class="faux-link">Link to us!</span> |
+            <span class="faux-link">Webrings</span> |
+            <span class="faux-link">MIDI Archive</span>
+        </p>
+    </div>
+
+    </main>
+
+    <!-- Badges / Footer -->
+    <footer>
+    <div class="badge-row" aria-hidden="true">
+        <span>Best viewed in Netscape Navigator 4.0</span>
+        <span>800x600 resolution</span>
+        <span>Made with Notepad</span>
+    </div>
+
+    <div class="footer-area">
+        <p>You are visitor number <strong style="color:#ffff00;">#83,958</strong> since 1987!</p>
+        <p class="blink">*** This page is always under construction! ***</p>
+        <p>&copy; 2026 Myopic Sunflowers Fan Page. All rights reserved.<br>
+        This is a fan-made page. We are not affiliated with Myopic Sunflowers or their management.</p>
+        <p><a href="#main-content">Back to Top</a></p>
+    </div>
+    </footer>
+
+</div>
+
+</body>
+</html>
