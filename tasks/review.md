@@ -1,471 +1,168 @@
 # UX & Accessibility Code Review
-**Date**: 2026-04-28
+**Date**: 2026-04-29
 **Reviewer**: Jennifer Mitchelle (Senior UX Design Critic, Swords, Ireland)
-**Branch**: fix/code-review-2026-04-28
+**Branch**: fix/code-review-2026-04-29
 
-## 2026-04-28 Audit (Jennifer Mitchelle, UX)
+## 2026-04-29 Audit (Jennifer Mitchelle, UX)
 
-Twenty-fifth periodic review. **Code changes today: N-033 remediated.** Re-audit performed against 8 source files (Python/CSS/JS/templates source line count unchanged: 2596 total) plus all 12 generated fan pages. Rotation this cycle: deep-read of `TheLuminescentUndertow` (v1, lines 180-260 — chosen because it is the only v1 page where the marquee header lives at line 191 rather than line 206; we needed to confirm the patch regex would still match) plus pre/post-patch grep verification across all 12 fan pages. Cross-page grep sweep across 12 structural markers; tooling checks (Python AST, pyflakes, Jinja2 compile, CSS brace balance, CSS custom-property reference audit, Flask `test_client` on 8 routes including 2 adversarial: `/band/$(evil)/` 400 and `/band/%2E%2E%2Fetc/` 404). Post-fix spot-render verification of 7 ASCII v1 pages via Flask test client to confirm `<h1 class="band-title"><marquee scrollamount="3">…</marquee></h1>` nesting in the served HTML.
+Twenty-sixth periodic review. **One new HIGH finding (J-001) — a regression introduced by yesterday's N-033 fix.** Re-audit performed against 9 source files (app.py 284, createAct.py 827, migrate_legacy_pages.py 152, base.html 63, index.html 97, generate.html 519, gallery.html 63, style.css 724, main.js 19 = 2748 total — note: prior cycle's 2596 figure excluded migrate_legacy_pages.py from the count) plus all 12 generated fan pages. Tooling checks (Python AST, pyflakes on all 3 .py files, Jinja2 compile, CSS brace balance, Flask `test_client` on 8 routes including 2 adversarial). Heading-hierarchy grep across all 12 fan pages (`grep -n '<h[1-6]'`) — this is the audit step that surfaced J-001.
 
-**N-033 escalated and remediated this cycle.** Per the escalation rule documented in the 2026-04-27 entry ("if N-033 is still unremediated at next cycle's audit it should escalate from Medium to High and trigger a Phase 2 fix"), today's audit confirmed N-033 was unremediated at the start of the cycle (`<h1>` 4/12 across fan pages; 8 v1 pages with `<marquee>` band-name heading and no `<h1>`), so it escalated Medium → High. Phase 2 then implemented the recommended structural fix via `migrate_legacy_pages.py`. Post-fix `<h1>` is 12/12 across fan pages; the 8 `<marquee>` elements are preserved (now nested inside the `<h1>` for visual continuity). The fix is idempotent and was verified by a second migration-script run that produced 0 patches.
-
-**No other new issues identified this cycle.** All 7 previously resolved issues (N-001, N-003, N-021, N-023, N-024, N-028, N-031) remain verified. With N-033 closed, open count drops from 7 Medium / 22 Low to **6 Medium / 22 Low**. This is the first "code changed" cycle since 2026-04-13's batch of fixes (12 cycles ago); the prior 11 had been "no new findings."
+**J-001 is a direct regression of the N-033 fix shipped in 78a18f4 on 2026-04-28.** Before that fix, the 8 v1 fan pages had no `<h1>` element (the band name was in a bare `<marquee>`), and section headers were already `<h3>` — so the visible "heading skip" was h0→h3, which is technically still a 1.3.1 violation but presents to AT as "no top-level heading" (which is what N-033 named). Yesterday's fix added a real `<h1 class="band-title">` wrapping the marquee. That correctly satisfies the missing-h1 leg of WCAG 1.3.1, but it now exposes an h1→h3 skip across the 8 v1 pages because the `<h3 class="section-header">` elements were left untouched. The page now has a top-level heading but the next heading is two levels deeper, which AT screen-reader rotors render as a broken outline.
 
 | Severity | Count | Change |
 |---|---|---|
 | Critical | 0 | — |
-| High | 0 | — |
-| Medium | 6 | -1 (N-033 closed) |
+| High | 1 | +1 (J-001 new — regression of N-033) |
+| Medium | 6 | — (N-002, N-004, N-009, N-012, N-016, N-019) |
 | Low | 22 | — |
+
+Per the workflow, J-001 was fixed in Phase 2 of this same cycle.
 
 ### Phase 1 — Audit findings by category
 
 **Critical**: 0 (none)
-**High**: 1 escalated → 1 closed = **0 net** (N-033 escalated from Medium to High per the documented aging rule, then fixed in Phase 2 of the same cycle)
-**Medium**: 0 new (6 carried — N-002, N-004, N-009, N-012, N-016, N-019 — N-033 escalated out and was closed)
+**High**: 1 new — **J-001** (regression introduced by N-033 fix; see below)
+**Medium**: 0 new (6 carried — N-002, N-004, N-009, N-012, N-016, N-019)
 **Low**: 0 new (22 carried — N-005, N-006, N-007, N-008, N-010, N-011, N-014, N-017, N-018, N-020, N-022, N-025, N-026, N-027, N-029, N-030, N-032, N-034, N-035, N-036, N-037, N-038, N-039)
+
+#### J-001 — HIGH — Heading-hierarchy skip (h1 → h3) on 8 v1 fan pages
+- **Severity**: HIGH
+- **WCAG**: SC 1.3.1 Info and Relationships (Level A), SC 2.4.6 Headings and Labels (Level AA)
+- **Files** (40 total occurrences — 5 per page × 8 pages):
+  - `ChãoDeCorais/home.html:228, 246, 260, 296, 373`
+  - `EtherealTrampleweed/home.html:228, 248, 262, 305, 377`
+  - `EucalyptusSaints/home.html:228, 246, 260, 296, 376`
+  - `Inu-k-trkadeka/home.html:228, 246, 260, 296, 368`
+  - `MidnightParlor/home.html:228, 246, 260, 296, 370`
+  - `MyopicSunflowers/home.html:228, 246, 260, 296, 368`
+  - `NightshadeVanguard/home.html:228, 246, 260, 296, 375`
+  - `TheLuminescentUndertow/home.html:213, 240, 251, 294, 374`
+- **Origin**: regression introduced by commit `78a18f4` (2026-04-28, N-033 fix). The fix wrapped the band-name `<marquee>` in `<h1 class="band-title">` but did not adjust the existing `<h3 class="section-header">` elements that mark the page sections (Backstory, Band Photo, Members, Discography, Guestbook).
+- **User impact**: Screen-reader users navigating by heading rotor (a primary AT pattern) jump from a top-level h1 (band name) directly to h3, signalling that two structural levels are missing. AT may announce this as "heading level 3" without context, breaking the page outline. Sighted users see no visual change — the bug is purely structural/semantic.
+- **Why this didn't appear in prior reviews**: Before 78a18f4, v1 pages had NO `<h1>` at all, so the audit framed the issue as "missing h1" (N-033) rather than "broken heading hierarchy". Now that h1 is present, the h1→h3 skip becomes the visible failure. The per-page heading inventory done in past audits counted `<h1>`, `<marquee>`, and `<h2>` markers but did not enumerate all `<h[1-6]>` levels in sequence — that's the audit improvement that surfaced this on 2026-04-29.
+- **Recommended fix (applied in Phase 2)**: Promote the 5 `<h3 class="section-header">` elements on each of the 8 v1 pages to `<h2 class="section-header">`. Visual styling is governed by the `.section-header` CSS class (defined in each page's embedded `<style>` block at line 38 in EtherealTrampleweed; same shape across all 8) and is independent of the heading level — so the substitution is purely semantic and preserves all visual output. Verified per-page that there are zero existing `<h2>` elements (so the change is unambiguous) and exactly 5 `<h3>` elements per page (all of them `section-header`).
+- **Rejected alternatives**:
+  - Demote `<h1>` to `<h2>` and unwrap N-033's contribution → regresses N-033 (would re-fail SC 2.4.6).
+  - Insert a synthetic `<h2>` before each `<h3>` → adds visual noise without solving the issue.
+  - Add `aria-level="2"` to the h3 elements → works for AT but leaves the DOM hierarchy broken; element-level promotion is the canonical fix.
 
 ### Phase 2 — Fix applied this cycle
 
-**N-033** (was Medium, escalated to High, now Resolved): v1-template fan pages had the band name inside a `<marquee>` element with no surrounding heading — a WCAG SC 1.3.1 (Info and Relationships, Level A) and SC 2.4.6 (Headings and Labels, Level AA) failure on every v1 page. Fixed by extending `migrate_legacy_pages.py` with a new patch step that wraps the existing `<marquee scrollamount="3">{band_name}</marquee>` element in an `<h1 class="band-title">…</h1>`. The marquee is preserved inside the `<h1>` so the visual animation continues to work; assistive tech now sees a real top-level heading. The pattern was uniform across all 8 v1 pages (verified pre-patch by reading the marquee line in each), so a single targeted regex replacement was safe to apply uniformly. The 4 legacy pages (`TheVelvetEchoes`, `MoonlitReverie`, `EchoesOfTheMirage`, `**VelvetEchoes`) already have a proper `<h1>` and no `<marquee>`, so the patch's existence-gates skipped them naturally. Idempotency was verified by re-running the script (0 patches on the second run).
+**J-001 (HIGH, Resolved)**: Extended `migrate_legacy_pages.py` with a new patch step (`J001_SECTION_HEADER_RE`) that promotes `<h3 class="section-header">…</h3>` to `<h2 class="section-header">…</h2>`. The regex matches both opening and closing tags so the surrounding inner content is preserved verbatim. The patch is gated on `'<h3 class="section-header"' in content` — once a v1 page has been migrated, the gate is false, so a re-run is a no-op (idempotency verified — see Phase 3). The 4 legacy pages (`TheVelvetEchoes`, `MoonlitReverie`, `EchoesOfTheMirage`, `**VelvetEchoes`) use `<h2 class="section-title">` (different class name), so their section headers don't match the regex and are correctly left alone.
 
-Files changed (9):
-- `migrate_legacy_pages.py` — added `N033_MARQUEE_RE` module-level regex and a new patch step in `patch_html()` (gated on `'class="band-title"' not in content` so it only runs on unpatched v1 pages); updated docstring to list N-033.
-- `ChãoDeCorais/home.html` — line 206 wrapped in `<h1 class="band-title">…</h1>`.
-- `EtherealTrampleweed/home.html` — line 206 wrapped.
-- `EucalyptusSaints/home.html` — line 206 wrapped.
-- `Inu-k-trkadeka/home.html` — line 206 wrapped.
-- `MidnightParlor/home.html` — line 206 wrapped.
-- `MyopicSunflowers/home.html` — line 206 wrapped.
-- `NightshadeVanguard/home.html` — line 206 wrapped.
-- `TheLuminescentUndertow/home.html` — line 191 wrapped (its header table is shorter; the line offset differs but the marquee element shape is identical).
+The script was re-run after the patch was added; 8 v1 pages were patched (one substitution path per page; 5 h3→h2 swaps each = 40 line edits), and the 4 legacy pages reported "no changes needed". Idempotency was verified by a third run that reported "no changes needed" on all 12 pages.
 
-DALL-E credits NOT consumed: `createAct.py` was not re-run; the fix is purely a structural retroactive patch on existing HTML files. The v2 template at `createAct.py:657` already correctly emits `<h1 class="band-title">{band_name}</h1>` (no marquee) so future generations are unaffected by the migration script.
+`createAct.py` v2 template (line 657 emits `<h1 class="band-title">`; lines 676, 683, 696, 703, 708 emit `<h2 class="section-header">`) was inspected and confirmed to ALREADY use `<h2>` correctly. So future v2-generated pages are unaffected by both N-033 and J-001 — no template change is required, only a one-time retroactive patch on the 8 pre-existing v1 pages. DALL-E credits are NOT consumed.
+
+**While I was in `migrate_legacy_pages.py`**, I also removed an unused `import sys` (line 20 in the prior file) — pyflakes flagged it as a pre-existing issue introduced when the script was originally created in commit 5d0042f. This is a one-line cleanup and did not warrant its own finding.
+
+Files changed (10):
+- `migrate_legacy_pages.py` — added `J001_SECTION_HEADER_RE` module-level regex and a new patch step in `patch_html()` (gated on `'<h3 class="section-header"' in content`); updated docstring to list J-001; removed unused `import sys`.
+- `ChãoDeCorais/home.html` — 5 `<h3 class="section-header">` → `<h2 class="section-header">` (and matching `</h3>` → `</h2>`).
+- `EtherealTrampleweed/home.html` — same.
+- `EucalyptusSaints/home.html` — same.
+- `Inu-k-trkadeka/home.html` — same.
+- `MidnightParlor/home.html` — same.
+- `MyopicSunflowers/home.html` — same.
+- `NightshadeVanguard/home.html` — same.
+- `TheLuminescentUndertow/home.html` — same.
+- `tasks/review.md` — this entry.
 
 ### Phase 3 — Verification this cycle
 
 | Check | Result |
 |---|---|
 | Python AST parse on app.py, createAct.py, migrate_legacy_pages.py | PASS |
-| `pyflakes` on app.py + createAct.py | 3 warnings → still N-037 (`flask.session`, `datetime.datetime`, `datetime.timedelta`) — unchanged |
+| `pyflakes` on app.py + createAct.py + migrate_legacy_pages.py | 3 warnings → still N-037 (`flask.session`, `datetime.datetime`, `datetime.timedelta`); migrate_legacy_pages.py now CLEAN (was: 1 unused-`sys` warning, fixed in this PR as drive-by) |
 | Jinja2 compile on 4 top-level templates | PASS (base/index/generate/gallery all compile) |
-| CSS brace balance | 128/128 (unchanged — N-033 fix did not touch CSS) |
-| CSS custom-property reference audit | 21 referenced / 24 defined — 3 unreferenced (`--space-2xl`, `--space-lg`, `--space-xl`); 0 missing — unchanged |
-| Flask `test_client` on 8 routes (incl. `/band/$(evil)/` 400 and `/band/%2E%2E%2Fetc/` 404) | 8/8 as expected (200×5, 400×1, 404×2) — no regression |
-| Structural marker grep across 12 fan pages | skip-link 12/12, lang="en" 12/12, viewport 12/12, DOCTYPE 12/12, **`<h1` 12/12 (was 4/12 — N-033 fix)**, **`<marquee` 8/8 v1 pages preserved**, href="#" 0/12, id="main-content" 12/12, id="main" 0/12, Back to Top 8/12, bgcolor 0/12, font color 0/12 |
-| Per-page `<h1>` / `<marquee>` count after fix | All 8 v1 pages now show h1=1 marquee=1 with `<h1 class="band-title"><marquee scrollamount="3">{name}</marquee></h1>` nesting; 4 legacy pages still h1=1 marquee=0 (untouched as intended) |
-| Spot-render via Flask `test_client` | 7/7 ASCII v1 pages (`EtherealTrampleweed`, `EucalyptusSaints`, `Inu-k-trkadeka`, `MidnightParlor`, `MyopicSunflowers`, `NightshadeVanguard`, `TheLuminescentUndertow`) returned 200 and the response body contained `<h1 class="band-title"><marquee scrollamount="3">` (correct nesting). The 8th (`ChãoDeCorais`) is unreachable via test_client due to pre-existing N-012 path validation rejecting non-ASCII; verified directly on disk |
-| Idempotency re-run of migrate_legacy_pages.py | 0 patches on second run (all 12 pages: "no changes needed") |
-| Source file line counts (8 source files) | 2596 total — exact match to 2026-04-27 (the migration script grew but is not in the 8 source-file count) |
+| CSS brace balance | 128/128 (unchanged — J-001 fix did not touch CSS) |
+| Flask `test_client` on 8 routes (incl. `/band/$(evil)/` 400 and `/band/%2E%2E%2Fetc/` 404) | 8/8 as expected (200×6, 400×1, 404×2) — no regression |
+| Per-page `<h1>` count after fix (12 fan pages) | 12/12 (unchanged — N-033 fix preserved) |
+| Per-page `<h3 class="section-header">` count after fix (8 v1 pages) | 0/8 (was 5/8 each) — fix correctly applied |
+| Per-page `<h2 class="section-header">` count after fix (8 v1 pages) | 5/8 each (40 total) — fix correctly applied |
+| Per-page heading-sequence read after fix (sampled 3 v1 pages: EtherealTrampleweed, MidnightParlor, TheLuminescentUndertow) | h1, h2, h2, h2, h2, h2 — correct outline |
+| Legacy page heading sequence (4 pages) | Unchanged: h1, h2, h2, h2 — still correct |
+| Idempotency re-run of migrate_legacy_pages.py | 0 patches on third run (all 12 pages: "no changes needed") |
+| Spot-render via Flask `test_client` on 7 ASCII v1 pages | All 7 returned 200 and contained `<h2 class="section-header">~ The Story ~</h2>` (correct nesting) |
+| Source file line counts | app.py 284, createAct.py 827, migrate_legacy_pages.py 165 (was 152, +13 for new regex/patch step), base.html 63, index.html 97, generate.html 519, gallery.html 63, style.css 724, main.js 19 = 2761 total (was 2748) |
 
-No regressions. All Phase 1 expected outcomes confirmed in Phase 3.
+No regressions. All Phase 1 expected outcomes confirmed in Phase 3. The 4 legacy pages and the v2 template are correctly skipped by the new patch step.
 
 ### Phase 4 — Delivery
 
-- Branch `fix/code-review-2026-04-28` created from `fix/code-review-2026-04-13` HEAD.
+- Branch `fix/code-review-2026-04-29` created from `main` (NOT from yesterday's branch).
 - Single commit covers the 8 modified `home.html` files, the change to `migrate_legacy_pages.py`, and this `tasks/review.md` update.
-- PR opened against `main` titled "Fix N-033: wrap v1 fan-page band names in <h1> for WCAG 1.3.1/2.4.6", referencing the 24-cycle aging history and the auto-escalation rule documented on 2026-04-27 that triggered the fix.
+- PR opened against `main` titled "Fix J-001: promote v1 fan-page section headers from h3 to h2".
 
-Recommendation priority ordering for next cycle: **N-009 (Medium — gallery responsive)** is now the longest-aged unfixed Medium. N-002, N-004, N-012, N-016, N-019 round out the remaining 5 Medium findings. No findings face an aging-escalation deadline in the next 10 days; recommend continuing the periodic re-audit cadence.
-
----
-
-## 2026-04-27 Audit (prior cycle — preserved for history)
-
-Twenty-fourth periodic review. **No code changes since 2026-04-26.** Re-audit performed against 8 source files (line counts unchanged: 2596 total — exact match to last cycle; MD5 hashes confirm zero drift on all 8 files) plus all 12 generated fan pages. Rotation this cycle: deep-read of `EchoesOfTheMirage` (legacy, full 269-line read — last fully deep-read 2026-04-24) plus structural body sampling on `NightshadeVanguard` (v1) at lines 180-280. Cross-page grep sweep across 12 structural markers; tooling checks (Python AST, pyflakes, Jinja2 compile, CSS brace balance, CSS custom-property reference audit, Flask `test_client` on 8 routes including 2 adversarial). v2 template structural lines 575-742 in `createAct.py` re-inspected to re-validate N-002, N-005, N-011, N-019, N-033, N-038 line references.
-
-**No new issues identified this cycle.** All 7 previously resolved issues remain verified. Open count is unchanged: 7 Medium, 22 Low. This is now the **sixth** "no new findings" cycle in the last 10 (2026-04-16, 2026-04-23, 2026-04-24, 2026-04-25, 2026-04-26, 2026-04-27). Codebase is genuinely stable; the audit surface is saturated for the current state.
-
-**Aging watch — N-033 is now 9 days old (CRITICAL ESCALATION WINDOW).** Threshold for auto-escalation to High is 10 days, hitting **tomorrow (2026-04-28 — next cycle)**. Per the agreed escalation rule, if N-033 is still unremediated at next cycle's audit it should escalate from Medium to High and trigger a Phase 2 fix. Mechanical fix is well-understood: the v2 template at `createAct.py:657` already correctly uses `<h1 class="band-title">{band_name}</h1>`, so the v2-generated pages have no issue. The 8 v1 pages predate that template change and use `<marquee>` without an `<h1>` wrapper. Recommended remediation: a targeted structural pass via `migrate_legacy_pages.py` to wrap the v1 pages' `<marquee>` element in an `<h1>` (preserving the visual marquee animation). Strongly recommend addressing this before next cycle.
-
-| Severity | Count | Change |
-|---|---|---|
-| Critical | 0 | — |
-| High | 0 | — |
-| Medium | 7 | — |
-| Low | 22 | — |
-
-### Phase 1 — Audit findings by category
-
-**Critical**: 0 (none)
-**High**: 0 (none)
-**Medium**: 0 new (7 carried — N-002, N-004, N-009, N-012, N-016, N-019, N-033)
-**Low**: 0 new (22 carried — N-005, N-006, N-007, N-008, N-010, N-011, N-014, N-017, N-018, N-020, N-022, N-025, N-026, N-027, N-029, N-030, N-032, N-034, N-035, N-036, N-037, N-038, N-039)
-
-Per the instructions, no Critical or High issues were identified this cycle, so Phase 2 makes **zero code changes**. All carried Medium and Low findings remain logged unchanged with their existing recommended fixes. Phase 3 verification is recorded below.
-
-### Verification this cycle (Phase 3)
-| Check | Result |
-|---|---|
-| Python AST parse on app.py and createAct.py | PASS |
-| `pyflakes` on app.py + createAct.py | 3 warnings → still N-037 (`flask.session`, `datetime.datetime`, `datetime.timedelta`) |
-| Jinja2 compile on 4 top-level templates | PASS (base/index/generate/gallery all compile) |
-| CSS brace balance | 128/128 |
-| CSS custom-property reference audit | 21 referenced / 24 defined — 3 unreferenced (`--space-2xl`, `--space-lg`, `--space-xl`); 0 missing definitions |
-| Flask `test_client` on 8 routes (incl. `/band/$(evil)/` 400 and `/band/%2E%2E%2Fetc/` 404) | 8/8 as expected (200×5, 400×1, 404×2) |
-| Structural marker grep across 12 fan pages, 12 markers | All match prior-cycle figures: skip-link 12/12, lang="en" 12/12, viewport 12/12, DOCTYPE 12/12, h1 4/12, marquee 8/12, href="#" 0/12, id="main-content" 12/12, id="main" 0/12, Back to Top 8/12, bgcolor 0/12, font color 0/12 |
-| Source file line counts | 2596 total — exact match to 2026-04-26 |
-| MD5 hashes on all 8 source files | match prior cycle (no drift) |
-| `EchoesOfTheMirage` deep-read (legacy, 269 lines) | Confirms N-029 (footer fixed-bottom at lines 91-93), N-030 (empty members section at lines 168-170), N-034 (plain `<nav>` at line 145), N-035 (`width: 600px` at line 96), N-039 (no Back-to-Top) all unchanged |
-| `NightshadeVanguard` v1 sampling (lines 180-280) | Confirms N-005 (`<hr ... color="#00ffff" size="2" noshade>` at lines 229,247,261), N-026 (`<a name=...>` at 227,245,259), N-033 (band name in `<marquee>` at line 206 with no `<h1>`), N-002 (inline `style=` on member rows 265-269,272-279) all unchanged |
-| createAct.py v2 template lines 575-742 re-inspection | Confirms N-002 (inline styles at 710,713,731), N-005 (deprecated `<hr color="..." size="2" noshade>` at 677,684,697,704,709), N-011 (`linear` at 584 vs CSS `step-start`), N-019 (3× `!important` at 624,627,630), N-038 (`#main`/`id="main"` at 650,673,735) all unchanged. v2 template at line 657 already uses correct `<h1 class="band-title">` (so N-033 only affects 8 v1 legacy pages, not future generations) |
-
-No code changes this cycle. Only `tasks/review.md` updated. Recommendation priority ordering: **N-033 is the top priority and faces auto-escalation tomorrow (2026-04-28) if still unremediated.** All other open findings are unchanged from 2026-04-26.
+Recommendation priority ordering for next cycle: **N-009 (Medium — gallery responsive)** is the longest-aged unfixed Medium and remains the top candidate. N-002, N-004, N-012, N-016, N-019 round out the remaining 5 Medium findings. No findings face an aging-escalation deadline in the next 10 days; recommend continuing the periodic re-audit cadence.
 
 ---
 
-## 2026-04-26 Audit (prior cycle — preserved for history)
-
-Twenty-third periodic review. **No code changes since 2026-04-25.** Re-audit performed against 8 source files (line counts unchanged: 2596 total — exact match to last cycle, MD5 hashes confirm zero drift) plus all 12 generated fan pages. Rotation this cycle: deep-read of `**VelvetEchoes` (legacy, full 245-line read — first full deep-read since 2026-04-22; previously only grep-surveyed) plus structural body sampling on `ChãoDeCorais` (v1) and `MyopicSunflowers` (v1) at lines 180-280. Cross-page grep sweep across 11 structural markers; tooling checks (Python AST, pyflakes, Jinja2 compile, CSS brace balance, CSS custom-property reference audit, Flask `test_client` on 8 routes including 2 adversarial). v2 template structural lines 575-742 in `createAct.py` re-inspected to re-validate N-002, N-005, N-019, N-038 line references.
-
-**No new issues identified this cycle.** All 7 previously resolved issues remain verified. Open count is unchanged: 7 Medium, 22 Low. This is now the **fifth** "no new findings" cycle in the last 9 (2026-04-16, 2026-04-23, 2026-04-24, 2026-04-25, 2026-04-26). Codebase is genuinely stable; the audit surface is saturated for the current state.
-
-**Aging watch — N-033 is now 8 days old.** Threshold for escalation to High remains 10 days (2026-04-28 — 2 cycles away). Strong recommend: fix in the next remediation pass before auto-escalation. Mechanical fix is well-understood (wrap `<marquee>` in `<h1>` on 8 v1 pages or modify v2 template line 657 — already correctly uses `<h1>`, so the migration script `migrate_legacy_pages.py` is the natural vehicle for a structural pass over the 8 v1 pages).
-
-| Severity | Count | Change |
-|---|---|---|
-| Critical | 0 | — |
-| High | 0 | — |
-| Medium | 7 | — |
-| Low | 22 | — |
-
-### Phase 1 — Audit findings by category
-
-**Critical**: 0 (none)
-**High**: 0 (none)
-**Medium**: 0 new (7 carried — N-002, N-004, N-009, N-012, N-016, N-019, N-033)
-**Low**: 0 new (22 carried — N-005, N-006, N-007, N-008, N-010, N-011, N-014, N-017, N-018, N-020, N-022, N-025, N-026, N-027, N-029, N-030, N-032, N-034, N-035, N-036, N-037, N-038, N-039)
-
-Per the instructions, no Critical or High issues were identified this cycle, so Phase 2 makes **zero code changes**. All carried Medium and Low findings remain logged unchanged with their existing recommended fixes. Phase 3 verification is recorded below.
-
-### Verification this cycle (Phase 3)
-| Check | Result |
-|---|---|
-| Python AST parse on app.py and createAct.py | PASS |
-| `pyflakes` on app.py + createAct.py | 3 warnings → still N-037 (`flask.session`, `datetime.datetime`, `datetime.timedelta`) |
-| Jinja2 compile on 4 top-level templates | PASS (base/index/generate/gallery all compile) |
-| CSS brace balance | 128/128 |
-| CSS custom-property reference audit | 21 referenced / 24 defined — 3 unreferenced (`--space-2xl`, `--space-lg`, `--space-xl`); 0 missing definitions |
-| Flask `test_client` on 8 routes (incl. `/band/$(evil)/` 400 and `/band/%2E%2E%2Fetc/` 404) | 8/8 as expected (200×5, 400×1, 404×2) |
-| Structural marker grep across 12 fan pages, 11 markers | All match prior-cycle figures: skip-link 12/12, lang="en" 12/12, viewport 12/12, DOCTYPE 12/12, h1 4/12, marquee 8/12, href="#" 0/12, id="main-content" 12/12, id="main" 0/12, Back to Top 8/12, prefers-reduced-motion 16 total |
-| Source file line counts | 2596 total — exact match to 2026-04-25 |
-| MD5 hashes on all 8 source files | match prior cycle (no drift) |
-| `**VelvetEchoes` deep-read (legacy, 245 lines) | Confirms N-029 (footer fixed-bottom at line 86-94), N-030 (empty members section at lines 168-175), N-034 (plain `<nav>` at line 145), N-035 (`width: 600px` at line 96), N-039 (no Back-to-Top) all unchanged |
-| `ChãoDeCorais` + `MyopicSunflowers` v1 sampling (lines 180-280) | Confirms N-005 (`<hr color="#00ff00" size="2" noshade>` deprecated attrs), N-026 (`<a name=...>`), N-033 (band name in `<marquee>` with no `<h1>`), N-002 (inline `style=` on member rows) all unchanged |
-| createAct.py v2 template lines 575-742 re-inspection | Confirms N-002 (inline styles at 710,713,731), N-005 (deprecated `<hr color="..." size="2" noshade>` at 677,684,697,704,709), N-011 (`linear` at 584 vs CSS `step-start`), N-019 (3× `!important` at 624,627,630), N-038 (`#main`/`id="main"` at 650,673,735) all unchanged |
-
-No code changes this cycle. Only `tasks/review.md` updated. Recommendation priority ordering unchanged from 2026-04-25 — N-033 remains top priority with hard escalation deadline at 2026-04-28 (now 2 cycles away).
-
----
-
-## 2026-04-25 Audit (prior cycle — preserved for history)
-
-Twenty-second periodic review. **No code changes since 2026-04-24.** Re-audit performed against 8 source files (line counts unchanged: 2596 total — exact match to last cycle) plus all 12 generated fan pages. Rotation this cycle: deep-read of MoonlitReverie (legacy, full 231-line read) and TheVelvetEchoes (legacy, full 235-line read) — neither was deep-read last cycle — plus structural body sampling on EucalyptusSaints (v1) and Inu-K-Trkadeka (v1) at lines 180-260. Cross-page grep sweep across 13 structural markers; tooling checks (Python AST, pyflakes, Jinja2 compile, CSS brace balance, Flask `test_client` on 8 routes including 2 adversarial). MD5 hashes captured on all 8 source files for future drift detection.
-
-**No new issues identified this cycle.** All 7 previously resolved issues remain verified. Open count is unchanged: 7 Medium, 22 Low. This is now the **fourth** "no new findings" cycle in the last 8 (2026-04-16, 2026-04-23, 2026-04-24, 2026-04-25). Codebase is genuinely stable; the audit surface is saturated for the current state.
-
-**Aging watch — N-033 is now 7 days old.** Threshold for escalation to High is 10 days (2026-04-28). Recommend addressing within 3 cycles before auto-escalation triggers.
-
-| Severity | Count | Change |
-|---|---|---|
-| Critical | 0 | — |
-| High | 0 | — |
-| Medium | 7 | — |
-| Low | 22 | — |
-
-### Verification this cycle
-| Check | Result |
-|---|---|
-| Python AST parse on app.py and createAct.py | PASS |
-| `pyflakes` on app.py + createAct.py | 3 warnings → still N-037 |
-| Jinja2 compile on 4 templates | PASS |
-| CSS brace balance | 128/128 |
-| Flask `test_client` on 8 routes (incl. `/band/$(evil)/` 400 and `/band/%2E%2E%2Fetc/` 404) | 8/8 expected |
-| Structural marker grep across 12 fan pages | 13/13 markers match prior cycle exactly |
-| Source file line counts | 2596 total — exact match to 2026-04-24 |
-| MoonlitReverie deep-read (legacy) | Confirms N-029, N-030, N-034, N-035, N-039 patterns |
-| TheVelvetEchoes deep-read (legacy) | Confirms same 5 legacy patterns |
-| EucalyptusSaints + Inu-K-Trkadeka v1 sampling | Confirms N-005, N-026, N-033 unchanged |
-
-No code changes this cycle. Only `tasks/review.md` updated. Recommendation priority ordering unchanged from 2026-04-24 — N-033 remains top priority with hard escalation deadline at 2026-04-28.
-
----
-
-## 2026-04-24 Audit (prior cycle — preserved for history)
-
-## Summary
-
-Twenty-first periodic review of the AI Band Generator. No code changes have been made since the prior review (2026-04-23). This cycle performed a fresh deep re-audit of all key source files and rotated the fan-page spot-check subset to EchoesOfTheMirage (legacy), EtherealTrampleweed (v1), TheLuminescentUndertow (v1), and MidnightParlor (v1) — three v1 pages that were **not** deep-read last cycle. Full grep verification across all 12 pages was performed against 13 structural markers (including a new `id="main"` / `id="main-content"` check to re-validate N-038), plus tooling checks (pyflakes, CSS brace balance, Flask test-client smoke tests with two extra adversarial routes, Jinja template compilation, Python AST parse).
-
-The deep re-audit identified **no new issues** this cycle. All 7 previously resolved issues (N-001, N-003, N-021, N-023, N-024, N-028, N-031) remain verified as resolved. The 7 existing Medium issues and 22 existing Low issues (through N-039) carry forward unchanged. Total open count remains 7 Medium and 22 Low.
-
-`tasks/review-recheck.md` is an untracked file from an earlier (2026-04-01) review session on a different branch. Left untouched.
-
-**Files reviewed:**
-- `templates/base.html` (63 lines), `templates/index.html` (97 lines), `templates/generate.html` (519 lines), `templates/gallery.html` (63 lines)
-- `static/css/style.css` (724 lines), `static/js/main.js` (19 lines)
-- `app.py` (284 lines), `createAct.py` (827 lines)
-- Generated fan pages (this cycle's rotation): EchoesOfTheMirage (legacy) — full 269-line read; EtherealTrampleweed (v1) — structural body read lines 180-259; TheLuminescentUndertow (v1) — structural body read lines 180-259; MidnightParlor (v1) — structural body read lines 180-259. Remaining 8 pages: targeted grep sweep on structural markers.
-- `migrate_legacy_pages.py` (inspected header lines 1-60; documents N-021/N-023/N-024 migration flow — confirms the script exists but only targets those 3 closed issues; does not address N-027/N-029/N-030/N-033/N-034/N-035/N-039).
-- Grep verification across all 12 pages for: `Back to Top`, `class="skip-link"`, `lang="en"`, `name="viewport"`, `<!DOCTYPE`, `<marquee`, `<a name=`, `href="#"`, `bgcolor=`, `font color=`, `<h1`, `id="main-content"`, `id="main"`.
-- Tooling: Python `ast.parse` on both source files (PASS); `pyflakes` on both (3 unused imports in app.py — still N-037); Flask `test_client` route smoke tests (`/`, `/gallery`, `/generate`, `/band/TheVelvetEchoes/`, `/band/Inu-k-trkadeka/`, `/band/NonExistent/`, `/band/$(evil)/`, `/band/%2E%2E%2Fetc/` — 200/200/200/200/200/404/400/404 as expected; 400 on injection attempt, 404 on URL-encoded path traversal); Jinja2 template compilation on all 4 templates (PASS); CSS brace balance (128/128 matched); line counts (2596 total, exact match to last cycle).
-- `tasks/review.md` (prior review document, reviewed for context).
-
-| Severity | Count |
-|---|---|
-| Critical | 0 |
-| High | 0 |
-| Medium | 7 |
-| Low | 22 |
-
----
-
-## Status of Previous Issues
+## Status of Previous Issues (carried forward — unchanged)
 
 | Prior ID | Issue | Status |
 |---|---|---|
 | N-001 | Color contrast failure in accent color tuple (#ff6666) | **RESOLVED** |
-| N-002 | Residual inline styles in generated fan pages | Open (Medium) |
-| N-003 | Guestbook links use `href="#"` with no indication | **RESOLVED** — re-verified 0 matches across 12 pages |
-| N-004 | Legacy generated pages still accessible via direct URL without band_info.json check | Open (Medium) |
-| N-005 | `<hr>` elements use deprecated HTML attributes | Open (Low) |
-| N-006 | Feature grid boxes lack equal height content alignment | Open (Low) |
-| N-007 | `role="form"` on `<form>` element is redundant | Open (Low) — re-verified at generate.html:18 |
-| N-008 | No `<meta name="description">` on any page | Open (Low) |
-| N-009 | Gallery table lacks responsive handling for narrow viewports | Open (Medium) |
-| N-010 | Generated fan page nav pipe separators not hidden from AT | Open (Low) |
-| N-011 | Blink animation timing mismatch (`linear` vs `step-start`) | Open (Low) |
-| N-012 | Band directory path validation blocks non-ASCII band names | Open (Medium) |
-| N-014 | Inline `import re` inside functions in createAct.py | Open (Low) |
-| N-015 | Inline style on visitor count in generated pages | Subsumed under N-002 |
-| N-016 | Inconsistent path resolution between gallery and view_band routes | Open (Medium) |
-| N-017 | No focus management after gallery page load | Open (Low) |
-| N-018 | Fixed polling interval with no backoff | Open (Low) |
-| N-019 | Generated fan pages use `!important` overrides in responsive styles | Open (Medium) |
-| N-020 | Generated fan page `<br>` tag after decorative stars in header | Open (Low) |
+| N-002 | Residual inline styles in generated fan pages | Open (Medium) — `createAct.py:710,713,731` |
+| N-003 | Guestbook links use `href="#"` with no indication | **RESOLVED** |
+| N-004 | Legacy generated pages still accessible via direct URL without band_info.json check | Open (Medium) — `app.py:95-104` |
+| N-005 | `<hr>` elements use deprecated HTML attributes | Open (Low) — `createAct.py:677,684,697,704,709` |
+| N-006 | Feature grid boxes lack equal height content alignment | Open (Low) — `static/css/style.css:304` |
+| N-007 | `role="form"` on `<form>` element is redundant | Open (Low) — `templates/generate.html:18` |
+| N-008 | No `<meta name="description">` on any page | Open (Low) — `templates/base.html:3-8` |
+| N-009 | Gallery table lacks responsive handling for narrow viewports | Open (Medium) — `static/css/style.css:449-492`, `templates/gallery.html:14-47` (WCAG 1.4.10) |
+| N-010 | Generated fan page nav pipe separators not hidden from AT | Open (Low) — `createAct.py:666` |
+| N-011 | Blink animation timing mismatch (`linear` vs `step-start`) | Open (Low) — `createAct.py:584` |
+| N-012 | Band directory path validation blocks non-ASCII band names | Open (Medium) — `app.py:36` |
+| N-014 | Inline `import re` inside functions in createAct.py | Open (Low) — `createAct.py:115,252` |
+| N-016 | Inconsistent path resolution between gallery and view_band routes | Open (Medium) — `app.py:66-86,95-104` |
+| N-017 | No focus management after gallery page load | Open (Low) — `templates/gallery.html` |
+| N-018 | Fixed polling interval with no backoff | Open (Low) — `templates/generate.html:355` |
+| N-019 | Generated fan pages use `!important` overrides in responsive styles | Open (Medium) — `createAct.py:624,627,630` |
+| N-020 | Generated fan page `<br>` tag after decorative stars in header | Open (Low) — `createAct.py:656` |
 | N-021 | Generated fan pages have no focus indicator styles | **RESOLVED** |
-| N-022 | Generated fan page body has no explicit line-height | Open (Low) |
+| N-022 | Generated fan page body has no explicit line-height | Open (Low) — `createAct.py:408-415` |
 | N-023 | Gallery displays zero bands because no `band_info.json` files exist | **RESOLVED** |
 | N-024 | Older generated pages use `#666666` text | **RESOLVED** |
-| N-025 | Older generated pages use deprecated `<marquee>` element | Open (Low) — 8 of 12 pages |
+| N-025 | Older generated pages use deprecated `<marquee>` element | Open (Low) — 8 of 12 pages (WCAG 2.2.2 mitigated by prefers-reduced-motion) |
 | N-026 | Older generated pages use `<a name="">` anchors instead of `id` | Open (Low) — 8 pages |
-| N-027 | Older generated pages heading hierarchy issues | Open (Low) — narrowed; v1 issue tracked as N-033 |
+| N-027 | Older generated pages heading hierarchy issues | Open (Low) — narrowed to legacy v0 pages only; v1 issue tracked separately |
 | N-028 | Dead gallery links from special-character band names | **RESOLVED** |
-| N-029 | Legacy-format fan pages have fixed-position footer that occludes content | Open (Low) |
-| N-030 | Legacy-format fan pages render empty band members section | Open (Low) |
-| N-031 | All 12 existing fan pages lack skip links, landmarks, and prefers-reduced-motion | **RESOLVED** |
-| N-032 | `band_assets` route does not validate `filename` parameter | Open (Low) |
-| N-033 | v1 fan pages have no `<h1>` element — band name inside `<marquee>` | Open (Medium) |
-| N-034 | Legacy fan pages lack `aria-label` on `<nav>` element | Open (Low) |
-| N-035 | Legacy fan pages have fixed-width band photo that overflows on narrow viewports | Open (Low) |
-| N-036 | Focus is not moved to a visible element after resetInterface / cancelGeneration | Open (Low) |
-| N-037 | Unused imports in app.py | Open (Low) |
-| N-038 | Skip-link target naming divergence between v1 migrated pages and createAct.py v2 template | Open (Low) |
-| N-039 | 4 legacy fan pages lack a "Back to Top" link | Open (Low) |
-
----
-
-## Escalation Assessment
-
-### Medium Issues Re-evaluated
-
-All 7 Medium issues were re-assessed for escalation to High. N-002, N-004, N-009, N-012, N-016, N-019 are now 18+ days old; N-033 is 6 days old.
-
-- **N-002**: Unchanged. Three inline `style` attributes in v2 template at createAct.py:710,713,731 (re-verified this cycle via grep). Cosmetic guestbook/footer only. Not escalating.
-- **N-004**: Unchanged. `view_band()` relies on `SAFE_BAND_NAME` regex and `send_from_directory` scoping for safety. Functional correctness, not security. Not escalating.
-- **N-009**: Unchanged. Table is cramped below 400px but does not overflow. Not escalating.
-- **N-012**: Unchanged. `ChãoDeCorais` and `**VelvetEchoes` remain unreachable via gallery but data is not lost. Not escalating.
-- **N-016**: Unchanged. Latent only in non-standard deployments. Not escalating.
-- **N-019**: Unchanged. Three `!important` declarations at createAct.py:624,627,630 that override nothing in the current CSS cascade. Not escalating.
-- **N-033**: Unchanged. Still the top-priority Medium. Band name in `<marquee>` on 8 v1 pages (re-verified this cycle on EtherealTrampleweed line 206, MidnightParlor line 206, TheLuminescentUndertow line 191; `<h1>` count = 0 on all 8 v1 pages). WCAG SC 1.3.1 Level A. Not escalating this cycle — remains flagged as highest-priority Medium for the next remediation pass. Aging watch: 6 days old, still within norms. If it reaches 10+ days unremediated, re-examine for escalation.
-
-### Low Issues Re-evaluated for Escalation
-
-All 22 existing Low issues were reassessed. None warrant escalation.
-
-- **N-029, N-030, N-034, N-035, N-039**: All legacy-page tech debt (4 pages). Cumulatively 5 distinct issues on the same 4 files. Recommendation stands: rather than piecemeal fixes, the cleanest remediation is to re-generate the 4 legacy pages via the v2 template pipeline. This cycle's inspection of `migrate_legacy_pages.py` confirms it only migrates N-021/N-023/N-024 (focus-visible CSS, band_info.json, #666666 text) — it does **not** regenerate page structure. A full regeneration would require running `createAct.py` against each legacy name (expensive — burns DALL-E credits) OR writing a new structural-migration pass. Flagged for a dedicated remediation PR. Not escalating any individual issue.
-- **N-038**: Re-verified this cycle. `createAct.py:650,673,735` uses `#main` and `id="main"`; all 8 v1 migrated pages use `#main-content` and `id="main-content"`. New v2-generated pages would introduce this divergence again. Still Low (each page is internally consistent). Flagged for fix whenever v2 template is next edited.
-
-No escalations this cycle.
-
----
-
-## New Issues
-
-None this cycle. This is the **third** "no new findings" cycle in the last 7 (2026-04-16, 2026-04-23, 2026-04-24). The rotation this cycle covered a full legacy page (EchoesOfTheMirage) previously only grep-surveyed, plus three v1 pages (EtherealTrampleweed, TheLuminescentUndertow, MidnightParlor) not deep-read last cycle. Cross-page grep sweep added `id="main"` and `id="main-content"` markers (re-validating N-038). Adversarial Flask routes (`/band/$(evil)/`, `/band/%2E%2E%2Fetc/`) added to smoke test — both correctly return 400/404. There is genuinely nothing new to report. The audit surface is saturated for the current codebase state; further issues will only surface when code changes land.
-
-Stability indicators this cycle:
-- Line counts of all 8 source files match last cycle exactly (2596 total — no drift).
-- Fan page marker counts unchanged: 12/12 on skip-link/lang/viewport/DOCTYPE/id="main-content"; 8/12 on Back-to-Top/marquee/`<a name=`; 4/12 on `<h1>`; 0/12 on `href="#"`/bgcolor/font-color/`id="main"`.
-- Flask routes 8/8 return expected status codes (200×5, 404×2, 400×1).
-
----
-
-## Medium Issues (carried forward)
-
-### N-002: Residual inline styles in generated fan pages
-- **File**: `createAct.py:710,713,731`
-
-### N-004: Legacy generated pages still accessible via direct URL without band_info.json check
-- **File**: `app.py:95-104`
-
-### N-009: Gallery table lacks responsive handling for narrow viewports
-- **File**: `static/css/style.css:449-492`, `templates/gallery.html:14-47`
-- **WCAG**: SC 1.4.10 Reflow, Level AA
-
-### N-012: Band directory path validation blocks non-ASCII and special-character band names
-- **File**: `app.py:36`
-
-### N-016: Inconsistent path resolution between gallery and view_band routes
-- **File**: `app.py:66-86,95-104`
-
-### N-019: Generated fan pages use `!important` overrides in responsive styles
-- **File**: `createAct.py:624,627,630`
-
-### N-033: v1 fan pages have no `<h1>` element
-- **Files**: 8 of 12 generated pages (all v1: `ChãoDeCorais`, `EtherealTrampleweed`, `EucalyptusSaints`, `Inu-k-trkadeka`, `MidnightParlor`, `MyopicSunflowers`, `NightshadeVanguard`, `TheLuminescentUndertow`)
-- **WCAG**: SC 1.3.1 Info and Relationships, Level A; SC 2.4.6 Headings and Labels, Level AA
-
----
-
-## Low Issues (carried forward)
-
-### N-005: `<hr>` elements use deprecated HTML attributes
-- **File**: `createAct.py:677,684,697,704,709`
-
-### N-006: Feature grid boxes lack equal height content alignment
-- **File**: `static/css/style.css:304`
-
-### N-007: `role="form"` on `<form>` element is redundant
-- **File**: `templates/generate.html:18`
-
-### N-008: No `<meta name="description">` on any page
-- **File**: `templates/base.html:3-8`
-
-### N-010: Generated fan page nav pipe separators not hidden from AT
-- **File**: `createAct.py:666` (v2 template); same pattern in all 8 v1 pages
-
-### N-011: Blink animation timing mismatch between main app and generated pages
-- **File**: `createAct.py:584` (`linear`) vs `static/css/style.css:650` (`step-start`)
-
-### N-014: Inline `import re` inside functions in createAct.py
-- **File**: `createAct.py:115,252`
-
-### N-015: Inline style on visitor count in generated pages
-- Subsumed under N-002
-
-### N-017: No focus management after gallery page load
-- **File**: `templates/gallery.html`
-
-### N-018: Fixed polling interval with no backoff
-- **File**: `templates/generate.html:355`
-
-### N-020: Generated fan page `<br>` tag after decorative stars
-- **File**: `createAct.py:656`
-
-### N-022: Generated fan page body has no explicit line-height
-- **File**: `createAct.py:408-415`
-
-### N-025: Older generated pages use deprecated `<marquee>` element
-- **Files**: 8 of 12 generated pages
-- **WCAG**: SC 2.2.2 Pause, Stop, Hide, Level A (mitigated by prefers-reduced-motion)
-
-### N-026: Older generated pages use `<a name="">` anchors instead of `id`
-- **Files**: 8 of 12 generated pages (re-verified this cycle: grep count is 5 per v1 page, 0 per legacy page)
-
-### N-027: Older generated pages heading hierarchy issues
-- **Files**: Narrowed to legacy pages only; v1 heading issue tracked as N-033
-
-### N-029: Legacy-format fan pages have fixed-position footer that occludes content
-- **Files**: 4 legacy pages (EchoesOfTheMirage re-verified this cycle at lines 86-94)
-
-### N-030: Legacy-format fan pages render empty band members section
-- **Files**: 4 legacy pages (EchoesOfTheMirage re-verified this cycle at lines 167-171)
-
-### N-032: `band_assets` route does not validate `filename` parameter
-- **File**: `app.py:107-112`
-
-### N-034: Legacy fan pages lack `aria-label` on `<nav>` element
-- **Files**: 4 legacy pages (EchoesOfTheMirage re-verified this cycle at line 145: plain `<nav>` with no aria-label)
-
-### N-035: Legacy fan pages have fixed-width band photo that overflows on narrow viewports
-- **Files**: 4 legacy pages (EchoesOfTheMirage re-verified this cycle at lines 95-100: `width: 600px`)
-- **WCAG**: SC 1.4.10 Reflow, Level AA
-
-### N-036: Focus is not moved to a visible element after resetInterface / cancelGeneration
-- **File**: `templates/generate.html:471-511`
-- **WCAG**: SC 2.4.3 Focus Order, Level A (advisory)
-
-### N-037: Unused imports in app.py
-- **File**: `app.py:1,9` (re-verified this cycle: `flask.session`, `datetime.datetime`, `datetime.timedelta`)
-
-### N-038: Skip-link target naming divergence between v1 migrated pages and createAct.py v2 template
-- **Files**: `createAct.py:650,673,735` (`#main` / `id="main"` / `href="#main"`) vs. all 8 v1 migrated fan pages (`#main-content` / `id="main-content"`)
-
-### N-039: 4 legacy fan pages lack a "Back to Top" link
-- **Files**: `TheVelvetEchoes/home.html`, `MoonlitReverie/home.html`, `EchoesOfTheMirage/home.html`, `**VelvetEchoes/home.html` (re-verified this cycle: `grep -c 'Back to Top'` returns 0 on all 4, 1 on all 8 v1 pages)
-
----
-
-## Positive Observations
-
-1. **v2 template quality remains excellent**: `lang="en"`, viewport meta, skip link, semantic `<header>`/`<main>`/`<footer>`/`<nav>`, correct heading hierarchy (h1 > h2), `focus-visible`, `prefers-reduced-motion`, ARIA labels, XSS escaping via `html.escape()`, and CSS custom properties.
-2. **Main app accessibility remains strong**: Skip link, ARIA progressbar with `aria-valuenow` updates (re-verified at generate.html:191,406,506), `aria-live` regions (`polite` for progress, `assertive` for error), focus management on forward state transitions (`progressTitle`/`successDisplay h3`/`errorDisplay h3`), `focus-visible` on all interactive elements, `prefers-reduced-motion`, scoped table headers, `fieldset`/`legend`, 44x44px touch targets on `.retro-button-small` and `.dice-btn`.
-3. **All color contrast ratios pass WCAG AA** (re-verified from prior cycle).
-4. **Design token system** well-organized in `:root` (29 tokens: colors, fonts, spacing scale).
-5. **Error resilience**: Consecutive network error counter (threshold 3 → user message, 5 → full abort) with graceful degradation.
-6. **Security**: CSRF origin/referer checks, per-IP rate limiting (5/hour), `SAFE_BAND_NAME` regex on routes, XSS escaping (verified `html.escape()` on `band_name`, members, tracks, titles), thread-safe `generation_lock`. Adversarial routes `/band/$(evil)/` and `/band/%2E%2E%2Fetc/` correctly return 400 and 404 respectively.
-7. **Responsive design**: Three-tier responsive strategy (base + 640px + 768px breakpoints); flex column-fallback on feature grid.
-8. **Fan-page baseline compliance**: All 12 fan pages have consistent `lang="en"`, alt text, skip-links, viewport meta, DOCTYPE, and main landmark with `id="main-content"` (12/12 on these six items per this cycle's grep sweep). "Back to Top" stands at 8/12 (N-039 tracks the gap).
-9. **Flask routes smoke-test cleanly**: 8/8 routes returned expected status codes under `test_client`.
-10. **CSS brace balance**: 128 open / 128 close — clean.
-11. **No `href="#"`, `bgcolor`, or `font color=` anywhere** in served pages (re-verified 0/12 on all three markers).
-12. **`SAFE_BAND_NAME` regex correctly behaves as designed**: 10/12 directories pass; 2 (`**VelvetEchoes`, `ChãoDeCorais`) blocked. Both blocked names also fail the gallery's `SAFE_BAND_NAME` filter (added per N-028 fix), so they don't generate dead links. Recovery path for these two pages remains rename-or-skip (N-012).
-13. **Codebase stability**: Line counts of all 8 source files match exactly to last cycle's figures (2596 total), confirming no drift has occurred since 2026-04-23.
-
----
-
-## Verification
-
-Commands run as part of this audit (all from project root, with venv activated where indicated):
-
-| Command | Result |
-|---|---|
-| `venv/bin/python -c "import ast; ast.parse(..)"` on app.py and createAct.py | PASS (syntax clean) |
-| `venv/bin/python -c "from jinja2 import ..."` on 4 templates | PASS (all 4 compile) |
-| `venv/bin/python -m pyflakes app.py createAct.py` | 3 warnings in app.py → still N-037 |
-| Flask `test_client` on 8 routes | PASS (200/200/200/200/200/404/400/404 as expected) |
-| CSS brace count (`open=128 close=128`) | PASS |
-| `grep -c 'Back to Top' */home.html` across 12 pages | 8/12 (4 legacy zeroes → N-039 confirmed) |
-| `grep -c 'class="skip-link"' */home.html` across 12 pages | 12/12 — N-031 still holds |
-| `grep -c 'lang="en"' */home.html` across 12 pages | 12/12 |
-| `grep -c 'name="viewport"' */home.html` across 12 pages | 12/12 |
-| `grep -c '<!DOCTYPE' */home.html` across 12 pages | 12/12 |
-| `grep -c '<h1' */home.html` across 12 pages | 4/12 (4 legacy have h1; 8 v1 have 0 → N-033 confirmed) |
-| `grep -c '<marquee' */home.html` across 12 pages | 8/12 (all 8 v1 have 1 marquee → N-025 confirmed) |
-| `grep -c 'href="#"' */home.html` across 12 pages | 0/12 — N-003 still holds |
-| `grep -c 'id="main-content"' */home.html` across 12 pages | 12/12 (all pages consistent) |
-| `grep -c 'id="main"' */home.html` across 12 pages | 0/12 (confirms no v2 pages generated post-N-038) |
-| `SAFE_BAND_NAME` regex against actual directory inventory | 10/12 pass (as designed) |
-
-No code changes were made this cycle (no new findings above the Low threshold). Only `tasks/review.md` is updated.
+| N-029 | Legacy-format fan pages have fixed-position footer that occludes content | Open (Low) — 4 legacy pages |
+| N-030 | Legacy-format fan pages render empty band members section | Open (Low) — 4 legacy pages |
+| N-031 | All 12 existing fan pages lack skip links, landmarks, prefers-reduced-motion | **RESOLVED** |
+| N-032 | `band_assets` route does not validate `filename` parameter | Open (Low) — `app.py:107-112` |
+| N-033 | v1 fan pages have no `<h1>` element — band name inside `<marquee>` | **RESOLVED** (2026-04-28, commit 78a18f4) |
+| N-034 | Legacy fan pages lack `aria-label` on `<nav>` element | Open (Low) — 4 legacy pages |
+| N-035 | Legacy fan pages have fixed-width band photo that overflows on narrow viewports | Open (Low) — 4 legacy pages (WCAG 1.4.10) |
+| N-036 | Focus is not moved to a visible element after resetInterface / cancelGeneration | Open (Low) — `templates/generate.html:471-511` |
+| N-037 | Unused imports in app.py | Open (Low) — `app.py:1,9` (`flask.session`, `datetime.datetime`, `datetime.timedelta`) |
+| N-038 | Skip-link target naming divergence between v1 migrated pages and createAct.py v2 template | Open (Low) — `createAct.py:650,673,735` |
+| N-039 | 4 legacy fan pages lack a "Back to Top" link | Open (Low) — 4 legacy pages |
+| **J-001** | **Heading-hierarchy skip (h1 → h3) on 8 v1 fan pages** | **RESOLVED** (2026-04-29, this cycle) |
 
 ---
 
 ## Metrics
 
-- Total tracked issues: 36 (N-001 through N-039, excluding invalidated N-013)
-- Critical: 0 | High: 0 | Medium: 7 | Low: 22
-- Resolved cumulative: N-001, N-003, N-021, N-023, N-024, N-028, N-031 (7 total; +0 this cycle)
-- Escalated this cycle: none
-- New this review: none
-- Previously invalid: N-013 (`json` import is used in gallery route)
-- Open medium issues aging: N-002, N-004, N-009, N-012, N-016, N-019 are all 18+ days old; N-033 is 6 days old
-- Cycles without new findings: 3 of the last 7 (2026-04-16, 2026-04-23, 2026-04-24)
-- **Recommendation**: Priority ordering unchanged from 2026-04-23 —
-  1. **N-033** (missing `<h1>` in v1 pages) remains the top Medium and a WCAG Level A issue. 6 days old. Fix by modifying the v2 template's `<marquee>` line in `createAct.py:584` to wrap in `<h1>` (e.g., `<h1 class="band-title"><marquee scrollamount="3">{band_name}</marquee></h1>`) and then either (a) re-generating the 8 v1 pages or (b) running a targeted find-and-replace migration across the 8 pages. Visual appearance is preserved; only semantic structure changes. **If this is not addressed by 2026-04-28 (10 days), escalate to High.**
-  2. **Legacy-page consolidation** (N-027, N-029, N-030, N-034, N-035, N-039) — 6 Low issues against the same 4 legacy pages. `migrate_legacy_pages.py` does not regenerate structure (confirmed this cycle by reading lines 1-60), so this needs either a new migration pass or manual re-generation.
-  3. **N-037** (3-line unused-import cleanup in app.py) and **N-038** (3-character fix in createAct.py v2 template: change `main` to `main-content` at lines 650, 673, 735) are trivial 5-minute wins.
-  4. **N-002** (remove 3 inline styles) and **N-019** (remove 3 superfluous `!important` declarations) in createAct.py v2 template — same file, pair them in one PR.
-  5. **N-036** (single-line focus fix in generate.html).
-  6. **N-009** (gallery table responsive — medium effort, WCAG AA).
+- Total tracked issues: 37 (N-001 through N-039 plus J-001, excluding invalidated N-013)
+- Critical: 0 | High: 0 | Medium: 6 | Low: 22 (after this cycle's fix)
+- Resolved cumulative: N-001, N-003, N-021, N-023, N-024, N-028, N-031, N-033, J-001 (9 total; +1 this cycle)
+- Escalated this cycle: J-001 surfaced as HIGH on first detection (regression of recent fix; severity reflects WCAG Level A failure on user-facing pages).
+- New this review: J-001 (1 finding).
+- Cycles without new findings: 6 of the last 11 (2026-04-16, 2026-04-23, 2026-04-24, 2026-04-25, 2026-04-26, 2026-04-27); 2026-04-28 and 2026-04-29 both had findings (N-033 and J-001 respectively).
+- Open medium issues aging: N-002, N-004, N-009, N-012, N-016, N-019 are all 19+ days old.
+
+## Verification — exact commands run
+
+| Command | Result |
+|---|---|
+| `venv/bin/python -c "import ast; ast.parse(open('app.py').read()); ast.parse(open('createAct.py').read()); ast.parse(open('migrate_legacy_pages.py').read())"` | PASS |
+| `venv/bin/python -m pyflakes app.py createAct.py migrate_legacy_pages.py` | 3 warnings (all N-037 — app.py only) |
+| `venv/bin/python -c "from jinja2 import …; env.get_template(t)"` for 4 templates | PASS |
+| CSS brace count | 128/128 |
+| `OPENAI_API_KEY=fake-test-key venv/bin/python -c "..."` Flask `test_client` on 8 routes | 8/8 expected (200/200/200/200/404/400/404/200) |
+| `grep -c '<h1' */home.html` across 12 pages | 12/12 |
+| `grep -c '<h3 class="section-header"' */home.html` across 8 v1 pages | 0/8 after fix |
+| `grep -c '<h2 class="section-header"' */home.html` across 8 v1 pages | 5/8 each = 40 total after fix |
+| `venv/bin/python migrate_legacy_pages.py` (third idempotent run) | "no changes needed" on all 12 pages |

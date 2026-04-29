@@ -12,12 +12,20 @@ Fixes:
                     marquee element is preserved inside the <h1> so the
                     visual animation behavior is unchanged. Idempotent: a
                     second run is a no-op once the <h1> is in place.
+  J-001  (HIGH):    Promotes <h3 class="section-header"> to
+                    <h2 class="section-header"> on the 8 v1 pages so the
+                    page heading hierarchy is h1 -> h2 -> ... instead of
+                    h1 -> h3 (WCAG SC 1.3.1). Regression introduced by the
+                    N-033 fix on 2026-04-28: that fix added a real <h1>
+                    but left the existing <h3> section headers untouched,
+                    creating an h1 -> h3 skip. The 4 legacy pages use a
+                    different class (section-title) and are not affected.
+                    Idempotent: gated on presence of the unmigrated h3.
 """
 
 import json
 import os
 import re
-import sys
 from datetime import datetime
 
 
@@ -45,6 +53,20 @@ FOCUS_VISIBLE_CSS = """
 # now has a proper top-level heading while preserving the marquee animation.
 # The marquee tag content has no '<' inside, so [^<]+ is safe.
 N033_MARQUEE_RE = re.compile(r'<marquee scrollamount="3">([^<]+)</marquee>')
+
+# J-001 migration: after N-033 added <h1>, the v1 pages skip from <h1> straight
+# to <h3 class="section-header"> for the 5 page sections (Backstory, Band
+# Photo, Members, Discography, Guestbook), violating WCAG SC 1.3.1 (heading
+# hierarchy must be sequential). Promote each h3 to h2; visual styling is
+# governed by the .section-header class so no rendered output changes. Match
+# only opening tags with the class attribute (closing </h3> handled by a
+# matched-pair sub on the same line shape: the v1 template emits
+# `<h3 class="section-header">~ {label} ~</h3>` on a single line with no
+# nested tags). Inner content has no '<' so [^<]+ is safe. The 4 legacy v0
+# pages use class="section-title" (different class) and won't match.
+J001_SECTION_HEADER_RE = re.compile(
+    r'<h3 class="section-header">([^<]+)</h3>'
+)
 
 
 def find_band_directories():
@@ -110,6 +132,19 @@ def patch_html(band_path):
             r'<h1 class="band-title"><marquee scrollamount="3">\1</marquee></h1>',
             content,
             count=1,
+        )
+        changed = True
+
+    # J-001: Promote <h3 class="section-header"> to <h2 class="section-header">.
+    # Only matches the 8 v1 pages (legacy v0 pages use class="section-title").
+    # Idempotency: once promoted, the original <h3 class="section-header"> is
+    # gone, so the gate evaluates False on a re-run and the substitution is
+    # a no-op. The .section-header CSS class governs visual styling, so the
+    # rendered output is unchanged after this swap.
+    if J001_SECTION_HEADER_RE.search(content):
+        content = J001_SECTION_HEADER_RE.sub(
+            r'<h2 class="section-header">\1</h2>',
+            content,
         )
         changed = True
 
