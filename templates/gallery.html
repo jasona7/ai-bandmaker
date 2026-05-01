@@ -22,9 +22,9 @@
         <td align="center" style="padding:8px;">
             {% if band.has_photo %}
             <img src="{{ url_for('band_assets', band_name=band.directory, filename='band_photo.jpg') }}"
-                 alt="{{ band.name }}" class="gallery-thumb">
+                 alt="Promotional photo of {{ band.name }}" class="gallery-thumb">
             {% else %}
-            <span style="color:#666666;">[no photo]</span>
+            <span class="no-photo">[no photo]</span>
             {% endif %}
         </td>
         <td style="vertical-align:middle;">

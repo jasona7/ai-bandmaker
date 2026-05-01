@@ -23,14 +23,14 @@
             <li>Retro fan page</li>
         </ul>
         <br>
-        <button id="generateBtn" class="retro-button">
+        <button id="generateBtn" type="button" class="retro-button">
             &gt;&gt; GENERATE BAND &lt;&lt;
         </button>
     </div>
 </div>
 
 <!-- Progress Display -->
-<div id="progressDisplay" style="display:none;">
+<div id="progressDisplay" style="display:none;" aria-live="polite" aria-atomic="false">
     <div class="retro-box">
         <h3 id="progressTitle" style="color:#00ff00; text-align:center;">Creating Your Band...</h3>
         <p id="progressMessage" style="text-align:center; color:#cccccc;">Initializing AI systems...</p>
@@ -77,7 +77,7 @@
         </table>
 
         <div style="text-align:center; margin-top:15px;">
-            <button id="cancelBtn" class="retro-button retro-button-secondary">
+            <button id="cancelBtn" type="button" class="retro-button retro-button-secondary">
                 [ CANCEL ]
             </button>
         </div>
@@ -85,7 +85,7 @@
 </div>
 
 <!-- Success Display -->
-<div id="successDisplay" style="display:none;">
+<div id="successDisplay" style="display:none;" aria-live="polite" aria-atomic="true">
     <div class="retro-box" style="text-align:center;">
         <h3 style="color:#00ff00;">** Band Created Successfully!! **</h3>
         <p>Your AI-generated band is ready to rock!</p>
@@ -94,11 +94,11 @@
         </div>
 
         <div style="margin-top:15px;">
-            <button id="viewBandBtn" class="retro-button">
+            <button id="viewBandBtn" type="button" class="retro-button">
                 &gt;&gt; VIEW BAND PAGE &lt;&lt;
             </button>
             &nbsp;&nbsp;
-            <button id="generateAnotherBtn" class="retro-button retro-button-secondary">
+            <button id="generateAnotherBtn" type="button" class="retro-button retro-button-secondary">
                 [ GENERATE ANOTHER ]
             </button>
         </div>
@@ -106,11 +106,11 @@
 </div>
 
 <!-- Error Display -->
-<div id="errorDisplay" style="display:none;">
+<div id="errorDisplay" style="display:none;" role="alert" aria-live="assertive">
     <div class="retro-box error-box" style="text-align:center;">
         <h3 style="color:#ff4444;">!! ERROR !!</h3>
         <p id="errorMessage">Something went wrong. Please try again.</p>
-        <button id="retryBtn" class="retro-button">
+        <button id="retryBtn" type="button" class="retro-button">
             [ TRY AGAIN ]
         </button>
     </div>
@@ -267,7 +267,7 @@ function resetInterface() {
 
 function viewBand() {
     if (currentDirectory) {
-        window.location.href = '/band/' + currentDirectory;
+        window.location.href = '/band/' + encodeURIComponent(currentDirectory) + '/';
     }
 }
 </script>
