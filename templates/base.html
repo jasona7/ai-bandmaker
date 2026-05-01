@@ -9,32 +9,34 @@
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
 <div class="page-wrapper">
 
     <!-- Top Banner -->
-    <div class="site-banner">
-        <div class="banner-stars">* * * * * * * * * * * * * * * * * * * * *</div>
+    <header class="site-banner" role="banner">
+        <div class="banner-stars" aria-hidden="true">* * * * * * * * * * * * * * * * * * * * *</div>
         <h1 class="site-title">
             <a href="{{ url_for('index') }}">~*~ AI Band Generator ~*~</a>
         </h1>
         <div class="banner-tagline">Creating Fictional Bands Since 1996</div>
-        <div class="banner-stars">* * * * * * * * * * * * * * * * * * * * *</div>
-    </div>
+        <div class="banner-stars" aria-hidden="true">* * * * * * * * * * * * * * * * * * * * *</div>
+    </header>
 
     <!-- Navigation Bar -->
-    <div class="nav-bar">
-        [ <a href="{{ url_for('index') }}">Home</a> ] |
-        [ <a href="{{ url_for('generate_page') }}">Generate a Band!</a> ] |
-        [ <a href="{{ url_for('gallery') }}">Band Gallery</a> ]
-    </div>
+    <nav class="nav-bar" aria-label="Primary">
+        [ <a href="{{ url_for('index') }}"{% if request.endpoint == 'index' %} aria-current="page"{% endif %}>Home</a> ] |
+        [ <a href="{{ url_for('generate_page') }}"{% if request.endpoint == 'generate_page' %} aria-current="page"{% endif %}>Generate a Band!</a> ] |
+        [ <a href="{{ url_for('gallery') }}"{% if request.endpoint == 'gallery' %} aria-current="page"{% endif %}>Band Gallery</a> ]
+    </nav>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <main id="main-content" class="main-content" tabindex="-1">
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
     <!-- Footer -->
-    <div class="site-footer">
+    <footer class="site-footer" role="contentinfo">
         <hr class="rainbow-hr">
         <div class="footer-badges">
             <span class="badge">Best viewed in Netscape Navigator 4.0</span>
@@ -49,7 +51,7 @@
         <p class="footer-email">
             Questions? <a href="mailto:webmaster@aibandgen.geocities.com">Email the Webmaster!</a>
         </p>
-    </div>
+    </footer>
 
 </div>
 
