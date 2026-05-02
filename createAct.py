@@ -596,7 +596,7 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     <div style="text-align:center; padding:10px;">
         <p><a href="#">Sign the Guestbook!</a> | <a href="#">View Guestbook</a></p>
         <p><a href="mailto:webmaster@{band_name.replace(' ', '').lower()}.geocities.com">Email the Webmaster</a></p>
-        <p style="color:#666666; font-size:0.8em;">
+        <p style="color:#999999; font-size:0.8em;">
             <a href="#">Link to us!</a> |
             <a href="#">Webrings</a> |
             <a href="#">MIDI Archive</a>

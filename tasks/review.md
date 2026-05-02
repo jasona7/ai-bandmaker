@@ -1,156 +1,125 @@
-# UX & Accessibility Audit — 2026-05-01
+# UX & Accessibility Audit — 2026-05-02
 
-**Branch:** `fix/code-review-2026-04-30`
+**Branch:** `fix/code-review-2026-05-01` (audit re-run; new fix branch will be `fix/code-review-2026-05-02`)
 **Reviewer:** Jennifer Mitchelle (Senior UX Design Critic)
 **Scope:** UI consistency, WCAG 2.1 AA compliance, design system adherence, responsive layout, UX patterns
-**Note on aesthetic:** The "retro 90s GeoCities" look is an intentional, deliberate design choice (see commit `8b971ef`). Findings below are limited to issues that are objectively broken — accessibility violations, layout bugs, security regressions — not stylistic critiques of the retro theme. Where the theme inherently conflicts with WCAG (e.g. `<marquee>`, `<blink>`, Comic Sans), I note pragmatic mitigations rather than demanding the theme be removed.
+**Note on aesthetic:** The "retro 90s GeoCities" look is an intentional, deliberate design choice (commit `8b971ef`). Findings below are limited to issues that are objectively broken — accessibility violations, layout bugs, security regressions — not stylistic critiques of the retro theme.
 
 ---
 
-## Context vs. Previous Review
+## Context vs. Previous Review (2026-05-01)
 
-The recheck at `tasks/review-recheck.md` (dated 2026-04-01) describes a state where the templates contained a skip link, semantic landmarks (`<header>/<nav>/<main>/<footer>`), `<fieldset>/<label>` form structure, ARIA labels, `aria-current="page"`, `aria-live` regions, `:focus-visible` styles, `prefers-reduced-motion`, plus security hardening (`SAFE_BAND_NAME` regex and `cleanup_old_generations()`).
+The 2026-05-01 audit (preserved in git history of this file) found 4 CRITICAL and 8 actionable HIGH issues caused by the retro-90s overhaul (`8b971ef`) discarding earlier accessibility/security fixes. Commit `7941ae9` ("Restore accessibility, security & UX fixes lost in retro overhaul") restored them.
 
-**The "Retro 90s overhaul" commit (`8b971ef`) discarded all of those.** The current templates and `app.py` are a fresh authoring that does not include any of those accessibility or security fixes. So this audit re-applies them where appropriate.
+**Verification of yesterday's fixes (all PASS):**
 
----
+| ID | Item | Status |
+|---|---|---|
+| C1 | Semantic landmarks (`<header>/<nav>/<main>/<footer>`) | PRESENT — `templates/base.html:17,27,34,39` |
+| C2 | Skip-to-content link | PRESENT — `templates/base.html:12` + CSS `static/css/style.css:7-24` |
+| C3 | `<marquee>` removed from generated band page | REMOVED — `createAct.py:548` now uses `<h1 class="band-title">` |
+| C4 | `<h1>` on generated band page; section headers `<h2>` | FIXED — `createAct.py:548,565,572,582,589,594` |
+| H1 | `SAFE_BAND_NAME` regex on `view_band` and `band_assets` | RESTORED — `app.py:21,73-74,85-86` |
+| H2 | `cleanup_old_generations()` lazy pruning | RESTORED — `app.py:27-38, 95` |
+| H3 | `type="button"` on all five `<button>` elements | RESTORED — `templates/generate.html:26,80,97,101,113` |
+| H4 | `aria-live` on dynamic regions | RESTORED — `templates/generate.html:33,88,109` |
+| H6 | `:focus-visible` on interactive elements | PRESENT — `static/css/style.css:40-48` |
+| H7 | Animations gated behind `prefers-reduced-motion` | PRESENT — `static/css/style.css:449-464`, `static/js/main.js:6-10` |
+| H8 | Contrast on placeholder/footer | FIXED — `.no-photo` and `.footer-copy` now `#9999bb` (~7:1) |
+| H9 | Touch targets ≥24x24 on `.retro-button-small` | FIXED — `min-height: 32px` + `padding: 8px 16px` |
 
-## Findings
-
-### [CRITICAL] C1 — Missing semantic landmarks across all templates
-**File:** `/home/jalloway/projects/ai-bandmaker/templates/base.html` lines 12-54
-**Issue:** The page is structured entirely with `<div>` elements — no `<header>`, `<nav>`, `<main>`, or `<footer>`. Screen-reader users rely on landmark navigation (rotor / "skip to" gestures) to jump between regions. Without landmarks, the entire page is a flat list. Violates WCAG 1.3.1 (Info and Relationships) and 2.4.1 (Bypass Blocks).
-**Fix:** Replace `<div class="site-banner">` with `<header role="banner">`, `<div class="nav-bar">` with `<nav aria-label="Primary">`, `<div class="main-content">` with `<main id="main-content" tabindex="-1">`, `<div class="site-footer">` with `<footer role="contentinfo">`.
-
-### [CRITICAL] C2 — No skip-to-content link
-**File:** `/home/jalloway/projects/ai-bandmaker/templates/base.html` line 11
-**Issue:** Keyboard and screen-reader users have no mechanism to bypass the banner+nav and jump directly to page content. Violates WCAG 2.4.1 (Bypass Blocks, Level A).
-**Fix:** Add a visually-hidden-until-focused skip link as the first focusable element: `<a class="skip-link" href="#main-content">Skip to main content</a>`. Pair with CSS that reveals it on `:focus`.
-
-### [CRITICAL] C3 — `<marquee>` element with no pause control on band fan pages
-**File:** `/home/jalloway/projects/ai-bandmaker/createAct.py` line 518
-**Issue:** Generated band pages use `<marquee scrollamount="3">{band_name}</marquee>` for the band name. WCAG 2.2.2 (Pause, Stop, Hide, Level A) requires that any moving/scrolling content lasting longer than 5 seconds offer a mechanism to pause it. `<marquee>` is also a deprecated, non-standard element (removed from HTML5 spec). The band name itself is the page's primary heading — animating it harms readability for users with cognitive/vestibular conditions.
-**Fix:** Replace `<marquee>{band_name}</marquee>` with a static `<h1>{band_name}</h1>`. If you want a hint of motion to preserve the retro feel, use a CSS keyframe animation gated behind `@media (prefers-reduced-motion: no-preference)` so it disables for users who request reduced motion. The band name MUST be a heading regardless — the page currently has no `<h1>`.
-
-### [CRITICAL] C4 — No `<h1>` on the generated band fan page
-**File:** `/home/jalloway/projects/ai-bandmaker/createAct.py` lines 514-525
-**Issue:** The generated band page jumps from `<title>` directly to `<h3>` section headers, with the band name only appearing inside a `<marquee>` (or after C3's fix, somewhere else). Violates WCAG 1.3.1 and 2.4.6 (Headings and Labels). Screen readers report "no heading level 1" and skip-by-heading navigation is broken.
-**Fix:** Make the band name a real `<h1>`. Demote section headers from `<h3>` to `<h2>` so the heading hierarchy is contiguous (h1 → h2, not h1 → h3).
-
-### [HIGH] H1 — Path-traversal regex removed from `app.py`
-**File:** `/home/jalloway/projects/ai-bandmaker/app.py` lines 54-67
-**Issue:** Previous review installed `SAFE_BAND_NAME = re.compile(r'^[A-Za-z0-9_\-]+$')` and validated it in `view_band()` and `band_assets()` before calling `send_from_directory`. That validation is gone in the current code. While `send_from_directory` does some path-safety checks of its own, the explicit allow-list is a defence-in-depth measure that was deliberately added and is now missing. Not strictly a UX issue but a regression worth flagging in the audit log; leaving the fix to a security-focused pass.
-**Fix:** Reinstate the `SAFE_BAND_NAME` regex check in both routes. Return 400 (or 404 to avoid leaking existence) for names that fail to match.
-
-### [HIGH] H2 — `generation_status` dict grows unboundedly
-**File:** `/home/jalloway/projects/ai-bandmaker/app.py` line 21
-**Issue:** Every band-generation request adds an entry keyed by timestamp; nothing prunes old entries. In a long-running process the dict will grow without limit. Previous review introduced `cleanup_old_generations()` to remove entries older than 1 hour — that function is no longer present.
-**Fix:** Reinstate a cleanup pass invoked from `api_generate()` (lazy cleanup, no extra threads). Remove entries older than ~1 hour.
-
-### [HIGH] H3 — Form controls in `generate.html` lack explicit `type="button"`
-**File:** `/home/jalloway/projects/ai-bandmaker/templates/generate.html` lines 26, 80, 97, 101, 113
-**Issue:** `<button>` defaults to `type="submit"` per the HTML spec. These buttons are not currently inside a `<form>` (so the default is harmless today), but if a `<form>` ancestor is ever introduced — for example by wrapping the page during a future refactor — pressing Enter on any of them will trigger an unintended submission. Always specify `type="button"` for non-submit buttons. Trivial to fix and prevents future regressions.
-**Fix:** Add `type="button"` to all five `<button>` elements: `generateBtn`, `cancelBtn`, `viewBandBtn`, `generateAnotherBtn`, `retryBtn`.
-
-### [HIGH] H4 — Progress region not announced to screen readers
-**File:** `/home/jalloway/projects/ai-bandmaker/templates/generate.html` lines 33-85
-**Issue:** The `#progressDisplay` region is updated dynamically (status messages, percent, step indicators) but has no `aria-live` attribute. Screen-reader users will hear the initial state and then nothing else as generation proceeds. They have no way to know the band is being generated or when it completes. Violates WCAG 4.1.3 (Status Messages, Level AA).
-**Fix:** Add `aria-live="polite"` and `aria-atomic="false"` to the `#progressMessage` element (or to a wrapping container). The success and error messages should also be in a polite live region.
-
-### [HIGH] H5 — (not applicable to current template — placeholder kept for traceability)
-**Note:** Previous review flagged missing `<label>` on `<select>` elements. The current `generate.html` has no `<select>` controls — generation is fully randomised on the server. **No action needed.**
-
-### [HIGH] H6 — Missing `:focus-visible` styles on interactive elements
-**File:** `/home/jalloway/projects/ai-bandmaker/static/css/style.css`
-**Issue:** Buttons, links, and skip-link have no explicit focus indicator. Browser defaults differ; Chromium's blue ring is fine but is often clobbered by the heavy retro borders (`border: 2px outset #6666cc`). Keyboard users may lose track of focus completely on `.retro-button` because the button already looks "active" without focus. Violates WCAG 2.4.7 (Focus Visible, Level AA).
-**Fix:** Add a high-contrast `:focus-visible` outline to `a`, `button`, `.retro-button`, `.retro-button-small`, `.big-link`, and `.skip-link` — e.g. `outline: 3px solid #ffff00; outline-offset: 2px;`.
-
-### [HIGH] H7 — Animations not gated by `prefers-reduced-motion`
-**File:** `/home/jalloway/projects/ai-bandmaker/static/css/style.css` lines 388-396; `/home/jalloway/projects/ai-bandmaker/static/js/main.js` lines 7-15
-**Issue:** The `.blink` keyframe runs unconditionally, and `main.js` runs a `setInterval` that mutates `.banner-stars` opacity every 2 seconds. Users with vestibular disorders or photosensitive epilepsy can't opt out. The 1.2s blink cycle is below the 3-flash-per-second WCAG 2.3.1 threshold, but combined with the pulsing star opacity it harms users with motion sensitivity. Best-practice violation of WCAG 2.3.3 (Animation from Interactions, AAA) and the spirit of 2.2.2 (Pause, Stop, Hide).
-**Fix:** Wrap `.blink` and the star-twinkle JS interval in `prefers-reduced-motion` checks. CSS: `@media (prefers-reduced-motion: reduce) { .blink { animation: none; } }`. JS: gate the `setInterval` behind `if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches)`.
-
-### [HIGH] H8 — Insufficient color contrast on placeholder text and footer
-**File:** `/home/jalloway/projects/ai-bandmaker/templates/gallery.html` line 27; `/home/jalloway/projects/ai-bandmaker/static/css/style.css` line 380
-**Issue:**
-- `[no photo]` text uses `color:#666666` on `background-color:#0a0a1a`. Contrast ratio approximately 3.4:1 — fails WCAG 1.4.3 AA (4.5:1 required for normal text).
-- `.footer-copy { color: #666666; }` on the dark page background — same problem, ratio approximately 3.4:1.
-- `.feature-box p { color: #aaaaaa; }` on `#0a0a2a` — ratio approximately 8.3:1, OK.
-**Fix:** Bump these `#666666` values to at least `#9999bb` (approximately 6.5:1) or `#aaaaaa` (approximately 8.3:1). Footer copy can stay muted but must clear 4.5:1.
-
-### [HIGH] H9 — Touch targets below 24x24 minimum
-**File:** `/home/jalloway/projects/ai-bandmaker/static/css/style.css` lines 249-260
-**Issue:** `.retro-button-small` has `padding: 4px 12px` and `font-size: 0.85em` (around 12px). Effective height around 20-22px. WCAG 2.5.5 (Target Size, AAA) recommends 44x44; WCAG 2.5.8 (Target Size Minimum, AA) requires 24x24 for non-inline targets. The gallery's `[ VIEW ]` link buttons are too small for touch users with motor impairments.
-**Fix:** Bump padding to `8px 16px` and ensure a `min-height: 32px` (or use `min-height: 44px` to meet AAA).
+The yesterday's pass is intact. This audit catches additional issues that survived (or were missed by) yesterday's pass.
 
 ---
 
-## Medium / Low (logged, not fixed in this pass)
+## NEW Findings (2026-05-02 audit)
 
-### [MEDIUM] M1 — Deprecated HTML attributes throughout generated band page
-**File:** `/home/jalloway/projects/ai-bandmaker/createAct.py`
-**Issue:** Generated band pages use deprecated HTML4 presentation attributes: `bordercolor=`, `color=` on `<hr>`, `noshade`, `cellpadding`, `cellspacing`, `border=` on `<table>`, `<a name="...">` anchors. They render in current browsers but are out of spec.
-**Fix (deferred):** Migrate to CSS-driven equivalents while preserving the visual look. Use `id="backstory"` instead of `<a name="backstory">`, move table presentation to the `<style>` block.
+### [HIGH] N1 — Color contrast failure on guestbook auxiliary links wrapper in generated band page
+**File:** `/home/jalloway/projects/ai-bandmaker/createAct.py` line 599
+**Issue:** `<p style="color:#666666; font-size:0.8em;">` wraps the small "Link to us! | Webrings | MIDI Archive" links on every generated band page. The wrapper text is set on the page's `#000000` body background. Computed contrast: **3.66:1** — fails WCAG 1.4.3 (Contrast (Minimum), Level AA, requires 4.5:1 for normal text). The 0.8em text is ~11px, which is well below the "large text" threshold. The pipe separators ("|") between the links use this color and are effectively invisible to low-vision users.
+**Fix:** Bump the wrapper color to `#999999` (computes 7.37:1 on black) or `#aaaaaa` (8.84:1). The pattern matches the colors used elsewhere on the same generated page, so this is a one-character edit.
 
-### [MEDIUM] M2 — Inline styles throughout templates and generated HTML
-**File:** All templates and `createAct.py`
-**Issue:** Many `style="color:#xxxxxx; ..."` attributes scattered across templates. Duplicates the design system, defeats CSP `style-src` if added later.
-**Fix (deferred):** Extract repeated inline styles to utility classes.
+### [HIGH] N2 — Top-level navigation links fail WCAG 2.5.8 minimum target size
+**File:** `/home/jalloway/projects/ai-bandmaker/static/css/style.css` lines 138-145
+**Issue:** `.nav-bar a` declares `margin: 0 3px` and inherits `font-size: 0.95em` (~13.3px). Effective click/touch target height is roughly the line-height box (~20-22px). WCAG 2.5.8 (Target Size (Minimum), Level AA) requires non-inline interactive targets to be at least 24×24 CSS pixels (with documented exceptions). Mobile users with motor impairments will struggle to tap accurately, especially since the three nav links sit on a single line separated only by literal `|` characters.
+**Fix:** Add vertical padding to the nav links to bring the touch target above 24px. Smallest surgical edit: `padding: 6px 8px; display: inline-block;` on `.nav-bar a`. This raises height to ~32px and gives each link its own discrete target zone.
 
-### [MEDIUM] M3 — `band_assets()` route doesn't restrict file types
-**File:** `/home/jalloway/projects/ai-bandmaker/app.py` lines 64-67
-**Issue:** `/band/<band_name>/<filename>` will serve any file in the band directory. Today directories only contain `home.html` and `band_photo.jpg`, but the route should whitelist filenames as defence-in-depth.
-**Fix (deferred):** Restrict to known filenames.
+### [HIGH] N3 — Data tables use `<td>` for header rows instead of `<th scope="col">`
+**Files:**
+- `/home/jalloway/projects/ai-bandmaker/templates/gallery.html` lines 15-19
+- `/home/jalloway/projects/ai-bandmaker/templates/generate.html` lines 45-48 (progress-steps table)
 
-### [MEDIUM] M4 — `<table>` used for layout in `index.html` features section
-**File:** `/home/jalloway/projects/ai-bandmaker/templates/index.html` lines 81-102
-**Issue:** "What You Get" three-column grid is a layout table. Screen readers announce it as tabular data when it isn't. WCAG 1.3.1.
-**Fix (deferred):** Replace with a CSS grid/flex container of `<div>` cards.
+**Issue:** Both data tables have a "header row" styled visually but constructed entirely with `<td>` elements wrapped in `<strong>`. Screen readers will not associate these as column headers. When navigating the gallery table cell-by-cell (NVDA's `Ctrl+Alt+Arrow`, JAWS table navigation), the user gets no spoken context like "Photo: [thumbnail of Velvet Echoes]" or "Band Name: Velvet Echoes". Violates WCAG 1.3.1 (Info and Relationships, Level A). The `info-table` in `index.html` and the "What You Get" three-column table are layout tables (already flagged as M4); this finding is for the genuine data tables only.
+**Fix:** Replace the `<td><strong>X</strong></td>` cells in the header rows of `gallery.html` and `generate.html` with `<th scope="col">X</th>`. This is also one of the items the previous (`tasks/review-recheck.md`) review confirmed had been added before the retro overhaul wiped it out.
 
-### [MEDIUM] M5 — Visitor counter randomises on every page load
-**File:** `/home/jalloway/projects/ai-bandmaker/templates/base.html` line 45
-**Issue:** Refreshing yields a different (often smaller) number — incoherent. Pure cosmetic joke; flagged for completeness.
-**Fix (deferred):** Use a stable per-session number or a real counter.
+### [HIGH] N4 — Dynamic-state changes do not move focus, causing keyboard users to lose orientation
+**File:** `/home/jalloway/projects/ai-bandmaker/templates/generate.html` lines 211-236
+**Issue:** When `showProgress()`, `showSuccess()`, or `showError()` swap the visible region, focus remains on the now-hidden trigger button. For keyboard users, pressing Tab next focuses an element far from the new content; for screen-reader users, although the `aria-live` polite announcement plays, they cannot easily reach the new buttons (`viewBandBtn`, `retryBtn`, `cancelBtn`) without traversing the whole page. WCAG 2.4.3 (Focus Order) and 3.2.4 (Consistent Identification) implications. Best-practice for SPA-like state transitions: move focus to the new region's heading.
+**Fix:** Each show* function should programmatically focus the heading (or a `tabindex="-1"` wrapper) of the newly-visible region. Add `tabindex="-1"` to the three section heading elements (`progressTitle`, the success `<h3>`, and the error `<h3>`) and call `.focus()` on them inside the corresponding show function.
 
-### [MEDIUM] M6 — `mailto:webmaster@aibandgen.geocities.com` is a dead address
-**File:** `/home/jalloway/projects/ai-bandmaker/templates/base.html` line 50
-**Issue:** GeoCities shut down in 2009. Clicking opens the user's mail client to nowhere.
-**Fix (deferred):** Remove the mailto, point to a real address, or render as plain text.
+### [MEDIUM] M7 — Dead `marquee {}` CSS rule remains in generated band page CSS
+**File:** `/home/jalloway/projects/ai-bandmaker/createAct.py` lines 528-534
+**Issue:** The generated band page's `<style>` block still declares a rule for the `marquee` element even though the marquee was removed in commit `7941ae9` (band name is now `<h1>`). Cosmetic dead code; no functional impact; deferred since it doesn't break anything.
+**Fix (deferred):** Remove the `marquee { ... }` block.
 
-### [LOW] L1 — `aria-current="page"` not set on active nav item
-**File:** `/home/jalloway/projects/ai-bandmaker/templates/base.html` lines 26-28
-**Fix (deferred):** Pass current route to template and set `aria-current="page"`.
+### [MEDIUM] M8 — `bandPreview.innerHTML` injects unsanitised AI-generated band name
+**File:** `/home/jalloway/projects/ai-bandmaker/templates/generate.html` lines 224-227
+**Issue:** `preview.innerHTML = '<p ...>~*~ ' + (data.band_name || 'Your Band') + ' ~*~</p>...'` interpolates the band name returned from the status API directly into innerHTML. The band name comes from a ChatGPT response and is therefore not strictly user-controlled, but a creative model output containing `<script>` or HTML markup would be executed. Defense-in-depth recommendation: use textContent on a child element instead of innerHTML on the parent.
+**Fix (deferred):** Build the preview using DOM APIs (`document.createElement`, `el.textContent = data.band_name`).
 
-### [LOW] L2 — `import json` unused in `app.py`
-**File:** `/home/jalloway/projects/ai-bandmaker/app.py` line 3
-**Fix (deferred):** Remove the import.
+### [MEDIUM] M9 — `import json` still unused in `app.py`
+**File:** `/home/jalloway/projects/ai-bandmaker/app.py` line 2 (note: line shifted since prior review)
+**Issue:** Wait — checking current state, `import json` is no longer present in app.py (the retro overhaul cleaned this). **No action — already resolved.**
 
-### [LOW] L3 — Inline `import re` inside functions in `createAct.py`
-**File:** `/home/jalloway/projects/ai-bandmaker/createAct.py` lines 85, 218
-**Fix (deferred):** Move to module-level imports.
-
-### [LOW] L4 — `Faker==28.1.0` declared but unused
+### [LOW] L7 — `Faker==28.1.0` declared but unused (carried over from L4)
 **File:** `/home/jalloway/projects/ai-bandmaker/requirements.txt`
 **Fix (deferred):** Remove from requirements.
 
-### [LOW] L5 — Comic Sans MS as primary font
-**File:** `/home/jalloway/projects/ai-bandmaker/static/css/style.css` line 15
-**Issue:** Intentional retro choice. Comic Sans is divisive in body copy but is acceptable here given the deliberate aesthetic and 14px size.
-**Fix:** No action — intentional.
+### [LOW] L8 — Inline `import re` inside functions in `createAct.py` (carried over from L3)
+**File:** `/home/jalloway/projects/ai-bandmaker/createAct.py` lines 85, 218
+**Fix (deferred):** Move to module-level import.
 
-### [LOW] L6 — Banner stars opacity twinkle has no purpose
-**File:** `/home/jalloway/projects/ai-bandmaker/static/js/main.js` lines 8-15
-**Issue:** Pure decoration that runs `setInterval` indefinitely. Covered by H7 (gate behind reduced-motion).
+### [LOW] L9 — Visitor counter randomises on every page load (carried over from M5)
+**File:** `/home/jalloway/projects/ai-bandmaker/templates/base.html` line 47
+**Fix (deferred):** Pure cosmetic 90s joke; not a real defect.
+
+### [LOW] L10 — `mailto:webmaster@aibandgen.geocities.com` is a dead address (carried over from M6)
+**File:** `/home/jalloway/projects/ai-bandmaker/templates/base.html` line 52
+**Fix (deferred):** Cosmetic / thematic; not a real defect.
+
+### [LOW] L11 — Visitor counter and `mailto` repeated in generated band pages
+**File:** `/home/jalloway/projects/ai-bandmaker/createAct.py` lines 598, 614
+**Fix (deferred):** Same as above — thematic.
+
+### [LOW] L12 — `<table>` used for layout in `index.html` "What You Get" section (carried over from M4)
+**File:** `/home/jalloway/projects/ai-bandmaker/templates/index.html` lines 81-102
+**Fix (deferred):** Replace with CSS grid of `<div>` cards.
+
+### [LOW] L13 — Inline styles throughout templates and generated HTML (carried over from M2)
+**Fix (deferred):** Extract repeated inline styles to utility classes; will conflict with CSP if added later.
+
+### [LOW] L14 — Deprecated HTML attributes (`bordercolor`, `noshade`, `cellpadding`, `align=`, `width=`) throughout (carried over from M1)
+**Fix (deferred):** Migrate to CSS-driven equivalents while preserving the visual look.
+
+### [LOW] L15 — `band_assets()` route doesn't whitelist filenames (carried over from M3)
+**File:** `/home/jalloway/projects/ai-bandmaker/app.py` lines 82-87
+**Fix (deferred):** Whitelist `home.html` and `band_photo.jpg` (and any future known assets) for defense-in-depth.
+
+---
+
+## Phase 2 plan
+
+Fix N1, N2, N3, N4 (one HIGH-severity contrast issue, one HIGH-severity touch-target issue, one HIGH-severity table-semantics issue, one HIGH-severity focus-management issue). Skip MEDIUM/LOW per task instructions.
 
 ---
 
 ## Summary
 
-| Severity | Count |
-|---|---|
-| CRITICAL | 4 |
-| HIGH | 8 (H5 not actionable for current template) |
-| MEDIUM | 6 |
-| LOW | 6 |
+| Severity | Count | Fixed in this pass |
+|---|---|---|
+| CRITICAL | 0 | — |
+| HIGH | 4 (N1–N4) | 4 |
+| MEDIUM | 2 (M7, M8) | 0 (deferred) |
+| LOW | 9 (L7–L15) | 0 (deferred) |
 
-**Phase 2 plan:** Fix C1, C2, C3, C4, H1, H2, H3, H4, H6, H7, H8, H9. Skip H5 (not applicable). Leave all MEDIUM and LOW items logged but unfixed.
+No CRITICAL issues. The yesterday's pass closed all the show-stoppers; today's pass finds four HIGH-severity issues that were not in scope yesterday (or were simply missed): one numeric contrast failure on the generated band page, one touch-target failure on the global nav, one data-table semantics regression, and one focus-management gap on the generate flow.

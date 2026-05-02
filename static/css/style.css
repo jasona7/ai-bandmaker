@@ -47,8 +47,11 @@ button:focus-visible,
     outline-offset: 2px;
 }
 
-/* Remove default outline on programmatically-focused main wrapper after skip-link */
-main:focus {
+/* Remove default outline on programmatically-focused non-interactive targets
+   (main wrapper after skip-link; section headings after state transitions).
+   :focus-visible above still applies for keyboard navigation. */
+main:focus,
+h3[tabindex]:focus {
     outline: none;
 }
 
@@ -137,7 +140,9 @@ a:active {
 
 .nav-bar a {
     color: #00ff00;
+    display: inline-block;
     margin: 0 3px;
+    padding: 6px 8px;
     font-weight: bold;
 }
 .nav-bar a:hover {
@@ -236,9 +241,12 @@ a:active {
     background-color: #1a1a3a;
 }
 
-.table-header-row td {
+.table-header-row td,
+.table-header-row th {
     color: #ff00ff;
     border-bottom: 2px solid #ff00ff;
+    padding: 8px 12px;
+    font-weight: bold;
 }
 
 /* --- Feature Boxes --- */

@@ -13,9 +13,9 @@
 {% if bands %}
 <table class="gallery-table" cellpadding="8" cellspacing="0" border="2" bordercolor="#ff00ff">
     <tr class="table-header-row">
-        <td width="120" align="center"><strong>Photo</strong></td>
-        <td><strong>Band Name</strong></td>
-        <td width="120" align="center"><strong>View</strong></td>
+        <th scope="col" width="120" align="center">Photo</th>
+        <th scope="col" align="left">Band Name</th>
+        <th scope="col" width="120" align="center">View</th>
     </tr>
     {% for band in bands %}
     <tr class="gallery-row">
