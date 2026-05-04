@@ -123,3 +123,60 @@ Fix N1, N2, N3, N4 (one HIGH-severity contrast issue, one HIGH-severity touch-ta
 | LOW | 9 (L7–L15) | 0 (deferred) |
 
 No CRITICAL issues. The yesterday's pass closed all the show-stoppers; today's pass finds four HIGH-severity issues that were not in scope yesterday (or were simply missed): one numeric contrast failure on the generated band page, one touch-target failure on the global nav, one data-table semantics regression, and one focus-management gap on the generate flow.
+
+---
+
+# UX & Accessibility Audit — 2026-05-04
+
+**Branch:** `fix/code-review-2026-05-02` (audit re-run; audit-only commit on this branch since no Critical/High found)
+**Reviewer:** Jennifer Mitchelle (Senior UX Design Critic)
+**Scope:** UI consistency, WCAG 2.1 AA compliance, design system adherence, responsive layout, UX patterns
+
+## Verification of prior fixes (2026-05-02 audit, N1–N4)
+
+| ID | Item | Status |
+|---|---|---|
+| N1 | Generated band-page guestbook auxiliary-link wrapper bumped from `#666666` to `#999999` (~7.4:1 on `#000000`) | PASS — `createAct.py:599` now `color:#999999` |
+| N2 | `.nav-bar a` padded to give ≥24px touch target | PASS — `static/css/style.css:143-145` (`display: inline-block; padding: 6px 8px;` → ~32px height) |
+| N3 | `<th scope="col">` on data tables in gallery and progress-steps | PASS — `templates/gallery.html:16-18` and `templates/generate.html:46-47` |
+| N4 | Focus moves to new region heading on state transitions | PASS — `templates/generate.html:211-217` (`focusHeading()`) called from `showProgress`, `showSuccess`, `showError` (lines 224, 237, 246); `tabindex="-1"` present on all three section `<h3>` headings (lines 35, 90, 111) |
+
+All four 2026-05-02 fixes are intact in current source.
+
+## NEW Findings (2026-05-04 audit)
+
+### Methodology
+Reviewed: `templates/base.html`, `templates/index.html`, `templates/gallery.html`, `templates/generate.html`, `static/css/style.css`, `static/js/main.js`, `createAct.py` (HTML emission, lines 324–625), `app.py` (routes & validation).
+
+Checks performed:
+1. **Color contrast (WCAG 1.4.3)** — sampled all foreground/background pairs across base templates and generated band page. Primary body text (`#cccccc` on `#000022` ≈ 11.7:1, `#cccccc` on `#000000` ≈ 12.6:1). Footer text `#888888` on `#000000` ≈ 5.36:1, badge `#999999` on `#111111` ≈ 6.5:1, intro text `#dddddd` on `#0a0a1a` ≈ 13.5:1, `.no-photo` `#9999bb` on `#0a0a1a` ≈ 7.6:1, `.feature-box p` `#aaaaaa` on `#0a0a2a` ≈ 8.7:1, footer-copy `#9999bb` ≈ 7.6:1. All accent c1/c2/c3 swatches verified ≥ 4.5:1 on `#000000`. No new contrast violations.
+2. **Touch-target size (WCAG 2.5.8)** — primary nav (~32px), `.retro-button` (~40px), `.retro-button-small` (≥32px), gallery row tap zones — all PASS.
+3. **Semantic structure (WCAG 1.3.1)** — H1 site-title in `base.html` (line 19), single-H1-per-page rule preserved on generated band page (`<h1 class="band-title">` line 548). Gallery and progress tables use `<th scope="col">`. Landmarks (`<header role="banner">`, `<nav aria-label>`, `<main>`, `<footer role="contentinfo">`) intact.
+4. **ARIA & live regions** — `aria-live="polite"` on progress/success, `role="alert" aria-live="assertive"` on error. `aria-current="page"` on active nav link. `aria-hidden="true"` on decorative star strips. PASS.
+5. **Keyboard / focus** — skip-link visible on focus (`style.css:19-24`), `:focus-visible` outline on interactive elements (`style.css:40-48`), `focusHeading()` moves focus on state transitions. PASS.
+6. **Reduced motion** — both `style.css:457-472` and the generated band page's inline `<style>` (`createAct.py:497-504`) honor `prefers-reduced-motion: reduce`. The band-title pulse animation is gated on `(prefers-reduced-motion: no-preference)` (`createAct.py:427-435`) — modern correct pattern. `static/js/main.js:6-10` early-returns on reduced-motion. PASS.
+7. **Image alt text** — gallery thumbs and generated band photo both have descriptive alt. PASS.
+8. **Lang attribute / `<title>` / viewport** — present on all four templates and on the generated band page. PASS.
+9. **Empty state** — gallery has clear empty-state with CTA (`templates/gallery.html:43-52`). PASS.
+10. **Form/input accessibility** — N/A (the app has no input forms; only buttons).
+
+### Result
+
+**No Critical, High, Medium, or Low findings new to today.** The carry-over Medium and Low items from the 2026-05-02 audit (M7 dead `marquee` CSS rule, M8 `bandPreview.innerHTML` interpolation, L7 unused `Faker` dep, L8 inline `import re`, L9–L11 thematic 90s artifacts, L12 layout table on index "What You Get", L13 inline styles, L14 deprecated HTML attributes, L15 `band_assets` whitelist) remain explicitly deferred as already noted; their status is unchanged. None rise to High under the project's stated retro-90s aesthetic exception.
+
+## Summary
+
+| Severity | Count | Fixed in this pass |
+|---|---|---|
+| CRITICAL | 0 | — |
+| HIGH | 0 | — |
+| MEDIUM | 0 new (2 carried) | 0 (deferred) |
+| LOW | 0 new (9 carried) | 0 (deferred) |
+
+Per task instructions: no Critical/High → no fix branch, no PR. Audit findings appended to this review file and committed on the current branch (`fix/code-review-2026-05-02`).
+
+## Phase 3 verification evidence
+
+- `python -c "import ast; ast.parse(open('app.py').read()); ast.parse(open('createAct.py').read())"` → `OK app.py and createAct.py parse`
+- Jinja2 template compile-check across all four templates (`base.html`, `index.html`, `gallery.html`, `generate.html`) → all OK.
+
