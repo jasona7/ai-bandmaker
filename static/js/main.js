@@ -2,6 +2,13 @@
 // Minimal — just enough to keep things working
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Respect prefers-reduced-motion: skip purely-cosmetic animations.
+    var prefersReducedMotion = window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+        return;
+    }
+
     // Add a subtle star twinkle effect to the starfield background
     // (purely cosmetic, non-blocking)
     try {
