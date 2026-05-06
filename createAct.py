@@ -523,6 +523,8 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
             font-size: 0.95em;
         }}
         .nav-bar a {{
+            display: inline-block;
+            padding: 6px 8px;
             margin: 0 5px;
         }}
         marquee {{
