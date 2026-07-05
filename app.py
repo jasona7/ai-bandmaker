@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, abort
 import os
-import json
+import re
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from createAct import (
     generate_band_profile, create_band_backstory, extract_band_members,
@@ -17,8 +17,25 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Store generation status
+# Path-traversal defense: only allow safe band-name characters in URL path params.
+SAFE_BAND_NAME = re.compile(r'^[A-Za-z0-9_\-]+$')
+
+# Store generation status (lazily pruned in api_generate)
 generation_status = {}
+
+
+def cleanup_old_generations(max_age_minutes=60):
+    """Remove generation_status entries older than max_age_minutes.
+
+    Lazily called from api_generate so we don't need a background thread.
+    """
+    cutoff = datetime.now() - timedelta(minutes=max_age_minutes)
+    cutoff_key = cutoff.strftime("%Y%m%d_%H%M%S")
+    stale = [k for k in generation_status.keys() if k < cutoff_key]
+    for key in stale:
+        generation_status.pop(key, None)
+    if stale:
+        logger.info(f"Cleaned up {len(stale)} stale generation status entries")
 
 
 @app.route('/')
@@ -40,7 +57,6 @@ def gallery():
 
     for band_dir in glob.glob("*/home.html"):
         band_name = os.path.dirname(band_dir)
-        import re
         display_name = re.sub(r'([A-Z])', r' \1', band_name).strip()
         bands.append({
             'name': display_name,
@@ -51,9 +67,11 @@ def gallery():
     return render_template('gallery.html', bands=bands)
 
 
-@app.route('/band/<band_name>')
+@app.route('/band/<band_name>/')
 def view_band(band_name):
     """View a specific band's page"""
+    if not SAFE_BAND_NAME.match(band_name):
+        abort(404)
     band_path = os.path.join(band_name, 'home.html')
     if os.path.exists(band_path):
         return send_from_directory(band_name, 'home.html')
@@ -64,6 +82,8 @@ def view_band(band_name):
 @app.route('/band/<band_name>/<filename>')
 def band_assets(band_name, filename):
     """Serve band assets like photos"""
+    if not SAFE_BAND_NAME.match(band_name):
+        abort(404)
     return send_from_directory(band_name, filename)
 
 
@@ -71,6 +91,9 @@ def band_assets(band_name, filename):
 def api_generate():
     """API endpoint to generate a new band"""
     try:
+        # Lazy cleanup so generation_status doesn't grow unboundedly.
+        cleanup_old_generations()
+
         generation_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         generation_status[generation_id] = {

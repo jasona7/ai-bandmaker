@@ -3,6 +3,58 @@
    "Best viewed in Netscape Navigator 4.0"
    ============================================ */
 
+/* --- Skip Link (accessibility) --- */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: #ffff00;
+    color: #000000;
+    padding: 8px 16px;
+    z-index: 1000;
+    font-weight: bold;
+    text-decoration: none;
+    border: 2px solid #000000;
+}
+.skip-link:focus {
+    left: 8px;
+    top: 8px;
+    outline: 3px solid #ff00ff;
+    outline-offset: 2px;
+}
+
+/* --- Visually Hidden Helper --- */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* --- Global Focus Indicator --- */
+a:focus-visible,
+button:focus-visible,
+.retro-button:focus-visible,
+.retro-button-small:focus-visible,
+.big-link:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid #ffff00;
+    outline-offset: 2px;
+}
+
+/* Remove default outline on programmatically-focused non-interactive targets
+   (main wrapper after skip-link; section headings after state transitions).
+   :focus-visible above still applies for keyboard navigation. */
+main:focus,
+h3[tabindex]:focus {
+    outline: none;
+}
+
 /* --- Base --- */
 body {
     background-color: #000022;
@@ -88,7 +140,9 @@ a:active {
 
 .nav-bar a {
     color: #00ff00;
+    display: inline-block;
     margin: 0 3px;
+    padding: 6px 8px;
     font-weight: bold;
 }
 .nav-bar a:hover {
@@ -187,9 +241,12 @@ a:active {
     background-color: #1a1a3a;
 }
 
-.table-header-row td {
+.table-header-row td,
+.table-header-row th {
     color: #ff00ff;
     border-bottom: 2px solid #ff00ff;
+    padding: 8px 12px;
+    font-weight: bold;
 }
 
 /* --- Feature Boxes --- */
@@ -250,13 +307,15 @@ a:active {
     background-color: #333366;
     color: #00ffff;
     border: 1px outset #6666cc;
-    padding: 4px 12px;
+    padding: 8px 16px;
+    min-height: 32px;
     font-family: 'Comic Sans MS', cursive;
-    font-size: 0.85em;
+    font-size: 0.9em;
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
+    line-height: 1.2;
 }
 .retro-button-small:hover {
     background-color: #444488;
@@ -377,7 +436,7 @@ a:active {
 }
 
 .footer-copy {
-    color: #666666;
+    color: #9999bb;
     font-size: 0.85em;
 }
 
@@ -393,6 +452,29 @@ a:active {
 
 @keyframes blinker {
     50% { opacity: 0; }
+}
+
+/* --- Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+    .blink {
+        animation: none;
+    }
+    .banner-stars {
+        opacity: 1 !important;
+    }
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+/* --- No-photo placeholder (gallery) --- */
+.no-photo {
+    color: #9999bb;
+    font-style: italic;
 }
 
 /* --- Responsive --- */

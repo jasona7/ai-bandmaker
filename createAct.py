@@ -391,6 +391,10 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         a {{ color: {c1}; }}
         a:visited {{ color: {c2}; }}
         a:hover {{ color: {c3}; text-decoration: none; }}
+        a:focus-visible {{
+            outline: 3px solid #ffff00;
+            outline-offset: 2px;
+        }}
         .page-wrapper {{
             max-width: 800px;
             margin: 0 auto;
@@ -401,14 +405,33 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
             background: linear-gradient(to right, #000033, #000066, #000033);
             border: 3px ridge {c2};
             margin-bottom: 10px;
-        }}
-        .header-table td {{
             text-align: center;
             padding: 15px;
+            box-sizing: border-box;
         }}
         .divider {{
             width: 80%;
             margin: 15px auto;
+            border: none;
+            height: 2px;
+            background: linear-gradient(to right, transparent, {c2}, transparent);
+        }}
+        h1.band-title {{
+            color: {c1};
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-size: 1.8em;
+            margin: 0;
+            text-shadow: 2px 2px 4px {c2};
+            letter-spacing: 1px;
+        }}
+        @media (prefers-reduced-motion: no-preference) {{
+            h1.band-title {{
+                animation: bandTitlePulse 3s ease-in-out infinite;
+            }}
+            @keyframes bandTitlePulse {{
+                0%, 100% {{ text-shadow: 2px 2px 4px {c2}; }}
+                50%      {{ text-shadow: 2px 2px 8px {c2}, 0 0 12px {c1}; }}
+            }}
         }}
         .section-header {{
             color: {c1};
@@ -471,6 +494,14 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         @keyframes blinker {{
             50% {{ opacity: 0; }}
         }}
+        @media (prefers-reduced-motion: reduce) {{
+            .blink {{ animation: none; }}
+            *, *::before, *::after {{
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }}
+        }}
         .badge-row {{
             text-align: center;
             margin: 15px 0;
@@ -492,6 +523,8 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
             font-size: 0.95em;
         }}
         .nav-bar a {{
+            display: inline-block;
+            padding: 6px 8px;
             margin: 0 5px;
         }}
         marquee {{
@@ -512,68 +545,60 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
 <div class="page-wrapper">
 
     <!-- Header -->
-    <table class="header-table" cellpadding="0" cellspacing="0">
-        <tr><td>
-            <span class="stars">* * * * * * * * * * * * *</span><br>
-            <marquee scrollamount="3">{band_name}</marquee>
-            <br>
-            <span style="color:{c3}; font-size:0.85em;">
-                {style_name} | {genre1} / {genre2} | Est. {ref_year} | {nationality}
-            </span><br>
-            <span class="stars">* * * * * * * * * * * * *</span>
-        </td></tr>
-    </table>
+    <header class="header-table" role="banner">
+        <span class="stars" aria-hidden="true">* * * * * * * * * * * * *</span><br>
+        <h1 class="band-title">{band_name}</h1>
+        <p style="color:{c3}; font-size:0.85em; margin:6px 0;">
+            {style_name} | {genre1} / {genre2} | Est. {ref_year} | {nationality}
+        </p>
+        <span class="stars" aria-hidden="true">* * * * * * * * * * * * *</span>
+    </header>
 
     <!-- Navigation -->
-    <div class="nav-bar">
+    <nav class="nav-bar" aria-label="Page sections">
         <a href="#backstory">Backstory</a> |
         <a href="#photo">Band Photo</a> |
         <a href="#members">Members</a> |
         <a href="#discography">Discography</a> |
         <a href="#guestbook">Guestbook</a>
-    </div>
+    </nav>
 
     <!-- Backstory -->
-    <a name="backstory"></a>
-    <h3 class="section-header">~ The Story ~</h3>
-    <hr class="divider" color="{c2}" size="2" noshade>
+    <h2 id="backstory" class="section-header">~ The Story ~</h2>
+    <hr class="divider" size="2" noshade>
     <div class="backstory-box">
         {backstory}
     </div>
 
     <!-- Band Photo -->
-    <a name="photo"></a>
-    <h3 class="section-header">~ Band Photo ~</h3>
-    <hr class="divider" color="{c2}" size="2" noshade>
+    <h2 id="photo" class="section-header">~ Band Photo ~</h2>
+    <hr class="divider" size="2" noshade>
     <div class="photo-frame">
-        <img src="band_photo.jpg" alt="{band_name} - Band Photo">
+        <img src="band_photo.jpg" alt="Promotional photo of {band_name}">
         <div class="photo-caption">
             {', '.join(m.get('name', '') for m in band_members)}
         </div>
     </div>
 
     <!-- Band Members -->
-    <a name="members"></a>
-    <h3 class="section-header">~ The Members ~</h3>
-    <hr class="divider" color="{c2}" size="2" noshade>
+    <h2 id="members" class="section-header">~ The Members ~</h2>
+    <hr class="divider" size="2" noshade>
     <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
         {members_html}
     </table>
 
     <!-- Discography -->
-    <a name="discography"></a>
-    <h3 class="section-header">~ Discography ~</h3>
-    <hr class="divider" color="{c2}" size="2" noshade>
+    <h2 id="discography" class="section-header">~ Discography ~</h2>
+    <hr class="divider" size="2" noshade>
     {disco_html}
 
     <!-- Guestbook / Links -->
-    <a name="guestbook"></a>
-    <h3 class="section-header">~ Guestbook & Links ~</h3>
-    <hr class="divider" color="{c2}" size="2" noshade>
+    <h2 id="guestbook" class="section-header">~ Guestbook & Links ~</h2>
+    <hr class="divider" size="2" noshade>
     <div style="text-align:center; padding:10px;">
         <p><a href="#">Sign the Guestbook!</a> | <a href="#">View Guestbook</a></p>
         <p><a href="mailto:webmaster@{band_name.replace(' ', '').lower()}.geocities.com">Email the Webmaster</a></p>
-        <p style="color:#666666; font-size:0.8em;">
+        <p style="color:#999999; font-size:0.8em;">
             <a href="#">Link to us!</a> |
             <a href="#">Webrings</a> |
             <a href="#">MIDI Archive</a>
