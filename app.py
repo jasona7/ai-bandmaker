@@ -57,6 +57,11 @@ def gallery():
 
     for band_dir in glob.glob("*/home.html"):
         band_name = os.path.dirname(band_dir)
+        # Directories outside SAFE_BAND_NAME can never be served by view_band,
+        # so listing them here would render a dead link and a broken image.
+        if not SAFE_BAND_NAME.match(band_name):
+            logging.warning("Skipping unservable band directory: %s", band_name)
+            continue
         display_name = re.sub(r'([A-Z])', r' \1', band_name).strip()
         bands.append({
             'name': display_name,

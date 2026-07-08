@@ -1,12 +1,39 @@
 import os
 import json
 import random
+import re
+import html
+import unicodedata
 import requests
 import logging
 from datetime import datetime
 
 # Get the current year
 current_year = datetime.now().year
+
+
+def esc(value):
+    """Escape model-generated text before interpolating it into HTML.
+
+    Everything the language model returns is untrusted markup as far as the fan
+    page is concerned. Without this, a band name containing a quote truncates
+    the `alt` attribute it lands in, and one containing `<` injects an element.
+    Safe for both text nodes and double-quoted attribute values.
+    """
+    return html.escape(str(value), quote=True)
+
+
+def slugify_band_name(band_name):
+    """Reduce a band name to CamelCase ASCII matching app.SAFE_BAND_NAME.
+
+    The web app gates /band/<name>/ on ^[A-Za-z0-9_-]+$. Any directory outside
+    that charset can never be served back, so the generator must not create one.
+    Accented characters are transliterated rather than dropped, so that
+    "Bjork Collective" survives as BjorkCollective instead of BjrkCollective.
+    """
+    camel = ''.join(word.capitalize() for word in band_name.split())
+    ascii_only = unicodedata.normalize('NFKD', camel).encode('ascii', 'ignore').decode('ascii')
+    return re.sub(r'[^A-Za-z0-9_-]', '', ascii_only) or 'UntitledBand'
 
 # Setup logging
 log_dir = "logs"
@@ -323,12 +350,16 @@ def build_band_photo_prompt(band_profile, band_members):
 
 def create_html_content(band_profile, backstory, albums, band_members, output_dir):
     """Generate a retro 90s-style fan page HTML for the band."""
-    band_name = band_profile['Band Name']
-    style_name = band_profile['Style Name']
-    ref_year = band_profile['Reference Year']
-    genre1 = band_profile['Genre 1']
-    genre2 = band_profile['Genre 2']
-    nationality = band_profile['Nationality']
+    raw_band_name = band_profile['Band Name']
+
+    # Everything below is model output. Escape it once, here, so no interpolation
+    # site further down can leak markup into the page.
+    band_name = esc(raw_band_name)
+    style_name = esc(band_profile['Style Name'])
+    ref_year = esc(band_profile['Reference Year'])
+    genre1 = esc(band_profile['Genre 1'])
+    genre2 = esc(band_profile['Genre 2'])
+    nationality = esc(band_profile['Nationality'])
 
     # Pick random retro accent colors
     accent_colors = [
@@ -344,11 +375,11 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     for member in band_members:
         members_html += f"""
         <tr>
-            <td style="color:{c2}; padding:4px 12px; font-weight:bold;">{member.get('name', 'Unknown')}</td>
-            <td style="color:{c3}; padding:4px 12px;">{member.get('instrument', '')}</td>
+            <td style="color:{c2}; padding:4px 12px; font-weight:bold;">{esc(member.get('name', 'Unknown'))}</td>
+            <td style="color:{c3}; padding:4px 12px;">{esc(member.get('instrument', ''))}</td>
         </tr>
         <tr>
-            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">{member.get('bio', '')}</td>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">{esc(member.get('bio', ''))}</td>
         </tr>"""
 
     # Build discography HTML
@@ -356,12 +387,12 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     for title, tracks in albums:
         tracks_html = ""
         for i, track in enumerate(tracks, 1):
-            tracks_html += f'<li style="color:#cccccc;">{track}</li>\n'
+            tracks_html += f'<li style="color:#cccccc;">{esc(track)}</li>\n'
         disco_html += f"""
         <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="{c2}"
                style="margin:10px auto; background-color:#111111;">
             <tr><td colspan="2" style="background-color:#222222; color:{c1}; font-weight:bold; padding:8px; font-size:1.1em;">
-                {title}
+                {esc(title)}
             </td></tr>
             <tr><td style="padding:8px;">
                 <ol style="color:{c3}; margin:0; padding-left:20px;">
@@ -372,6 +403,10 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
 
     # Visitor counter (fake, random)
     visitor_count = random.randint(1247, 99999)
+
+    # Derived from the slug, not the raw name: a stray quote or & would otherwise
+    # break out of the href.
+    mailto_host = slugify_band_name(raw_band_name).lower()
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -567,7 +602,7 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     <h2 id="backstory" class="section-header">~ The Story ~</h2>
     <hr class="divider" size="2" noshade>
     <div class="backstory-box">
-        {backstory}
+        {esc(backstory)}
     </div>
 
     <!-- Band Photo -->
@@ -576,7 +611,7 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     <div class="photo-frame">
         <img src="band_photo.jpg" alt="Promotional photo of {band_name}">
         <div class="photo-caption">
-            {', '.join(m.get('name', '') for m in band_members)}
+            {', '.join(esc(m.get('name', '')) for m in band_members)}
         </div>
     </div>
 
@@ -597,7 +632,7 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     <hr class="divider" size="2" noshade>
     <div style="text-align:center; padding:10px;">
         <p><a href="#">Sign the Guestbook!</a> | <a href="#">View Guestbook</a></p>
-        <p><a href="mailto:webmaster@{band_name.replace(' ', '').lower()}.geocities.com">Email the Webmaster</a></p>
+        <p><a href="mailto:webmaster@{mailto_host}.geocities.com">Email the Webmaster</a></p>
         <p style="color:#999999; font-size:0.8em;">
             <a href="#">Link to us!</a> |
             <a href="#">Webrings</a> |
@@ -641,7 +676,7 @@ def save_html_to_file(content, output_dir, filename="home.html"):
 
 def create_project_directory(band_name):
     """Create a unique subdirectory based on band name in CamelCase."""
-    directory_name = ''.join(word.capitalize() for word in band_name.split())
+    directory_name = slugify_band_name(band_name)
     directory = directory_name
     counter = 1
     while os.path.exists(directory):
