@@ -169,6 +169,16 @@ function checkStatus() {
     fetch('/api/status/' + currentGenerationId)
     .then(response => response.json())
     .then(data => {
+        // The server no longer knows this id -- the entry was pruned, or the
+        // process restarted mid-generation. Nothing will ever move it to
+        // 'complete' or 'error', so stop polling and hand the user a recovery
+        // path rather than leaving the bar frozen at 0% forever.
+        if (data.status === 'not_found') {
+            clearInterval(statusCheckInterval);
+            showError('This generation is no longer being tracked. The server may have restarted. Please start a new band.');
+            return;
+        }
+
         updateProgress(data);
 
         if (data.status === 'complete') {
