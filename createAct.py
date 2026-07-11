@@ -1,12 +1,39 @@
 import os
 import json
 import random
+import re
+import html
+import unicodedata
 import requests
 import logging
 from datetime import datetime
 
 # Get the current year
 current_year = datetime.now().year
+
+
+def esc(value):
+    """Escape model-generated text before interpolating it into HTML.
+
+    Everything the language model returns is untrusted markup as far as the fan
+    page is concerned. Without this, a band name containing a quote truncates
+    the `alt` attribute it lands in, and one containing `<` injects an element.
+    Safe for both text nodes and double-quoted attribute values.
+    """
+    return html.escape(str(value), quote=True)
+
+
+def slugify_band_name(band_name):
+    """Reduce a band name to CamelCase ASCII matching app.SAFE_BAND_NAME.
+
+    The web app gates /band/<name>/ on ^[A-Za-z0-9_-]+$. Any directory outside
+    that charset can never be served back, so the generator must not create one.
+    Accented characters are transliterated rather than dropped, so that
+    "Bjork Collective" survives as BjorkCollective instead of BjrkCollective.
+    """
+    camel = ''.join(word.capitalize() for word in band_name.split())
+    ascii_only = unicodedata.normalize('NFKD', camel).encode('ascii', 'ignore').decode('ascii')
+    return re.sub(r'[^A-Za-z0-9_-]', '', ascii_only) or 'UntitledBand'
 
 # Setup logging
 log_dir = "logs"
@@ -323,12 +350,16 @@ def build_band_photo_prompt(band_profile, band_members):
 
 def create_html_content(band_profile, backstory, albums, band_members, output_dir):
     """Generate a retro 90s-style fan page HTML for the band."""
-    band_name = band_profile['Band Name']
-    style_name = band_profile['Style Name']
-    ref_year = band_profile['Reference Year']
-    genre1 = band_profile['Genre 1']
-    genre2 = band_profile['Genre 2']
-    nationality = band_profile['Nationality']
+    raw_band_name = band_profile['Band Name']
+
+    # Everything below is model output. Escape it once, here, so no interpolation
+    # site further down can leak markup into the page.
+    band_name = esc(raw_band_name)
+    style_name = esc(band_profile['Style Name'])
+    ref_year = esc(band_profile['Reference Year'])
+    genre1 = esc(band_profile['Genre 1'])
+    genre2 = esc(band_profile['Genre 2'])
+    nationality = esc(band_profile['Nationality'])
 
     # Pick random retro accent colors
     accent_colors = [
@@ -344,11 +375,11 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     for member in band_members:
         members_html += f"""
         <tr>
-            <td style="color:{c2}; padding:4px 12px; font-weight:bold;">{member.get('name', 'Unknown')}</td>
-            <td style="color:{c3}; padding:4px 12px;">{member.get('instrument', '')}</td>
+            <td style="color:{c2}; padding:4px 12px; font-weight:bold;">{esc(member.get('name', 'Unknown'))}</td>
+            <td style="color:{c3}; padding:4px 12px;">{esc(member.get('instrument', ''))}</td>
         </tr>
         <tr>
-            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">{member.get('bio', '')}</td>
+            <td colspan="2" style="color:#cccccc; padding:2px 12px 8px 12px; font-size:0.9em;">{esc(member.get('bio', ''))}</td>
         </tr>"""
 
     # Build discography HTML
@@ -356,12 +387,12 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
     for title, tracks in albums:
         tracks_html = ""
         for i, track in enumerate(tracks, 1):
-            tracks_html += f'<li style="color:#cccccc;">{track}</li>\n'
+            tracks_html += f'<li style="color:#cccccc;">{esc(track)}</li>\n'
         disco_html += f"""
         <table width="90%" cellpadding="4" cellspacing="0" border="1" bordercolor="{c2}"
                style="margin:10px auto; background-color:#111111;">
             <tr><td colspan="2" style="background-color:#222222; color:{c1}; font-weight:bold; padding:8px; font-size:1.1em;">
-                {title}
+                {esc(title)}
             </td></tr>
             <tr><td style="padding:8px;">
                 <ol style="color:{c3}; margin:0; padding-left:20px;">
@@ -372,6 +403,10 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
 
     # Visitor counter (fake, random)
     visitor_count = random.randint(1247, 99999)
+
+    # Derived from the slug, not the raw name: a stray quote or & would otherwise
+    # break out of the href.
+    mailto_host = slugify_band_name(raw_band_name).lower()
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -391,6 +426,10 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         a {{ color: {c1}; }}
         a:visited {{ color: {c2}; }}
         a:hover {{ color: {c3}; text-decoration: none; }}
+        a:focus-visible {{
+            outline: 3px solid #ffff00;
+            outline-offset: 2px;
+        }}
         .page-wrapper {{
             max-width: 800px;
             margin: 0 auto;
@@ -401,14 +440,33 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
             background: linear-gradient(to right, #000033, #000066, #000033);
             border: 3px ridge {c2};
             margin-bottom: 10px;
-        }}
-        .header-table td {{
             text-align: center;
             padding: 15px;
+            box-sizing: border-box;
         }}
         .divider {{
             width: 80%;
             margin: 15px auto;
+            border: none;
+            height: 2px;
+            background: linear-gradient(to right, transparent, {c2}, transparent);
+        }}
+        h1.band-title {{
+            color: {c1};
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-size: 1.8em;
+            margin: 0;
+            text-shadow: 2px 2px 4px {c2};
+            letter-spacing: 1px;
+        }}
+        @media (prefers-reduced-motion: no-preference) {{
+            h1.band-title {{
+                animation: bandTitlePulse 3s ease-in-out infinite;
+            }}
+            @keyframes bandTitlePulse {{
+                0%, 100% {{ text-shadow: 2px 2px 4px {c2}; }}
+                50%      {{ text-shadow: 2px 2px 8px {c2}, 0 0 12px {c1}; }}
+            }}
         }}
         .section-header {{
             color: {c1};
@@ -471,6 +529,14 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
         @keyframes blinker {{
             50% {{ opacity: 0; }}
         }}
+        @media (prefers-reduced-motion: reduce) {{
+            .blink {{ animation: none; }}
+            *, *::before, *::after {{
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }}
+        }}
         .badge-row {{
             text-align: center;
             margin: 15px 0;
@@ -492,6 +558,8 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
             font-size: 0.95em;
         }}
         .nav-bar a {{
+            display: inline-block;
+            padding: 6px 8px;
             margin: 0 5px;
         }}
         marquee {{
@@ -512,68 +580,60 @@ def create_html_content(band_profile, backstory, albums, band_members, output_di
 <div class="page-wrapper">
 
     <!-- Header -->
-    <table class="header-table" cellpadding="0" cellspacing="0">
-        <tr><td>
-            <span class="stars">* * * * * * * * * * * * *</span><br>
-            <marquee scrollamount="3">{band_name}</marquee>
-            <br>
-            <span style="color:{c3}; font-size:0.85em;">
-                {style_name} | {genre1} / {genre2} | Est. {ref_year} | {nationality}
-            </span><br>
-            <span class="stars">* * * * * * * * * * * * *</span>
-        </td></tr>
-    </table>
+    <header class="header-table" role="banner">
+        <span class="stars" aria-hidden="true">* * * * * * * * * * * * *</span><br>
+        <h1 class="band-title">{band_name}</h1>
+        <p style="color:{c3}; font-size:0.85em; margin:6px 0;">
+            {style_name} | {genre1} / {genre2} | Est. {ref_year} | {nationality}
+        </p>
+        <span class="stars" aria-hidden="true">* * * * * * * * * * * * *</span>
+    </header>
 
     <!-- Navigation -->
-    <div class="nav-bar">
+    <nav class="nav-bar" aria-label="Page sections">
         <a href="#backstory">Backstory</a> |
         <a href="#photo">Band Photo</a> |
         <a href="#members">Members</a> |
         <a href="#discography">Discography</a> |
         <a href="#guestbook">Guestbook</a>
-    </div>
+    </nav>
 
     <!-- Backstory -->
-    <a name="backstory"></a>
-    <h3 class="section-header">~ The Story ~</h3>
-    <hr class="divider" color="{c2}" size="2" noshade>
+    <h2 id="backstory" class="section-header">~ The Story ~</h2>
+    <hr class="divider" size="2" noshade>
     <div class="backstory-box">
-        {backstory}
+        {esc(backstory)}
     </div>
 
     <!-- Band Photo -->
-    <a name="photo"></a>
-    <h3 class="section-header">~ Band Photo ~</h3>
-    <hr class="divider" color="{c2}" size="2" noshade>
+    <h2 id="photo" class="section-header">~ Band Photo ~</h2>
+    <hr class="divider" size="2" noshade>
     <div class="photo-frame">
-        <img src="band_photo.jpg" alt="{band_name} - Band Photo">
+        <img src="band_photo.jpg" alt="Promotional photo of {band_name}">
         <div class="photo-caption">
-            {', '.join(m.get('name', '') for m in band_members)}
+            {', '.join(esc(m.get('name', '')) for m in band_members)}
         </div>
     </div>
 
     <!-- Band Members -->
-    <a name="members"></a>
-    <h3 class="section-header">~ The Members ~</h3>
-    <hr class="divider" color="{c2}" size="2" noshade>
+    <h2 id="members" class="section-header">~ The Members ~</h2>
+    <hr class="divider" size="2" noshade>
     <table class="members-table" cellpadding="0" cellspacing="0" width="90%">
         {members_html}
     </table>
 
     <!-- Discography -->
-    <a name="discography"></a>
-    <h3 class="section-header">~ Discography ~</h3>
-    <hr class="divider" color="{c2}" size="2" noshade>
+    <h2 id="discography" class="section-header">~ Discography ~</h2>
+    <hr class="divider" size="2" noshade>
     {disco_html}
 
     <!-- Guestbook / Links -->
-    <a name="guestbook"></a>
-    <h3 class="section-header">~ Guestbook & Links ~</h3>
-    <hr class="divider" color="{c2}" size="2" noshade>
+    <h2 id="guestbook" class="section-header">~ Guestbook & Links ~</h2>
+    <hr class="divider" size="2" noshade>
     <div style="text-align:center; padding:10px;">
         <p><a href="#">Sign the Guestbook!</a> | <a href="#">View Guestbook</a></p>
-        <p><a href="mailto:webmaster@{band_name.replace(' ', '').lower()}.geocities.com">Email the Webmaster</a></p>
-        <p style="color:#666666; font-size:0.8em;">
+        <p><a href="mailto:webmaster@{mailto_host}.geocities.com">Email the Webmaster</a></p>
+        <p style="color:#999999; font-size:0.8em;">
             <a href="#">Link to us!</a> |
             <a href="#">Webrings</a> |
             <a href="#">MIDI Archive</a>
@@ -616,7 +676,7 @@ def save_html_to_file(content, output_dir, filename="home.html"):
 
 def create_project_directory(band_name):
     """Create a unique subdirectory based on band name in CamelCase."""
-    directory_name = ''.join(word.capitalize() for word in band_name.split())
+    directory_name = slugify_band_name(band_name)
     directory = directory_name
     counter = 1
     while os.path.exists(directory):
