@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory, abort
 import os
 import re
+import shutil
 import threading
 import uuid
 from datetime import datetime, timedelta
@@ -27,7 +28,17 @@ generation_status = {}
 STATUS_LOCK = threading.Lock()
 
 # A generation that has reached one of these is finished and safe to prune.
-TERMINAL_STATUSES = frozenset({'complete', 'error'})
+# 'cancelled' is terminal too: the worker has bailed out, so the entry can be
+# pruned like any other completed run.
+TERMINAL_STATUSES = frozenset({'complete', 'error', 'cancelled'})
+
+
+class GenerationCancelled(Exception):
+    """Raised inside the worker when the user has requested a cancel.
+
+    Caught separately from real errors so a deliberate stop is reported as
+    'cancelled' (and its partial output cleaned up) rather than as an 'error'.
+    """
 
 # Fields api_status is allowed to echo back; anything else (created_at) is internal.
 PUBLIC_STATUS_FIELDS = ('status', 'progress', 'message', 'band_name', 'directory')
@@ -70,6 +81,35 @@ def update_status(generation_id, **fields):
             return False
         entry.update(fields)
         return True
+
+
+def raise_if_cancelled(generation_id):
+    """Raise GenerationCancelled if the user has requested a stop.
+
+    The worker calls this at each step boundary so a cancel takes effect before
+    the next expensive GPT/DALL-E call instead of running to completion.
+    """
+    with STATUS_LOCK:
+        entry = generation_status.get(generation_id)
+        if entry is not None and entry.get('cancelled'):
+            raise GenerationCancelled()
+
+
+def cleanup_partial_output(output_dir):
+    """Remove a cancelled run's partial output directory, best-effort.
+
+    create_project_directory always makes a fresh unique dir, so removing it
+    can't clobber another band. A cancelled run never reaches save_html_to_file,
+    so its dir has no home.html and would otherwise linger as an orphan.
+    """
+    if not output_dir:
+        return
+    try:
+        if os.path.isdir(output_dir):
+            shutil.rmtree(output_dir)
+            logger.info("Removed partial output directory %s", output_dir)
+    except OSError as e:
+        logger.warning("Could not remove partial output dir %s: %s", output_dir, e)
 
 
 @app.route('/')
@@ -144,6 +184,7 @@ def api_generate():
                 'message': 'Initializing band generation...',
                 'band_name': None,
                 'directory': None,
+                'cancelled': False,
                 'created_at': datetime.now()
             }
 
@@ -165,6 +206,27 @@ def api_generate():
         }), 500
 
 
+@app.route('/api/cancel/<generation_id>', methods=['POST'])
+def api_cancel(generation_id):
+    """Request cancellation of an in-flight band generation.
+
+    Sets a flag the worker checks at each step boundary. Without this, CANCEL
+    only stopped client polling while the worker ran to completion -- a full
+    paid generation that then appeared in the gallery as a ghost band.
+    """
+    with STATUS_LOCK:
+        entry = generation_status.get(generation_id)
+        if entry is None:
+            return jsonify({'success': False, 'error': 'not_found'}), 404
+        if entry.get('status') in TERMINAL_STATUSES:
+            # Already finished (or already cancelled); nothing left to stop.
+            return jsonify({'success': True, 'already_finished': True})
+        entry['cancelled'] = True
+
+    logger.info("Cancellation requested for generation %s", generation_id)
+    return jsonify({'success': True})
+
+
 @app.route('/api/status/<generation_id>')
 def api_status(generation_id):
     """Check the status of a band generation"""
@@ -183,7 +245,12 @@ def api_status(generation_id):
 
 def generate_band_async(generation_id):
     """Generate a band asynchronously"""
+    # Track the output dir so a cancel can clean up its partial contents. Stays
+    # None until create_project_directory runs, so an early cancel has nothing
+    # to remove.
+    output_dir = None
     try:
+        raise_if_cancelled(generation_id)
         update_status(
             generation_id,
             status='generating_profile',
@@ -193,6 +260,7 @@ def generate_band_async(generation_id):
 
         band_profile = generate_band_profile()
 
+        raise_if_cancelled(generation_id)
         update_status(
             generation_id,
             status='creating_directory',
@@ -204,6 +272,7 @@ def generate_band_async(generation_id):
         output_dir = create_project_directory(band_profile['Band Name'])
         update_status(generation_id, directory=output_dir)
 
+        raise_if_cancelled(generation_id)
         update_status(
             generation_id,
             status='generating_backstory',
@@ -213,6 +282,7 @@ def generate_band_async(generation_id):
 
         backstory = create_band_backstory(band_profile)
 
+        raise_if_cancelled(generation_id)
         update_status(
             generation_id,
             status='extracting_members',
@@ -222,6 +292,7 @@ def generate_band_async(generation_id):
 
         band_members = extract_band_members(band_profile, backstory)
 
+        raise_if_cancelled(generation_id)
         update_status(
             generation_id,
             status='generating_discography',
@@ -231,6 +302,7 @@ def generate_band_async(generation_id):
 
         albums = generate_discography_info(band_profile, backstory)
 
+        raise_if_cancelled(generation_id)
         update_status(
             generation_id,
             status='generating_photo',
@@ -242,6 +314,7 @@ def generate_band_async(generation_id):
         photo_prompt = build_band_photo_prompt(band_profile, band_members)
         generate_dall_e_image(photo_prompt, os.path.join(output_dir, 'band_photo.jpg'))
 
+        raise_if_cancelled(generation_id)
         update_status(
             generation_id,
             status='creating_page',
@@ -257,6 +330,16 @@ def generate_band_async(generation_id):
             status='complete',
             progress=100,
             message=f'{band_profile["Band Name"]} is ready to rock!'
+        )
+
+    except GenerationCancelled:
+        logger.info("Generation %s cancelled by user", generation_id)
+        cleanup_partial_output(output_dir)
+        update_status(
+            generation_id,
+            status='cancelled',
+            progress=0,
+            message='Generation cancelled.'
         )
 
     except Exception as e:

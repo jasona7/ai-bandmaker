@@ -179,6 +179,14 @@ function checkStatus() {
             return;
         }
 
+        // The server confirmed the worker stopped (e.g. a poll raced ahead of
+        // cancelGeneration's own clearInterval). The UI is already being reset;
+        // just stop polling rather than announcing progress for a dead run.
+        if (data.status === 'cancelled') {
+            clearInterval(statusCheckInterval);
+            return;
+        }
+
         updateProgress(data);
 
         if (data.status === 'complete') {
@@ -283,6 +291,19 @@ function cancelGeneration() {
     if (statusCheckInterval) {
         clearInterval(statusCheckInterval);
     }
+
+    // Tell the server to actually stop the worker. Without this, CANCEL only
+    // stopped the client poll while the in-flight band ran to completion --
+    // costing a full paid generation and appearing in the gallery as a ghost.
+    // Best-effort: capture the id before resetInterface() clears it.
+    var idToCancel = currentGenerationId;
+    if (idToCancel) {
+        fetch('/api/cancel/' + idToCancel, { method: 'POST' })
+            .catch(function(error) {
+                console.error('Error cancelling generation:', error);
+            });
+    }
+
     resetInterface();
 }
 
