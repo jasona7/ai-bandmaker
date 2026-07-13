@@ -1,150 +1,215 @@
-# UX / Accessibility / Design-System Review — AI Band Generator
+# UX / Accessibility / Design-System Review — 2026-07-13
 
-**Reviewer:** Jennifer Mitchelle (Senior UX Design Critic)
-**Date:** 2026-07-11
-**Scope:** `templates/base.html`, `index.html`, `generate.html`, `gallery.html`, `static/css/style.css`, `static/js/main.js`, and the template-facing parts of `app.py`.
-**Framing:** The 1996 GeoCities aesthetic (Comic Sans, blink, neon-on-dark, ASCII bar, star field, under-construction) is treated as an intentional design language. Findings judge usability, WCAG 2.1 AA conformance, internal consistency, responsiveness, and UX anti-patterns **within** that theme. No finding says "this looks dated."
-
----
-
-## Summary (counts by severity)
-
-| Severity | Count |
-|----------|-------|
-| Critical | 0 |
-| High     | 1 |
-| Medium   | 3 |
-| Low      | 6 |
-| **Total** | **10** |
-
-**Overall:** This is a genuinely well-hardened front end. Contrast across the neon palette is excellent (see Verification notes), the skip link / `sr-only` live region / `aria-current` / focus management on state entry / `prefers-reduced-motion` are all present and correct, images have real alt text, and the status indicators use symbol-plus-color rather than color alone. The remaining issues cluster in the generate.html state machine — a CANCEL control that doesn't cancel, focus lost on the reset/cancel transitions, and unbounded polling — plus low-severity polish.
+**Reviewer:** Jennifer Mitchelle (UX Design Critic). Every finding independently re-verified against the
+code by the orchestrator; H-A and M-A were reproduced by executing the real `generate.html` script
+against a stub DOM, before and after the fix.
+**Branch:** `fix/code-review-2026-07-13` (audit #29)
+**Scope:** `templates/`, `static/`, `createAct.py`, `app.py`, and the generated band pages.
+**Standard:** WCAG 2.2 AA.
 
 ---
 
-## High
+## ⚠ The finding that outranks every finding below
 
-### H1 — CANCEL is a false affordance: it stops the client but never stops the server  — ✅ FIXED (2026-07-11)
-**Category:** UX anti-pattern (Nielsen #1 Visibility of system status, #3 User control & freedom)
-**File:** `templates/generate.html` lines 282–287 (`cancelGeneration`); `app.py` (no cancel route exists)
+**Nothing this audit loop produces is reaching `main`.**
 
-**Fix applied (Phase 2):** Implemented a real server-side stop rather than the relabel fallback.
-- `app.py`: added `POST /api/cancel/<generation_id>` (`api_cancel`) that sets a `cancelled` flag on the status entry (404 for unknown ids, no-op for already-terminal runs); added a `GenerationCancelled` exception, a `raise_if_cancelled()` helper called at every step boundary in `generate_band_async`, and `cleanup_partial_output()` to `shutil.rmtree` the aborted run's partial directory. `'cancelled'` added to `TERMINAL_STATUSES` so entries prune normally.
-- `templates/generate.html`: `cancelGeneration()` now `POST`s to `/api/cancel/<id>` (best-effort, capturing the id before reset) so the worker actually stops; the poll loop short-circuits on a `cancelled` status.
-- **Verified** end-to-end with the paid generators mocked: cancelling mid-run flips status to `cancelled`, the later DALL·E/page-save steps never execute, the partial directory is removed, unknown-id → 404, and already-finished → `already_finished`. All 6 checks passed.
+```
+PRs merged, all time ................. 0
+PRs open ............................ 19   (oldest: 2026-04-02)
+Commits on this branch not on main .. 36
+Commits on main not on this branch ... 0
+```
 
-**What's wrong:** `cancelGeneration()` only does `clearInterval(statusCheckInterval)` and `resetInterface()`. There is no `fetch()` to the server and no `/api/cancel` route in `app.py`. The worker thread `generate_band_async` runs to completion regardless: it still calls the profile/backstory/discography generators and DALL·E, still writes a project directory, and still flips the status entry to `complete`. The band the user "cancelled" silently appears in the Band Gallery 30–60s later.
+`main` today still has **zero HTML escaping** in `createAct.py`. The stored-injection fix, the
+`aria-live` scoping fix, the WCAG fixes from PRs #10/#11/#14, the hang-at-0% fix, the CANCEL fix —
+none of it has ever landed. Users are running code that none of these 29 audits has improved.
 
-**Why it matters:** `[ CANCEL ]` is the only "emergency exit" from the multi-step progress flow, so it sets a firm expectation that work stops. It doesn't. The user's mental model and the system state diverge (ghost bands appear), and every cancel still incurs a full paid generation (multiple GPT calls + a DALL·E image). A control that visibly contradicts its label is a top-tier usability defect, not cosmetic.
+**Good news, and it is genuinely good:** the daily branches are *stacked*. This branch is a strict
+superset of `main` (zero commits on main that aren't here), and it already contains PRs **#10 → #19**.
+Verified by ancestry check:
 
-**Recommended fix:** Add a real server-side stop. Minimum viable: a `POST /api/cancel/<id>` that sets a `cancelled` flag on the status entry; have `generate_band_async` check the flag at each `update_status` boundary and bail early (cleaning up any partial directory). Have `cancelGeneration()` call it before resetting the UI. If a true stop is out of scope for Phase 2, relabel the control (e.g. `[ HIDE / START OVER ]`) and add a note that the in-flight band will still finish and appear in the gallery — so the label stops promising something the code doesn't deliver.
+| PR branch | contained in this branch? |
+|---|---|
+| `fix/code-review-2026-05-02` (#10) | ✅ |
+| `fix/code-review-2026-05-09` (#14) | ✅ |
+| `fix/code-review-2026-07-08` (#17) | ✅ |
+| `fix/code-review-2026-07-10` (#18) | ✅ |
+| `fix/code-review` (#1) | ❌ diverged |
+| `fix/code-review-2026-04-05` (#2) | ❌ diverged |
+| `fix/code-review-2026-04-12` (#4) | ❌ diverged |
 
----
+So **one merge of this branch into `main` lands ten PRs' worth of accumulated fixes.** PRs #1–#4 and
+#8/#9 predate the "retro overhaul" that landed on `main` and rewrote these files; they need separate
+triage. (PR #9's own title — *"Restore accessibility, security & UX fixes lost in retro overhaul"* —
+records that the overhaul already destroyed one round of fixes once.)
 
-## Medium
+**Recommended action, in priority order:**
+1. Merge this branch into `main`. Close #10–#19 as absorbed.
+2. Triage #1–#4, #8, #9 against current `main` — most are likely obsolete post-overhaul.
+3. Only then run audit #30.
 
-### M1 — Focus is dropped on the CANCEL and "GENERATE ANOTHER" transitions
-**Category:** Accessibility — keyboard/focus management (WCAG 2.4.3 Focus Order, Level A)
-**File:** `templates/generate.html` — `cancelGeneration` (282–287) and `resetInterface` (289–315)
-
-**What's wrong:** Every *other* state transition moves focus deliberately (`showProgress`/`showSuccess`/`showError` all call `focusHeading(...)`). But `resetInterface()` — reached from CANCEL and from the "GENERATE ANOTHER" button — hides the currently focused element (`progressTitle` after cancel, or `generateAnotherBtn` itself after success) with `display:none` and never calls `focus()` on anything. When the focused element is removed from the render tree, browsers reset focus to `<body>`. A keyboard or screen-reader user is silently dumped at the top of the document with no announcement.
-
-**Why it matters:** Focus loss mid-flow is a documented A-level failure; the next Tab restarts from the page top and screen-reader users get no context about what happened. This is exactly the kind of gap earlier passes missed — entry transitions were handled, the two *reset* paths were not.
-
-**Recommended fix:** After `resetInterface()` re-shows `#startGeneration`, move focus to the GENERATE button: `document.getElementById('generateBtn').focus();`. (It's a real `<button>`, already focusable.)
-
-### M2 — Polling has no timeout ceiling and silently swallows fetch failures
-**Category:** UX / error recovery (Nielsen #1 Visibility of system status)
-**File:** `templates/generate.html` — `startStatusCheck` (162–164) and the `checkStatus` catch block (193–195)
-
-**What's wrong:** Two related gaps. (1) The 1.5s poll runs unbounded — if the worker sticks in a non-terminal status (e.g. a hung DALL·E call that never raises), the bar freezes at the last percent forever. (2) The `.catch()` only does `console.error(...)` and leaves the interval running, so repeated `/api/status` 500s or network drops produce no visible feedback and no bound. The recent `not_found` handling (commit d5a50b1) covers *pruned/restarted* ids, but not a worker that is alive-but-stuck or an endpoint that is erroring.
-
-**Why it matters:** The only escape from a frozen bar is CANCEL — which (per H1) doesn't stop the server and gives no explanation of *why* it froze. "Visibility of system status" requires telling the user when something is wrong, not just spinning.
-
-**Recommended fix:** Track poll count / elapsed time; after a ceiling (e.g. ~3 minutes with no progress change, or N consecutive failed polls) call `showError('This is taking longer than expected — the server may be stuck. Please try again.')` and `clearInterval`. Treat a run of consecutive `.catch()` failures as an error surface rather than retrying silently forever.
-
-### M3 — GENERATE / RETRY have no disabled state; double-submit is prevented only as a layout side effect
-**Category:** UX robustness (double-submit of a costly action)
-**File:** `templates/generate.html` — `generateBtn` (26), `startGeneration` (140–160), `showProgress` (252–258)
-
-**What's wrong:** The button is never disabled or guarded by an `isGenerating` flag. Double-submission is prevented *only* because `showProgress()` sets the button's parent `#startGeneration` to `display:none` synchronously on the first click, so the second click of a fast double-click hit-tests empty space. That works today, but it couples "don't fire twice" to an unrelated layout decision. Any future refactor that keeps the button visible during progress (or moves the hide after the `fetch`) reintroduces uncontrolled double-generation — and each extra fire is a full paid generation plus an orphaned worker/directory.
-
-**Why it matters:** Guarding an expensive, irreversible action with a rendering side effect is fragile. An explicit guard is a few lines and removes the coupling.
-
-**Recommended fix:** Add a module-scoped `let isGenerating = false;`. At the top of `startGeneration()`: `if (isGenerating) return; isGenerating = true;`; clear it in `resetInterface`, `showError`, and `showSuccess`. Optionally set `generateBtn.disabled = true` while the request is in flight for a visible affordance.
+Auditing harder cannot fix a delivery problem. **The highest-value action available is not another
+audit — it is merging.**
 
 ---
 
-## Low
+## Summary of counts
 
-### L1 — Heading level skips from h2 to h4 on the home page
-**Category:** Accessibility — document structure (WCAG 1.3.1 Info and Relationships, Level A)
-**File:** `templates/index.html` lines 85, 91, 97 (feature-box `<h4>`) under the `<h2>` "What You Get" (line 78)
+| Severity | Count | Status |
+|----------|-------|--------|
+| CRITICAL | 0 | — |
+| HIGH | 1 | **H-A fixed this run** |
+| MEDIUM | 1 new + 4 carried | M-A **fixed** (subsumed by the H-A fix); rest logged, unfixed per scope |
+| LOW | 2 new + 7 carried | Logged, unfixed per scope |
 
-**What's wrong:** The page runs `h1` (banner) → `h2` (section headers) → `h4` (feature titles), skipping `h3`. Heading-navigation users hit a gap. (generate.html and gallery.html are clean: `h2` → `h3`.)
-
-**Recommended fix:** Change the three feature-box headings to `<h3>`; they keep their per-box neon colors via existing inline styles / `.feature-box`. No visual change.
-
-### L2 — "Pending" step indicator fails AA contrast
-**Category:** Accessibility — contrast (WCAG 1.4.3, Level AA)
-**File:** `static/css/style.css` `.step-row .step-indicator { color:#666666 }` (367–371) on the `#0a0a1a` table background
-
-**What's wrong:** The pending indicator (`...`) computes to **3.41:1**, below the 4.5:1 AA threshold. The in-progress (`#ffff00`) and complete (`#00ff00`) states pass; only the resting gray is low. It's `aria-hidden` (SR users get the parallel `sr-only` status text), but it is the primary *visual* status cue, so the decorative-text exemption doesn't cleanly apply for sighted low-vision users.
-
-**Recommended fix:** Lighten to at least ~`#909090` (~4.6:1), preserving the muted "not started" look while clearing AA.
-
-### L3 — Blinking "Under Construction" text has no stop mechanism
-**Category:** Accessibility — blinking content (WCAG 2.2.2 Pause, Stop, Hide, Level A)
-**File:** `templates/base.html` line 49 (`.blink`); `static/css/style.css` 447–455
-
-**What's wrong:** The blink toggles opacity on a 1.2s infinite loop (well past the 5s threshold in 2.2.2). `prefers-reduced-motion` disables it (good, and the right thematic call), but 2.2.2 has no reduced-motion carve-out — users without that OS preference get unstoppable blinking with no pause/stop/hide control. (At ~0.8 Hz it is far below the 3-flashes/second seizure threshold of 2.3.1, so there is no photosensitivity risk — this is purely the 2.2.2 "provide a control" clause.)
-
-**Recommended fix:** Give the animation a finite `animation-iteration-count` so it self-terminates within a few seconds (keeps the joke, satisfies the SC), or formally accept `prefers-reduced-motion` as the documented mitigation.
-
-### L4 — `.retro-button-small` is a link dressed as a button, and duplicates the row's band-name link
-**Category:** UI consistency / semantics
-**File:** `templates/gallery.html` lines 31–39; `static/css/style.css` 306–324
-
-**What's wrong:** Interactive elements are otherwise consistent (real `<button>`s for actions, `<a>` for navigation). The gallery "[ VIEW ]" is an `<a>` styled like the `.retro-button` family. Because it navigates (has `href`), link semantics are actually *correct* — but the button styling implies Space-to-activate (links respond only to Enter), a subtle affordance mismatch. Separately, each row exposes **two** links to the identical destination (band-name link on line 31, VIEW link on line 36), doubling tab stops and the screen-reader link list for no new target.
-
-**Recommended fix:** Keep it an `<a>` (navigation is right) but either drop the redundant VIEW link, or if you want the button affordance, give it `aria-label="View {band name}"` so the two links aren't announced identically.
-
-### L5 — Design tokens are ad-hoc: palette hexes are hardcoded inline across templates
-**Category:** Design-system adherence / maintainability
-**Files:** `templates/index.html` (inline `style="color:#…"` on 16, 35–61, 85, 91, 97), `templates/generate.html` (inline colors on 15, 16, 35, 36, 45, 46, 95, 116, 267–269), plus `border`/`bordercolor` HTML attributes throughout
-
-**What's wrong:** The same ~8 neon values (`#00ffff`, `#00ff00`, `#ffff00`, `#ff00ff`, `#ff4444`, `#cccccc`, `#0a0a2a`, `#333333`) are re-typed inline dozens of times rather than centralized. There is no CSS custom-property palette, so the "system" is the stylesheet *plus* a large body of inline overrides. Global palette/contrast changes (e.g. the L2 fix, or re-theming) become error-prone and inconsistent — which is how contrast regressions can slip past template edits.
-
-**Recommended fix:** Define the palette once as `:root` custom properties (`--neon-cyan`, `--neon-green`, …) and replace repeated inline hexes with utility classes or `var(--…)`. Maintainability only — the retro look is preserved.
-
-### L6 — ASCII progress bar and fixed `width=` cells don't adapt on narrow screens
-**Category:** Responsive layout
-**Files:** `templates/generate.html` 44–47 (`.ascii-progress`); `static/css/style.css` `.ascii-progress` (344–351) and the `@media (max-width:640px)` block (481–506); fixed `width="…"` attributes in `index.html` (28), `gallery.html` (14–19), `generate.html` (49–53)
-
-**What's wrong:** The ASCII bar is a fixed 20-char fill plus `Progress: [` / `]` / ` 100%` in 1.1em monospace with 1px letter-spacing — roughly 370px wide. Inside `.retro-box` on a ~320px viewport the usable width is ~260px, so the line wraps across 2–3 lines, breaking the single-line bar illusion. The mobile media query shrinks table fonts but never touches `.ascii-progress`. It's `aria-hidden` (percentage + step table carry the same info for AT), so this is cosmetic, not an AA failure — but it degrades the intended visual on phones. Relatedly, the HTML `width="120"/"50"/"30"` header attributes don't scale; tables avoid horizontal scroll only because CSS forces `width:100%` and the browser shrinks the flexible column, cramping the gallery band-name column.
-
-**Recommended fix:** In the `max-width:640px` block add `.ascii-progress { font-size: 0.85em; letter-spacing: 0; white-space: nowrap; }` (consider `overflow-x: hidden` on its container), or shorten the fill to ~12 chars on small screens. For tables, prefer a CSS `min-width` on the flexible column over fixed pixel `width=` attributes.
+**Note:** The 1996 GeoCities aesthetic (blink text, "under construction", visitor counter, table
+layout, neon palette, Comic Sans, tiled starfield) is intentional and is NOT flagged. Contrast and
+motion defects *inside* that aesthetic are still flagged.
 
 ---
 
-## Verification notes (contrast ratios)
+## HIGH
 
-Ratios were computed with the WCAG 2.1 relative-luminance formula (sRGB linearization, `L = 0.2126R + 0.7152G + 0.0722B`, contrast `= (L1+0.05)/(L2+0.05)`), each against its *actual* rendered background (body `#000022`, boxes `#0a0a2a`/`#0a0a1a`, header row `#1a1a3a`, error box `#1a0a0a`, badge `#111111`). AA normal-text threshold = 4.5:1.
+### H-A — CANCEL during the in-flight POST leaks an unclearable poller that steals focus every 1.5s, then destroys the success screen — **NEW** ✅ FIXED
 
-| Foreground | Background | Ratio | AA |
-|---|---|---|---|
-| `#cccccc` body text | `#000022` / `#0a0a2a` / `#0a0a1a` | 12.8 / 12.0 / 12.2 | Pass |
-| `#dddddd` intro | `#0a0a1a` | 14.4 | Pass |
-| `#aaaaaa` feature/footer | `#0a0a2a` / `#000022` | 8.3 / 8.8 | Pass |
-| `#888888` badge | `#111111` | 5.33 | Pass |
-| `#9999bb` copy/no-photo | `#000022` / `#0a0a1a` | 7.5 / 7.1 | Pass |
-| `#00ffff` links/cyan | `#000022` / `#0a0a2a` | 16.4 / 15.4 | Pass |
-| `#00ff00` nav/step | `#111122` / `#0a0a1a` | 13.6 / 14.3 | Pass |
-| `#ffff00` yellow | `#000022` / `#0a0a2a` | 19.1 / 18.0 | Pass |
-| `#ff00ff` table header | `#1a1a3a` / `#0a0a1a` | 5.34 / 6.25 | Pass |
-| `#ff4444` error | `#1a0a0a` / `#000022` | 5.64 / 6.02 | Pass |
-| `#ff69b4` tagline/email | `#000022` / `#000000` | 7.8 / 7.9 | Pass |
-| `#cc99ff` visited link | `#000022` | 9.35 | Pass |
-| button text `#00ffff`/`#ffff00`/`#cccccc` | `#333366`/`#444488`/`#222222` | 9.3 / 10.8 / 9.9 | Pass |
-| **`#666666` pending step indicator** | **`#0a0a1a`** | **3.41** | **Fail (L2)** |
+**Files:** `templates/generate.html` — `:141` (`showProgress()` ran *before* the fetch), `:150-151`
+(`.then` assigns id + starts polling), `:163` (`startStatusCheck` never cleared an existing interval),
+`:299` (`var idToCancel = currentGenerationId`)
+**WCAG:** 2.4.3 Focus Order (A); effectively 2.1.2 No Keyboard Trap (A); 3.3.1 Error Identification (A)
 
-**Caveats:** (1) Ratios assume the flat background color; the body's sparse radial-gradient star dots (`#ffffff`, 0.3–0.5px) don't meaningfully change local text contrast. (2) `text-shadow` on `.site-title`/`.section-header` is not modeled by the formula; the underlying pairings are 17–19:1, so shadow legibility is a non-issue. (3) The only sub-4.5 result conveying information is the `#666666` pending indicator (3.41:1) — the basis for L2. The decorative `#333333` empty-bar dashes (1.53:1) sit inside the `aria-hidden`, purely-ornamental ASCII bar and carry no information, so they are exempt from 1.4.3 and are not filed. Every text color that conveys meaning passes AA.
+This is a **regression introduced by `1faf73e`** — the commit that added the CANCEL fix — not something
+28 audits missed in stable code. It is exactly the composed-severity class the last audit warned about:
+three individually-trivial JS gaps that compose into the primary task's final step becoming unreachable.
+
+`showProgress()` was called *before* `fetch('/api/generate')`, so `[ CANCEL ]` was live and clickable
+for the entire POST round-trip — a window in which `currentGenerationId` is still `null`. Reproduced by
+executing the real script:
+
+```
+1. click GENERATE  (POST in flight, CANCEL is visible)
+2. click CANCEL    (while POST still in flight)
+   -> /api/cancel sent?  *** NO -- worker keeps running, full paid generation ***
+3. POST lands -> poller starts AFTER the user cancelled       (live intervals: I1)
+4. click GENERATE again                                       (live intervals: I1, I2)
+   -> ORPHANED: statusCheckInterval only holds the newest handle; I1 is unreachable
+5. generation 2 completes -> FOCUS -> successTitle
+6. three more ticks    -> FOCUS -> successTitle x3   (every 1.5s, forever)
+7. later, entry pruned -> orphan replaces the success panel with a false error
+```
+
+Composed user-facing failure:
+1. **The H1 CANCEL fix was bypassed.** `idToCancel` was `null`, so no `/api/cancel` was sent and the
+   worker ran to completion — a full paid GPT+DALL·E generation and a ghost band in the gallery. The
+   exact defect `1faf73e` was written to eliminate.
+2. **The orphaned interval could never be cleared** — `statusCheckInterval` holds one handle.
+3. **Focus yanked to `#successTitle` every 1.5 seconds, indefinitely.** A keyboard user **cannot Tab to
+   `[ VIEW BAND PAGE ]`** — focus is stolen back before they reach it. The primary task dead-ends.
+4. **The orphan later replaced the success panel with a false error**, destroying the VIEW button.
+
+**Root cause (why this class keeps recurring):** `generate.html`'s state machine had **no single source
+of truth**. `currentGenerationId`, `statusCheckInterval`, `currentDirectory` and the step-table DOM were
+four independent mutable states written from three entry points. Every HIGH for three consecutive audits
+has been two of them disagreeing.
+
+**Fix applied — structural, not symptomatic.** Introduced a monotonic **`runToken`** identifying the run
+the UI belongs to:
+- `resetInterface()` bumps `runToken` and stops the poller — one teardown, one owner.
+- `startGeneration()` calls `resetInterface()` first, then captures its token; the `.then`/`.catch` bail
+  out if the token changed, so an abandoned run can never resurrect the UI.
+- If the run is abandoned while the POST is in flight, the `.then` now **cancels the id the server just
+  returned**, closing the window in which no id existed to cancel.
+- `startStatusCheck()` calls `stopStatusCheck()` first — an orphan poller can no longer form.
+- `stopStatusCheck()` nulls the handle (previously `if (statusCheckInterval)` stayed permanently truthy
+  after the first run).
+
+**Verification:** differential test against the real script. Pre-fix: 7 failures (no `/api/cancel` sent,
+2 live pollers, focus stolen 3 extra times, 7 stale step rows). Post-fix: 8/8 checks pass.
+
+---
+
+## MEDIUM
+
+### M-A — After `[ TRY AGAIN ]`, the step table reports steps that never ran as complete — **NEW** ✅ FIXED
+**Files:** `templates/generate.html:135` (retry → `startGeneration`), `:229-245` (`updateProgress` has no
+`else`; indicators only ever advance)
+**Heuristic:** Nielsen #1, Visibility of System Status
+
+`resetInterface()` was the only code that cleared step indicators, and it was **not** on the retry path.
+Run #1 fails at 50%, user clicks TRY AGAIN, the new run is at 10% — but the table still reads:
+
+```
+[X] Creating Profile      screen-reader: (complete)
+[X] Setting Up Directory  screen-reader: (complete)
+[X] Writing Backstory     screen-reader: (complete)
+[>] Identifying Members   screen-reader: (in progress)
+```
+
+Screen-reader users are told "(complete)" for work that has not happened, and because the loop never
+regresses an indicator it stays wrong for the entire new run. **Fixed for free** by the H-A fix, since
+`startGeneration()` now calls `resetInterface()` first. (Logged as MEDIUM; fixed only because the correct
+HIGH fix subsumes it — not scope creep.)
+
+### Carried forward — logged, unfixed per scope
+- **`bandPreview.innerHTML` interpolates the unescaped model-authored band name** — `generate.html:275-277`.
+  Self-XSS; also mis-renders a legitimate name containing `&` or `<`. `createAct.py` has `esc()` on every
+  other sink; this is the one gap. Logged since 2026-05.
+- **Discography collapses to one mislabeled album** — `createAct.py:237`. The `album:` prefix test misses
+  GPT-4o's markdown (`### Album 1: "..."`); subsequent headers match neither branch and are silently
+  dropped. Breaks a feature advertised at `generate.html:21`. Artifacts on disk:
+  `TheVelvetEchoes/home.html`, `MoonlitReverie/home.html` (3 raw-markdown lines each).
+- **`resetInterface()` drops keyboard focus to `<body>`** — WCAG 2.4.3 (A). One line. Logged 7 audits running.
+- **Polling has no ceiling; `.catch` only `console.error`s** — `generate.html:201-203`. A run of failing
+  polls spins silently forever.
+
+---
+
+## LOW
+
+- **NEW — `h3[tabindex]:focus { outline: none }` out-specifies the focus-visible rule.**
+  `static/css/style.css:53-56` is specificity `(0,2,1)`; `[tabindex]:focus-visible` at `:45` is `(0,2,0)`.
+  The higher one wins, so the comment at `:50-52` ("`:focus-visible` above still applies") **is false** —
+  a keyboard user pressing Enter on GENERATE has focus moved to `#progressTitle` with no visible
+  indicator. `main:focus` `(0,1,1)` *loses* to `(0,2,0)`, so `<main>` behaves the opposite way. Inconsistent.
+- **NEW — failed runs leak their output directory.** `app.py:337` calls `cleanup_partial_output()` only in
+  the `GenerationCancelled` handler; the generic `except` at `:345-352` does not. A DALL·E rate-limit or
+  content-policy rejection (common) leaves an orphan dir that consumes the band's slug, so the retry
+  becomes `TheVelvetEchoes1` and the gallery renders "The Velvet Echoes**1**" (`app.py:139`).
+- Pending step indicator `#666666` on `#0a0a1a` = **3.41:1** — `style.css:369`. WCAG 1.4.3 (AA).
+  `#909090` → 6.14:1. *(All 12 palette pairs re-derived; this is the only failure. Prior contrast work is sound.)*
+- Blinking "Under Construction" has no pause/stop/hide — `base.html:49`. WCAG 2.2.2 (A).
+  `prefers-reduced-motion` mitigates; a finite `animation-iteration-count` would close it outright.
+- `h2` → `h4` heading skip — `index.html:85, 91, 97`. WCAG 1.3.1 (A). *Carried, 7 audits.*
+- Generated members table has no `<th>`/`scope` — `createAct.py:621-623`. WCAG 1.3.1 (A).
+- Backstory renders as an unbroken wall (newlines collapse) — `createAct.py:605`.
+- Bare unstyled 404 text — `app.py:158`.
+- ASCII bar wraps below ~360px — cosmetic; it is `aria-hidden`.
+
+---
+
+## Correction to a prior audit (WCAG 2.2-specific)
+
+The previous `review.md` **L4** recommended dropping the redundant `[ VIEW ]` link in the gallery.
+**Do not do that** — it would *introduce* a WCAG 2.2 **SC 2.5.8 Target Size (Minimum, AA)** failure. The
+band-name link (`gallery.html:31`) is ~**23.1px** tall (1.1em × 1.5 line-height), under the 24×24
+minimum, and as a lone target in a table cell it does not qualify for the inline exception. It currently
+passes **only** via 2.5.8's *Equivalent* exception — the `[ VIEW ]` link (`min-height:32px`,
+`style.css:311`) is the conforming equivalent control. **The redundancy is load-bearing.** Keep both;
+just add `aria-label="View {{ band.name }}"`.
+
+## WCAG 2.2 new criteria — clean
+Prior audits were all 2.1. Checked the five additions: **2.4.11** Focus Not Obscured — pass (no
+`position:fixed/sticky` in current source; only stale on-disk legacy pages have it). **2.5.7** Dragging —
+N/A. **2.5.8** Target Size — pass (see correction above; `.retro-button` ≈47px, `.retro-button-small`
+32px, nav links 32px). **3.2.6 / 3.3.7 / 3.3.8** — N/A (no help mechanism, no forms, no auth).
+
+---
+
+## Verification performed
+
+| Check | Result |
+|---|---|
+| `python -m py_compile app.py createAct.py` | ✅ |
+| Jinja parse: base / index / generate / gallery | ✅ |
+| Flask boot; `GET /`, `/generate`, `/gallery` | ✅ 200, 200, 200 |
+| H-A + M-A differential test, pre-fix (real script, stub DOM) | ❌ 7 failures — bug reproduced |
+| H-A + M-A differential test, post-fix | ✅ 8/8 pass |

@@ -129,6 +129,11 @@ let currentGenerationId = null;
 let statusCheckInterval = null;
 let currentDirectory = null;
 
+// Identifies the run the UI currently belongs to. Every teardown bumps it, so
+// any callback still in flight for an abandoned run sees a stale token and
+// bails out instead of writing its result over the live one.
+let runToken = 0;
+
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('generateBtn').addEventListener('click', startGeneration);
     document.getElementById('cancelBtn').addEventListener('click', cancelGeneration);
@@ -138,6 +143,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function startGeneration() {
+    // Clear any prior run first: this is also the retry path, and without it the
+    // step table would carry the failed run's ticks into the new one.
+    resetInterface();
+    var token = runToken;
+
     showProgress();
 
     fetch('/api/generate', {
@@ -146,6 +156,20 @@ function startGeneration() {
     })
     .then(response => response.json())
     .then(data => {
+        // CANCEL is clickable while this POST is in flight, at which point we
+        // have no id to cancel yet. If the run was abandoned meanwhile, stop the
+        // worker the server just started -- nobody is watching it, and letting it
+        // finish costs a full paid generation and leaves a ghost in the gallery.
+        if (token !== runToken) {
+            if (data.success && data.generation_id) {
+                fetch('/api/cancel/' + data.generation_id, { method: 'POST' })
+                    .catch(function(error) {
+                        console.error('Error cancelling abandoned generation:', error);
+                    });
+            }
+            return;
+        }
+
         if (data.success) {
             currentGenerationId = data.generation_id;
             startStatusCheck();
@@ -154,13 +178,26 @@ function startGeneration() {
         }
     })
     .catch(error => {
+        if (token !== runToken) return;
         console.error('Error:', error);
         showError('Failed to start generation. Please try again.');
     });
 }
 
 function startStatusCheck() {
+    // Never leave an orphan poller behind: statusCheckInterval holds one handle,
+    // so overwriting it without clearing would strand the old interval forever.
+    stopStatusCheck();
     statusCheckInterval = setInterval(checkStatus, 1500);
+}
+
+function stopStatusCheck() {
+    if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+        // Null it out: leaving a stale handle here makes `if (statusCheckInterval)`
+        // permanently truthy after the first run.
+        statusCheckInterval = null;
+    }
 }
 
 function checkStatus() {
@@ -174,7 +211,7 @@ function checkStatus() {
         // 'complete' or 'error', so stop polling and hand the user a recovery
         // path rather than leaving the bar frozen at 0% forever.
         if (data.status === 'not_found') {
-            clearInterval(statusCheckInterval);
+            stopStatusCheck();
             showError('This generation is no longer being tracked. The server may have restarted. Please start a new band.');
             return;
         }
@@ -183,18 +220,18 @@ function checkStatus() {
         // cancelGeneration's own clearInterval). The UI is already being reset;
         // just stop polling rather than announcing progress for a dead run.
         if (data.status === 'cancelled') {
-            clearInterval(statusCheckInterval);
+            stopStatusCheck();
             return;
         }
 
         updateProgress(data);
 
         if (data.status === 'complete') {
-            clearInterval(statusCheckInterval);
+            stopStatusCheck();
             currentDirectory = data.directory;
             showSuccess(data);
         } else if (data.status === 'error') {
-            clearInterval(statusCheckInterval);
+            stopStatusCheck();
             showError(data.message);
         }
     })
@@ -288,26 +325,31 @@ function showError(message) {
 }
 
 function cancelGeneration() {
-    if (statusCheckInterval) {
-        clearInterval(statusCheckInterval);
-    }
+    // Capture the id before resetInterface() clears it. If the POST that creates
+    // it is still in flight this is null -- startGeneration's stale-token branch
+    // cancels that case instead, so both windows are covered.
+    var idToCancel = currentGenerationId;
+
+    // Invalidates the run token and stops the poller.
+    resetInterface();
 
     // Tell the server to actually stop the worker. Without this, CANCEL only
     // stopped the client poll while the in-flight band ran to completion --
     // costing a full paid generation and appearing in the gallery as a ghost.
-    // Best-effort: capture the id before resetInterface() clears it.
-    var idToCancel = currentGenerationId;
     if (idToCancel) {
         fetch('/api/cancel/' + idToCancel, { method: 'POST' })
             .catch(function(error) {
                 console.error('Error cancelling generation:', error);
             });
     }
-
-    resetInterface();
 }
 
 function resetInterface() {
+    // Abandon the current run: any in-flight start or poll callback for it is
+    // now stale and will bail out rather than resurrect a dead run's UI.
+    runToken++;
+    stopStatusCheck();
+
     document.getElementById('startGeneration').style.display = 'block';
     document.getElementById('progressDisplay').style.display = 'none';
     document.getElementById('successDisplay').style.display = 'none';
