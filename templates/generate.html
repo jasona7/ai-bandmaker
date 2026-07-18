@@ -309,9 +309,17 @@ function showSuccess(data) {
     document.getElementById('errorDisplay').style.display = 'none';
 
     var preview = document.getElementById('bandPreview');
-    preview.innerHTML = '<p style="color:#00ffff; font-size:1.3em;">' +
-        '~*~ ' + (data.band_name || 'Your Band') + ' ~*~</p>' +
-        '<p style="color:#cccccc;">The fan page is ready!</p>';
+    // band_name is raw, un-escaped model output (api_status echoes it verbatim).
+    // Build the preview with textContent, never innerHTML, so a name containing
+    // markup renders as text instead of injecting nodes/scripts into the page.
+    var nameLine = document.createElement('p');
+    nameLine.style.color = '#00ffff';
+    nameLine.style.fontSize = '1.3em';
+    nameLine.textContent = '~*~ ' + (data.band_name || 'Your Band') + ' ~*~';
+    var readyLine = document.createElement('p');
+    readyLine.style.color = '#cccccc';
+    readyLine.textContent = 'The fan page is ready!';
+    preview.replaceChildren(nameLine, readyLine);
     focusHeading('successTitle');
 }
 

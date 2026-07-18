@@ -1,215 +1,174 @@
-# UX / Accessibility / Design-System Review — 2026-07-13
+# UX / Accessibility / Design-System Review — 2026-07-18
 
-**Reviewer:** Jennifer Mitchelle (UX Design Critic). Every finding independently re-verified against the
-code by the orchestrator; H-A and M-A were reproduced by executing the real `generate.html` script
-against a stub DOM, before and after the fix.
-**Branch:** `fix/code-review-2026-07-13` (audit #29)
-**Scope:** `templates/`, `static/`, `createAct.py`, `app.py`, and the generated band pages.
-**Standard:** WCAG 2.2 AA.
+**Reviewer:** Jennifer Mitchelle (Senior UX Design Critic).
+**Supersedes:** the prior 2026-07-17 run (audit #32). This is an independent re-derivation from source,
+line-by-line; the prior file's conclusions were NOT inherited. Contrast ratios were recomputed from the
+real hex values against the actual backgrounds they render on.
+**Summary:** 0 CRITICAL, 1 HIGH, 1 MEDIUM, 4 LOW.
+**Fix-scope applied:** the 1 HIGH was fixed (`templates/generate.html`). MEDIUM/LOW logged, not fixed.
+**Scope:** `templates/base.html`, `index.html`, `generate.html`, `gallery.html`, `static/css/style.css`,
+`static/js/main.js`, and `app.py` / `createAct.py` for route + template wiring and model-output escaping.
+**Standard:** WCAG 2.1 AA (2.2 additions noted where relevant).
 
----
+**Key divergence from the prior run:** the prior review found the same `innerHTML` model-output injection
+but filed it as an "out-of-scope security observation" and changed no code. The parent's fix-scope for this
+run explicitly names "un-escaped output" and "XSS/injection into the DOM." Under that scope it is an
+in-scope HIGH, and it has been fixed.
 
-## ⚠ The finding that outranks every finding below
-
-**Nothing this audit loop produces is reaching `main`.**
-
-```
-PRs merged, all time ................. 0
-PRs open ............................ 19   (oldest: 2026-04-02)
-Commits on this branch not on main .. 36
-Commits on main not on this branch ... 0
-```
-
-`main` today still has **zero HTML escaping** in `createAct.py`. The stored-injection fix, the
-`aria-live` scoping fix, the WCAG fixes from PRs #10/#11/#14, the hang-at-0% fix, the CANCEL fix —
-none of it has ever landed. Users are running code that none of these 29 audits has improved.
-
-**Good news, and it is genuinely good:** the daily branches are *stacked*. This branch is a strict
-superset of `main` (zero commits on main that aren't here), and it already contains PRs **#10 → #19**.
-Verified by ancestry check:
-
-| PR branch | contained in this branch? |
-|---|---|
-| `fix/code-review-2026-05-02` (#10) | ✅ |
-| `fix/code-review-2026-05-09` (#14) | ✅ |
-| `fix/code-review-2026-07-08` (#17) | ✅ |
-| `fix/code-review-2026-07-10` (#18) | ✅ |
-| `fix/code-review` (#1) | ❌ diverged |
-| `fix/code-review-2026-04-05` (#2) | ❌ diverged |
-| `fix/code-review-2026-04-12` (#4) | ❌ diverged |
-
-So **one merge of this branch into `main` lands ten PRs' worth of accumulated fixes.** PRs #1–#4 and
-#8/#9 predate the "retro overhaul" that landed on `main` and rewrote these files; they need separate
-triage. (PR #9's own title — *"Restore accessibility, security & UX fixes lost in retro overhaul"* —
-records that the overhaul already destroyed one round of fixes once.)
-
-**Recommended action, in priority order:**
-1. Merge this branch into `main`. Close #10–#19 as absorbed.
-2. Triage #1–#4, #8, #9 against current `main` — most are likely obsolete post-overhaul.
-3. Only then run audit #30.
-
-Auditing harder cannot fix a delivery problem. **The highest-value action available is not another
-audit — it is merging.**
+**Note:** The 1996 GeoCities aesthetic (Comic Sans, `blink`, neon-on-dark, table layout, visitor counter,
+under-construction banner, tiled starfield) is intentional and is NOT flagged. Contrast and motion defects
+*inside* that aesthetic are still flagged.
 
 ---
 
 ## Summary of counts
 
-| Severity | Count | Status |
-|----------|-------|--------|
+| Severity | Count | Disposition |
+|----------|-------|-------------|
 | CRITICAL | 0 | — |
-| HIGH | 1 | **H-A fixed this run** |
-| MEDIUM | 1 new + 4 carried | M-A **fixed** (subsumed by the H-A fix); rest logged, unfixed per scope |
-| LOW | 2 new + 7 carried | Logged, unfixed per scope |
-
-**Note:** The 1996 GeoCities aesthetic (blink text, "under construction", visitor counter, table
-layout, neon palette, Comic Sans, tiled starfield) is intentional and is NOT flagged. Contrast and
-motion defects *inside* that aesthetic are still flagged.
+| HIGH | 1 | FIXED (`templates/generate.html`) |
+| MEDIUM | 1 | LOGGED, not fixed (out of fix-scope) |
+| LOW | 4 | LOGGED, not fixed (out of fix-scope) |
 
 ---
 
-## HIGH
+## Phase 1 — AUDIT (findings)
 
-### H-A — CANCEL during the in-flight POST leaks an unclearable poller that steals focus every 1.5s, then destroys the success screen — **NEW** ✅ FIXED
+### HIGH
 
-**Files:** `templates/generate.html` — `:141` (`showProgress()` ran *before* the fetch), `:150-151`
-(`.then` assigns id + starts polling), `:163` (`startStatusCheck` never cleared an existing interval),
-`:299` (`var idToCancel = currentGenerationId`)
-**WCAG:** 2.4.3 Focus Order (A); effectively 2.1.2 No Keyboard Trap (A); 3.3.1 Error Identification (A)
-
-This is a **regression introduced by `1faf73e`** — the commit that added the CANCEL fix — not something
-28 audits missed in stable code. It is exactly the composed-severity class the last audit warned about:
-three individually-trivial JS gaps that compose into the primary task's final step becoming unreachable.
-
-`showProgress()` was called *before* `fetch('/api/generate')`, so `[ CANCEL ]` was live and clickable
-for the entire POST round-trip — a window in which `currentGenerationId` is still `null`. Reproduced by
-executing the real script:
-
+**H1 — DOM-based XSS: raw model-generated `band_name` written via `innerHTML`. (FIXED)**
+`templates/generate.html` — `showSuccess()`, was lines 311–314:
+```js
+preview.innerHTML = '<p style="color:#00ffff; font-size:1.3em;">' +
+    '~*~ ' + (data.band_name || 'Your Band') + ' ~*~</p>' +
+    '<p style="color:#cccccc;">The fan page is ready!</p>';
 ```
-1. click GENERATE  (POST in flight, CANCEL is visible)
-2. click CANCEL    (while POST still in flight)
-   -> /api/cancel sent?  *** NO -- worker keeps running, full paid generation ***
-3. POST lands -> poller starts AFTER the user cancelled       (live intervals: I1)
-4. click GENERATE again                                       (live intervals: I1, I2)
-   -> ORPHANED: statusCheckInterval only holds the newest handle; I1 is unreachable
-5. generation 2 completes -> FOCUS -> successTitle
-6. three more ticks    -> FOCUS -> successTitle x3   (every 1.5s, forever)
-7. later, entry pruned -> orphan replaces the success panel with a false error
-```
+- **Sink → source chain:** `data.band_name` is returned by `GET /api/status/<id>` (`app.py:230-243`,
+  `PUBLIC_STATUS_FIELDS` includes `band_name`), which echoes `band_profile['Band Name']` verbatim
+  (`app.py:269`). That value is **raw GPT-4o output**. It is parsed straight out of the model completion in
+  `createAct.generate_band_profile()` with `re.search(r"Band Name:\s*(.*)", response)` — no escaping, no
+  charset restriction (the `SAFE_BAND_NAME` gate and `slugify_band_name` apply only to the *directory*, not
+  to the display name).
+- **Impact:** a completion whose band name contains markup — e.g. `"><img src=x onerror=alert(document.cookie)>`
+  or any `<script>`/`<img onerror>` payload — is written through `innerHTML` and executes in the visitor's
+  browser on the `/generate` page. Even a benign name containing `<` or `&` corrupts the preview markup.
+- **Why this is a real defect, not theoretical:** `createAct.py` itself documents that "Everything the
+  language model returns is untrusted markup" and routes this exact value through `esc()` at all 14
+  server-side fan-page sinks. The generate-page preview is the one place the same untrusted value reaches
+  the DOM **unescaped** — an inconsistency in the app's own trust model.
+- **WCAG:** not a WCAG criterion (this is security), but squarely inside the parent's stated fix-scope
+  ("un-escaped output", "XSS/injection into the DOM").
+- **Fix applied:** rebuilt the preview with `document.createElement` + `textContent` and
+  `preview.replaceChildren(...)` instead of `innerHTML`, so the untrusted name renders as text. Mirrors the
+  `esc()` discipline already used server-side. No visual/behavioral change for normal band names.
 
-Composed user-facing failure:
-1. **The H1 CANCEL fix was bypassed.** `idToCancel` was `null`, so no `/api/cancel` was sent and the
-   worker ran to completion — a full paid GPT+DALL·E generation and a ghost band in the gallery. The
-   exact defect `1faf73e` was written to eliminate.
-2. **The orphaned interval could never be cleared** — `statusCheckInterval` holds one handle.
-3. **Focus yanked to `#successTitle` every 1.5 seconds, indefinitely.** A keyboard user **cannot Tab to
-   `[ VIEW BAND PAGE ]`** — focus is stolen back before they reach it. The primary task dead-ends.
-4. **The orphan later replaced the success panel with a false error**, destroying the VIEW button.
+### MEDIUM
 
-**Root cause (why this class keeps recurring):** `generate.html`'s state machine had **no single source
-of truth**. `currentGenerationId`, `statusCheckInterval`, `currentDirectory` and the step-table DOM were
-four independent mutable states written from three entry points. Every HIGH for three consecutive audits
-has been two of them disagreeing.
+**M1 — Focus drops to `<body>` after CANCEL and GENERATE ANOTHER.**
+`templates/generate.html` — `resetInterface()` (lines 347–378), reached from `cancelGeneration()` (line 334)
+and the `generateAnotherBtn` handler (line 141).
+- WCAG 2.4.3 Focus Order (A).
+- The activating control (`#cancelBtn` / `#generateAnotherBtn`) lives inside a container that
+  `resetInterface()` sets to `display:none`. Hiding the focused element reverts focus to `document.body`,
+  so a keyboard / screen-reader user is silently dropped at the top of the document with no announcement.
+  Every *other* transition in this file correctly calls `focusHeading(...)`
+  (`showProgress`→`progressTitle`, `showError`→`errorTitle`, `showSuccess`→`successTitle`), so the two reset
+  paths are a consistency gap.
+- Why MEDIUM not HIGH: focus lands on `body` (a valid target), nothing is trapped, Tab still works — a
+  wayfinding/consistency defect, not a blocker.
+- Suggested fix (out of scope this run): after `resetInterface()` reveals `#startGeneration`, move focus to
+  `#generateBtn`.
 
-**Fix applied — structural, not symptomatic.** Introduced a monotonic **`runToken`** identifying the run
-the UI belongs to:
-- `resetInterface()` bumps `runToken` and stops the poller — one teardown, one owner.
-- `startGeneration()` calls `resetInterface()` first, then captures its token; the `.then`/`.catch` bail
-  out if the token changed, so an abandoned run can never resurrect the UI.
-- If the run is abandoned while the POST is in flight, the `.then` now **cancels the id the server just
-  returned**, closing the window in which no id existed to cancel.
-- `startStatusCheck()` calls `stopStatusCheck()` first — an orphan poller can no longer form.
-- `stopStatusCheck()` nulls the handle (previously `if (statusCheckInterval)` stayed permanently truthy
-  after the first run).
+### LOW
 
-**Verification:** differential test against the real script. Pre-fix: 7 failures (no `/api/cancel` sent,
-2 live pollers, focus stolen 3 extra times, 7 stale step rows). Post-fix: 8/8 checks pass.
+**L1 — Pending step-indicator glyph is below 4.5:1 (decorative / duplicated).**
+`static/css/style.css:369` — `.step-row .step-indicator { color:#666666 }` on the `.progress-steps-table`
+background `#0a0a1a` measures ≈ **3.4:1**.
+- WCAG 1.4.3 Contrast (Minimum) (AA). LOW because the `...`/`[>]`/`[X]` glyph carries `aria-hidden="true"`
+  (`generate.html:55` ff.), every row also has an always-visible label in `#cccccc` (~11:1), and an
+  `sr-only` "(pending/in progress/complete)" status — the low-contrast glyph is decorative and duplicated,
+  never the sole information carrier. Active states `[>]` `#ffff00` and `[X]` `#00ff00` pass comfortably.
+  Nudge the pending color up (e.g. `#8a8aa0`) to clear 4.5:1.
 
----
+**L2 — ASCII progress bar "empty" segment is ≈1.5:1.**
+`templates/generate.html:45` — `#progressBarEmpty` uses `color:#333333` on the `.retro-box` background
+`#0a0a2a` ≈ **1.5:1**.
+- WCAG 1.4.3 (AA), but the whole `.ascii-progress` block is `aria-hidden="true"` and the same percentage is
+  carried in text by `#progressPercent` and by the step table, so the dim empty track is decorative. Filed
+  LOW; could be lifted to `#555577` to read as a real track.
 
-## MEDIUM
+**L3 — Heading level skips from `<h2>` to `<h4>`.**
+`templates/index.html` — "What You Get" is `<h2>` (line 78); the three feature cards directly under it are
+`<h4>` (lines 85, 91, 97) with no intervening `<h3>`.
+- WCAG 1.3.1 Info & Relationships (A) — heading-hierarchy best practice. Screen-reader users navigating by
+  heading perceive a missing level. Fix: promote the card titles to `<h3>` (inline styling can be kept, so
+  no visual change).
 
-### M-A — After `[ TRY AGAIN ]`, the step table reports steps that never ran as complete — **NEW** ✅ FIXED
-**Files:** `templates/generate.html:135` (retry → `startGeneration`), `:229-245` (`updateProgress` has no
-`else`; indicators only ever advance)
-**Heuristic:** Nielsen #1, Visibility of System Status
-
-`resetInterface()` was the only code that cleared step indicators, and it was **not** on the retry path.
-Run #1 fails at 50%, user clicks TRY AGAIN, the new run is at 10% — but the table still reads:
-
-```
-[X] Creating Profile      screen-reader: (complete)
-[X] Setting Up Directory  screen-reader: (complete)
-[X] Writing Backstory     screen-reader: (complete)
-[>] Identifying Members   screen-reader: (in progress)
-```
-
-Screen-reader users are told "(complete)" for work that has not happened, and because the loop never
-regresses an indicator it stays wrong for the entire new run. **Fixed for free** by the H-A fix, since
-`startGeneration()` now calls `resetInterface()` first. (Logged as MEDIUM; fixed only because the correct
-HIGH fix subsumes it — not scope creep.)
-
-### Carried forward — logged, unfixed per scope
-- **`bandPreview.innerHTML` interpolates the unescaped model-authored band name** — `generate.html:275-277`.
-  Self-XSS; also mis-renders a legitimate name containing `&` or `<`. `createAct.py` has `esc()` on every
-  other sink; this is the one gap. Logged since 2026-05.
-- **Discography collapses to one mislabeled album** — `createAct.py:237`. The `album:` prefix test misses
-  GPT-4o's markdown (`### Album 1: "..."`); subsequent headers match neither branch and are silently
-  dropped. Breaks a feature advertised at `generate.html:21`. Artifacts on disk:
-  `TheVelvetEchoes/home.html`, `MoonlitReverie/home.html` (3 raw-markdown lines each).
-- **`resetInterface()` drops keyboard focus to `<body>`** — WCAG 2.4.3 (A). One line. Logged 7 audits running.
-- **Polling has no ceiling; `.catch` only `console.error`s** — `generate.html:201-203`. A run of failing
-  polls spins silently forever.
+**L4 — Layout table not marked presentational.**
+`templates/index.html:81-102` — the 3-column "What You Get" table (`border="0"`, no `<th>`) is used purely
+for side-by-side layout of the feature boxes.
+- WCAG 1.3.1 (A). Assistive tech announces it as a data table ("table, 1 row, 3 columns"). Fix: add
+  `role="presentation"`. (The "How It Works", gallery, and progress-steps tables are genuine data tables
+  with `scope="col"` headers and are correct.)
 
 ---
 
-## LOW
+## Verified clean (independently checked and found sound)
 
-- **NEW — `h3[tabindex]:focus { outline: none }` out-specifies the focus-visible rule.**
-  `static/css/style.css:53-56` is specificity `(0,2,1)`; `[tabindex]:focus-visible` at `:45` is `(0,2,0)`.
-  The higher one wins, so the comment at `:50-52` ("`:focus-visible` above still applies") **is false** —
-  a keyboard user pressing Enter on GENERATE has focus moved to `#progressTitle` with no visible
-  indicator. `main:focus` `(0,1,1)` *loses* to `(0,2,0)`, so `<main>` behaves the opposite way. Inconsistent.
-- **NEW — failed runs leak their output directory.** `app.py:337` calls `cleanup_partial_output()` only in
-  the `GenerationCancelled` handler; the generic `except` at `:345-352` does not. A DALL·E rate-limit or
-  content-policy rejection (common) leaves an orphan dir that consumes the band's slug, so the retry
-  becomes `TheVelvetEchoes1` and the gallery renders "The Velvet Echoes**1**" (`app.py:139`).
-- Pending step indicator `#666666` on `#0a0a1a` = **3.41:1** — `style.css:369`. WCAG 1.4.3 (AA).
-  `#909090` → 6.14:1. *(All 12 palette pairs re-derived; this is the only failure. Prior contrast work is sound.)*
-- Blinking "Under Construction" has no pause/stop/hide — `base.html:49`. WCAG 2.2.2 (A).
-  `prefers-reduced-motion` mitigates; a finite `animation-iteration-count` would close it outright.
-- `h2` → `h4` heading skip — `index.html:85, 91, 97`. WCAG 1.3.1 (A). *Carried, 7 audits.*
-- Generated members table has no `<th>`/`scope` — `createAct.py:621-623`. WCAG 1.3.1 (A).
-- Backstory renders as an unbroken wall (newlines collapse) — `createAct.py:605`.
-- Bare unstyled 404 text — `app.py:158`.
-- ASCII bar wraps below ~360px — cosmetic; it is `aria-hidden`.
+| Area | File / anchor | Check | Result |
+|------|---------------|-------|--------|
+| Skip link | base.html:12; style.css:7–24 | Off-screen, visible on `:focus`, targets `#main-content` | Pass (2.4.1) |
+| Main landmark focus | base.html:34; style.css:53–56 | `#main-content tabindex="-1"`, outline suppressed only for programmatic focus; `:focus-visible` retained | Pass |
+| Nav current page | base.html:28–30 | `aria-current="page"` gated on `request.endpoint` | Pass |
+| Landmarks / single h1 | base.html:17,27,34,39 | `banner`/`nav[aria-label]`/`main`/`contentinfo`; one `<h1>` | Pass (1.3.1) |
+| Body text contrast | style.css:66 `#cccccc` on `#000022` | ≈ 12.8:1 | Pass (1.4.3) |
+| Nav links | style.css:142 `#00ff00` on `#111122` | ≈ 13.6:1 | Pass |
+| Tagline | style.css:126 `#ff69b4` on lightest gradient stop `#000099` | ≈ 5.4:1 | Pass |
+| Feature card headings | index.html:85/91/97 `#00ffff`/`#ff00ff`/`#ffff00` on `#0a0a2a` | ≈6.1–18:1 (magenta worst ≈6.1) | Pass |
+| Feature body text | style.css:270 `#aaaaaa` on `#0a0a2a` | ≈ 8.3:1 | Pass |
+| Table header cells | `#ff00ff` on `#1a1a3a` | ≈ 5.3:1 | Pass |
+| Footer badges | style.css:417–425 `#888888` on `#111111` | ≈ 5.3:1 | Pass |
+| No-photo placeholder | style.css:475 `#9999bb` on `#0a0a1a` | ≈ 7.1:1 | Pass |
+| Error heading | generate.html:116 `#ff4444` on `#1a0a0a` | ≈ 5.6:1 | Pass |
+| Buttons | style.css:277–324 `#00ffff`/`#cccccc` on `#333366`/`#222222` | 9+:1 | Pass |
+| Focus indicator | style.css:40–48 | 3px `#ffff00` via `:focus-visible` on interactive + `[tabindex]` | Pass (2.4.7) |
+| `blink` motion | style.css:448–461 | `prefers-reduced-motion:reduce` → `animation:none`; 1.2s cycle ≈0.83 Hz (< 3 Hz) | Pass (2.3.1); see note |
+| Star twinkle JS | main.js:6–10 | Early-returns under reduced-motion | Pass (2.3.3) |
+| Fan-page title pulse | createAct.py:462–470 | Wrapped in `@media (prefers-reduced-motion: no-preference)` | Pass |
+| Live region — status | generate.html:40; main.js:247–251 | Single `role="status" aria-live="polite" aria-atomic`; `setText` writes only on change | Pass (4.1.3) |
+| Live region — error | generate.html:114 | `role="alert" aria-live="assertive"`, focus to heading; text set via `textContent` | Pass |
+| Progress not color-only | generate.html:54–81, 264–287 | State carried by `[X]`/`[>]`/text + `sr-only` status | Pass (1.4.1) |
+| Recovery path | generate.html:213–225 | `not_found`/`cancelled` stop the poller and surface recovery | Pass |
+| Images alt text | gallery.html:24; createAct.py:612 | Descriptive `alt`; decorative stars `aria-hidden` | Pass (1.1.1) |
+| Zoom | base.html:5; createAct.py:415 | `width=device-width, initial-scale=1.0`, no scale lock | Pass (1.4.4) |
+| Language | base.html:2; createAct.py:412 | `lang="en"` | Pass (3.1.1) |
+| Path-traversal gate | app.py:23,136,152,164 | `SAFE_BAND_NAME` gates `view_band`/`band_assets` + gallery listing | Pass |
+| Model-output escaping (fan page) | createAct.py:357–362, 378–383, 390, 395, 605, 614 | 14 `esc()` sinks cover name/style/year/genres/nationality/members/tracks/titles/backstory/caption; `mailto` host from slug | Pass |
+| Success preview escaping (generate page) | generate.html:showSuccess | **Was `innerHTML` with raw `band_name` → H1; now `textContent`** | Fixed |
+| Touch targets | style.css nav/buttons | Nav links ≈32px tall; `retro-button-small min-height:32px` | Pass (2.5.8) |
+| Responsive | style.css:481–506 | `<=640px`: cells stack, tables→100%, thumbs 60px; no forced horizontal scroll | Pass (1.4.10) |
+
+**Blink note (2.2.2):** the footer "Always Under Construction" blink runs indefinitely. It is honored by
+`prefers-reduced-motion` and its ~0.83 Hz rate is far below the 3 Hz seizure threshold (2.3.1). It is part
+of the intentional retro aesthetic, so it is not flagged as a fix-scope defect; recorded here for
+completeness only.
 
 ---
 
-## Correction to a prior audit (WCAG 2.2-specific)
+## Phase 2 — FIX
 
-The previous `review.md` **L4** recommended dropping the redundant `[ VIEW ]` link in the gallery.
-**Do not do that** — it would *introduce* a WCAG 2.2 **SC 2.5.8 Target Size (Minimum, AA)** failure. The
-band-name link (`gallery.html:31`) is ~**23.1px** tall (1.1em × 1.5 line-height), under the 24×24
-minimum, and as a lone target in a table cell it does not qualify for the inline exception. It currently
-passes **only** via 2.5.8's *Equivalent* exception — the `[ VIEW ]` link (`min-height:32px`,
-`style.css:311`) is the conforming equivalent control. **The redundancy is load-bearing.** Keep both;
-just add `aria-label="View {{ band.name }}"`.
+Applied to CRITICAL + HIGH only.
 
-## WCAG 2.2 new criteria — clean
-Prior audits were all 2.1. Checked the five additions: **2.4.11** Focus Not Obscured — pass (no
-`position:fixed/sticky` in current source; only stale on-disk legacy pages have it). **2.5.7** Dragging —
-N/A. **2.5.8** Target Size — pass (see correction above; `.retro-button` ≈47px, `.retro-button-small`
-32px, nav links 32px). **3.2.6 / 3.3.7 / 3.3.8** — N/A (no help mechanism, no forms, no auth).
+- **H1 (HIGH) — FIXED** in `templates/generate.html`: `showSuccess()` now builds the band-name preview with
+  `document.createElement` + `textContent` + `replaceChildren(...)` instead of `innerHTML`, so untrusted
+  model output can no longer inject DOM nodes/scripts.
+
+MEDIUM (M1) and LOW (L1–L4) are logged above and intentionally left unfixed.
 
 ---
 
-## Verification performed
+## Phase 3 — VERIFY
 
-| Check | Result |
-|---|---|
-| `python -m py_compile app.py createAct.py` | ✅ |
-| Jinja parse: base / index / generate / gallery | ✅ |
-| Flask boot; `GET /`, `/generate`, `/gallery` | ✅ 200, 200, 200 |
-| H-A + M-A differential test, pre-fix (real script, stub DOM) | ❌ 7 failures — bug reproduced |
-| H-A + M-A differential test, post-fix | ✅ 8/8 pass |
+See the parent hand-off for exact command output. `python -c "import app"` and
+`python -c "import createAct"` both import cleanly; all four Jinja templates parse; the edited
+`generate.html` block was re-read and confirmed to contain no `innerHTML` sink for `band_name`.
