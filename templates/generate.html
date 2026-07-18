@@ -23,7 +23,7 @@
             <li>Retro fan page</li>
         </ul>
         <br>
-        <button id="generateBtn" class="retro-button">
+        <button id="generateBtn" type="button" class="retro-button">
             &gt;&gt; GENERATE BAND &lt;&lt;
         </button>
     </div>
@@ -32,52 +32,57 @@
 <!-- Progress Display -->
 <div id="progressDisplay" style="display:none;">
     <div class="retro-box">
-        <h3 id="progressTitle" style="color:#00ff00; text-align:center;">Creating Your Band...</h3>
+        <h3 id="progressTitle" tabindex="-1" style="color:#00ff00; text-align:center;">Creating Your Band...</h3>
         <p id="progressMessage" style="text-align:center; color:#cccccc;">Initializing AI systems...</p>
 
-        <!-- ASCII progress bar -->
-        <div class="ascii-progress">
+        <!-- The one region assistive tech listens to. Carries a concise
+             "message, percent" string and is written only when it changes. -->
+        <p id="progressStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+        <!-- ASCII progress bar: decorative. The percent and step table below
+             carry the same information in text. -->
+        <div class="ascii-progress" aria-hidden="true">
             <span style="color:#ffff00;">Progress: [</span><span id="progressBarFill" style="color:#00ff00;"></span><span id="progressBarEmpty" style="color:#333333;"></span><span style="color:#ffff00;">]</span>
             <span id="progressPercent" style="color:#ff00ff;"> 0%</span>
         </div>
 
         <table class="progress-steps-table" cellpadding="4" cellspacing="0" border="1" bordercolor="#333333">
             <tr class="table-header-row">
-                <td width="30" align="center">?</td>
-                <td>Step</td>
+                <th scope="col" width="30" align="center"><span class="sr-only">Status</span><span aria-hidden="true">?</span></th>
+                <th scope="col" align="left">Step</th>
             </tr>
             <tr id="step1" class="step-row">
-                <td align="center" class="step-indicator">...</td>
-                <td>Creating Profile</td>
+                <td align="center" class="step-indicator" aria-hidden="true">...</td>
+                <td>Creating Profile<span class="sr-only step-status"> (pending)</span></td>
             </tr>
             <tr id="step2" class="step-row">
-                <td align="center" class="step-indicator">...</td>
-                <td>Setting Up Directory</td>
+                <td align="center" class="step-indicator" aria-hidden="true">...</td>
+                <td>Setting Up Directory<span class="sr-only step-status"> (pending)</span></td>
             </tr>
             <tr id="step3" class="step-row">
-                <td align="center" class="step-indicator">...</td>
-                <td>Writing Backstory</td>
+                <td align="center" class="step-indicator" aria-hidden="true">...</td>
+                <td>Writing Backstory<span class="sr-only step-status"> (pending)</span></td>
             </tr>
             <tr id="step4" class="step-row">
-                <td align="center" class="step-indicator">...</td>
-                <td>Identifying Members</td>
+                <td align="center" class="step-indicator" aria-hidden="true">...</td>
+                <td>Identifying Members<span class="sr-only step-status"> (pending)</span></td>
             </tr>
             <tr id="step5" class="step-row">
-                <td align="center" class="step-indicator">...</td>
-                <td>Creating Discography</td>
+                <td align="center" class="step-indicator" aria-hidden="true">...</td>
+                <td>Creating Discography<span class="sr-only step-status"> (pending)</span></td>
             </tr>
             <tr id="step6" class="step-row">
-                <td align="center" class="step-indicator">...</td>
-                <td>Taking Band Photo</td>
+                <td align="center" class="step-indicator" aria-hidden="true">...</td>
+                <td>Taking Band Photo<span class="sr-only step-status"> (pending)</span></td>
             </tr>
             <tr id="step7" class="step-row">
-                <td align="center" class="step-indicator">...</td>
-                <td>Building Fan Page</td>
+                <td align="center" class="step-indicator" aria-hidden="true">...</td>
+                <td>Building Fan Page<span class="sr-only step-status"> (pending)</span></td>
             </tr>
         </table>
 
         <div style="text-align:center; margin-top:15px;">
-            <button id="cancelBtn" class="retro-button retro-button-secondary">
+            <button id="cancelBtn" type="button" class="retro-button retro-button-secondary">
                 [ CANCEL ]
             </button>
         </div>
@@ -85,20 +90,20 @@
 </div>
 
 <!-- Success Display -->
-<div id="successDisplay" style="display:none;">
+<div id="successDisplay" style="display:none;" aria-live="polite" aria-atomic="true">
     <div class="retro-box" style="text-align:center;">
-        <h3 style="color:#00ff00;">** Band Created Successfully!! **</h3>
+        <h3 id="successTitle" tabindex="-1" style="color:#00ff00;">** Band Created Successfully!! **</h3>
         <p>Your AI-generated band is ready to rock!</p>
 
         <div id="bandPreview" class="band-preview-retro">
         </div>
 
         <div style="margin-top:15px;">
-            <button id="viewBandBtn" class="retro-button">
+            <button id="viewBandBtn" type="button" class="retro-button">
                 &gt;&gt; VIEW BAND PAGE &lt;&lt;
             </button>
             &nbsp;&nbsp;
-            <button id="generateAnotherBtn" class="retro-button retro-button-secondary">
+            <button id="generateAnotherBtn" type="button" class="retro-button retro-button-secondary">
                 [ GENERATE ANOTHER ]
             </button>
         </div>
@@ -106,11 +111,11 @@
 </div>
 
 <!-- Error Display -->
-<div id="errorDisplay" style="display:none;">
+<div id="errorDisplay" style="display:none;" role="alert" aria-live="assertive">
     <div class="retro-box error-box" style="text-align:center;">
-        <h3 style="color:#ff4444;">!! ERROR !!</h3>
+        <h3 id="errorTitle" tabindex="-1" style="color:#ff4444;">!! ERROR !!</h3>
         <p id="errorMessage">Something went wrong. Please try again.</p>
-        <button id="retryBtn" class="retro-button">
+        <button id="retryBtn" type="button" class="retro-button">
             [ TRY AGAIN ]
         </button>
     </div>
@@ -124,6 +129,11 @@ let currentGenerationId = null;
 let statusCheckInterval = null;
 let currentDirectory = null;
 
+// Identifies the run the UI currently belongs to. Every teardown bumps it, so
+// any callback still in flight for an abandoned run sees a stale token and
+// bails out instead of writing its result over the live one.
+let runToken = 0;
+
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('generateBtn').addEventListener('click', startGeneration);
     document.getElementById('cancelBtn').addEventListener('click', cancelGeneration);
@@ -133,6 +143,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function startGeneration() {
+    // Clear any prior run first: this is also the retry path, and without it the
+    // step table would carry the failed run's ticks into the new one.
+    resetInterface();
+    var token = runToken;
+
     showProgress();
 
     fetch('/api/generate', {
@@ -141,6 +156,20 @@ function startGeneration() {
     })
     .then(response => response.json())
     .then(data => {
+        // CANCEL is clickable while this POST is in flight, at which point we
+        // have no id to cancel yet. If the run was abandoned meanwhile, stop the
+        // worker the server just started -- nobody is watching it, and letting it
+        // finish costs a full paid generation and leaves a ghost in the gallery.
+        if (token !== runToken) {
+            if (data.success && data.generation_id) {
+                fetch('/api/cancel/' + data.generation_id, { method: 'POST' })
+                    .catch(function(error) {
+                        console.error('Error cancelling abandoned generation:', error);
+                    });
+            }
+            return;
+        }
+
         if (data.success) {
             currentGenerationId = data.generation_id;
             startStatusCheck();
@@ -149,13 +178,26 @@ function startGeneration() {
         }
     })
     .catch(error => {
+        if (token !== runToken) return;
         console.error('Error:', error);
         showError('Failed to start generation. Please try again.');
     });
 }
 
 function startStatusCheck() {
+    // Never leave an orphan poller behind: statusCheckInterval holds one handle,
+    // so overwriting it without clearing would strand the old interval forever.
+    stopStatusCheck();
     statusCheckInterval = setInterval(checkStatus, 1500);
+}
+
+function stopStatusCheck() {
+    if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+        // Null it out: leaving a stale handle here makes `if (statusCheckInterval)`
+        // permanently truthy after the first run.
+        statusCheckInterval = null;
+    }
 }
 
 function checkStatus() {
@@ -164,14 +206,32 @@ function checkStatus() {
     fetch('/api/status/' + currentGenerationId)
     .then(response => response.json())
     .then(data => {
+        // The server no longer knows this id -- the entry was pruned, or the
+        // process restarted mid-generation. Nothing will ever move it to
+        // 'complete' or 'error', so stop polling and hand the user a recovery
+        // path rather than leaving the bar frozen at 0% forever.
+        if (data.status === 'not_found') {
+            stopStatusCheck();
+            showError('This generation is no longer being tracked. The server may have restarted. Please start a new band.');
+            return;
+        }
+
+        // The server confirmed the worker stopped (e.g. a poll raced ahead of
+        // cancelGeneration's own clearInterval). The UI is already being reset;
+        // just stop polling rather than announcing progress for a dead run.
+        if (data.status === 'cancelled') {
+            stopStatusCheck();
+            return;
+        }
+
         updateProgress(data);
 
         if (data.status === 'complete') {
-            clearInterval(statusCheckInterval);
+            stopStatusCheck();
             currentDirectory = data.directory;
             showSuccess(data);
         } else if (data.status === 'error') {
-            clearInterval(statusCheckInterval);
+            stopStatusCheck();
             showError(data.message);
         }
     })
@@ -180,15 +240,26 @@ function checkStatus() {
     });
 }
 
+// The textContent setter is replace-all: it swaps in a fresh Text node even when
+// the string is identical, which fires a mutation record. Inside a live region
+// that means an announcement on every 1.5s poll, whether or not progress moved.
+// Write only on actual change.
+function setText(el, value) {
+    if (el && el.textContent !== value) {
+        el.textContent = value;
+    }
+}
+
 function updateProgress(data) {
     var pct = data.progress || 0;
     var filled = Math.round(pct / 5);
     var empty = 20 - filled;
+    var message = data.message || '';
 
-    document.getElementById('progressBarFill').textContent = '='.repeat(filled);
-    document.getElementById('progressBarEmpty').textContent = '-'.repeat(empty);
-    document.getElementById('progressPercent').textContent = ' ' + pct + '%';
-    document.getElementById('progressMessage').textContent = data.message || '';
+    setText(document.getElementById('progressBarFill'), '='.repeat(filled));
+    setText(document.getElementById('progressBarEmpty'), '-'.repeat(empty));
+    setText(document.getElementById('progressPercent'), ' ' + pct + '%');
+    setText(document.getElementById('progressMessage'), message);
 
     // Update step indicators based on progress thresholds
     var thresholds = [10, 20, 35, 50, 60, 75, 90];
@@ -196,15 +267,30 @@ function updateProgress(data) {
         var step = document.getElementById('step' + (i + 1));
         if (!step) continue;
         var indicator = step.querySelector('.step-indicator');
+        var status = step.querySelector('.step-status');
         if (pct >= thresholds[i]) {
             if (pct >= (thresholds[i + 1] || 100)) {
-                indicator.textContent = '[X]';
+                setText(indicator, '[X]');
                 indicator.style.color = '#00ff00';
+                setText(status, ' (complete)');
             } else {
-                indicator.textContent = '[>]';
+                setText(indicator, '[>]');
                 indicator.style.color = '#ffff00';
+                setText(status, ' (in progress)');
             }
         }
+    }
+
+    // Single, human-readable announcement. setText suppresses the repeats.
+    setText(document.getElementById('progressStatus'),
+            message ? message + ', ' + pct + '%' : pct + '%');
+}
+
+function focusHeading(id) {
+    var el = document.getElementById(id);
+    if (el && typeof el.focus === 'function') {
+        // Move focus so keyboard/screen-reader users land on the new region.
+        el.focus();
     }
 }
 
@@ -213,6 +299,7 @@ function showProgress() {
     document.getElementById('progressDisplay').style.display = 'block';
     document.getElementById('successDisplay').style.display = 'none';
     document.getElementById('errorDisplay').style.display = 'none';
+    focusHeading('progressTitle');
 }
 
 function showSuccess(data) {
@@ -222,9 +309,18 @@ function showSuccess(data) {
     document.getElementById('errorDisplay').style.display = 'none';
 
     var preview = document.getElementById('bandPreview');
-    preview.innerHTML = '<p style="color:#00ffff; font-size:1.3em;">' +
-        '~*~ ' + (data.band_name || 'Your Band') + ' ~*~</p>' +
-        '<p style="color:#cccccc;">The fan page is ready!</p>';
+    // band_name is raw, un-escaped model output (api_status echoes it verbatim).
+    // Build the preview with textContent, never innerHTML, so a name containing
+    // markup renders as text instead of injecting nodes/scripts into the page.
+    var nameLine = document.createElement('p');
+    nameLine.style.color = '#00ffff';
+    nameLine.style.fontSize = '1.3em';
+    nameLine.textContent = '~*~ ' + (data.band_name || 'Your Band') + ' ~*~';
+    var readyLine = document.createElement('p');
+    readyLine.style.color = '#cccccc';
+    readyLine.textContent = 'The fan page is ready!';
+    preview.replaceChildren(nameLine, readyLine);
+    focusHeading('successTitle');
 }
 
 function showError(message) {
@@ -233,16 +329,35 @@ function showError(message) {
     document.getElementById('successDisplay').style.display = 'none';
     document.getElementById('errorDisplay').style.display = 'block';
     document.getElementById('errorMessage').textContent = message;
+    focusHeading('errorTitle');
 }
 
 function cancelGeneration() {
-    if (statusCheckInterval) {
-        clearInterval(statusCheckInterval);
-    }
+    // Capture the id before resetInterface() clears it. If the POST that creates
+    // it is still in flight this is null -- startGeneration's stale-token branch
+    // cancels that case instead, so both windows are covered.
+    var idToCancel = currentGenerationId;
+
+    // Invalidates the run token and stops the poller.
     resetInterface();
+
+    // Tell the server to actually stop the worker. Without this, CANCEL only
+    // stopped the client poll while the in-flight band ran to completion --
+    // costing a full paid generation and appearing in the gallery as a ghost.
+    if (idToCancel) {
+        fetch('/api/cancel/' + idToCancel, { method: 'POST' })
+            .catch(function(error) {
+                console.error('Error cancelling generation:', error);
+            });
+    }
 }
 
 function resetInterface() {
+    // Abandon the current run: any in-flight start or poll callback for it is
+    // now stale and will bail out rather than resurrect a dead run's UI.
+    runToken++;
+    stopStatusCheck();
+
     document.getElementById('startGeneration').style.display = 'block';
     document.getElementById('progressDisplay').style.display = 'none';
     document.getElementById('successDisplay').style.display = 'none';
@@ -253,12 +368,17 @@ function resetInterface() {
     document.getElementById('progressBarEmpty').textContent = '--------------------';
     document.getElementById('progressPercent').textContent = ' 0%';
     document.getElementById('progressMessage').textContent = 'Initializing AI systems...';
+    document.getElementById('progressStatus').textContent = '';
 
     // Reset step indicators
     var indicators = document.querySelectorAll('.step-indicator');
     for (var i = 0; i < indicators.length; i++) {
         indicators[i].textContent = '...';
         indicators[i].style.color = '';
+    }
+    var statuses = document.querySelectorAll('.step-status');
+    for (var j = 0; j < statuses.length; j++) {
+        statuses[j].textContent = ' (pending)';
     }
 
     currentGenerationId = null;
@@ -267,7 +387,7 @@ function resetInterface() {
 
 function viewBand() {
     if (currentDirectory) {
-        window.location.href = '/band/' + currentDirectory;
+        window.location.href = '/band/' + encodeURIComponent(currentDirectory) + '/';
     }
 }
 </script>
